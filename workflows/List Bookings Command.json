@@ -3,7 +3,6 @@
   "createdAt": "2025-12-25T12:24:14.384Z",
   "id": "51Y9SIV139LvX5jl",
   "name": "List Bookings Command",
-  "description": null,
   "active": true,
   "isArchived": false,
   "nodes": [
@@ -588,15 +587,14 @@
   },
   "versionId": "854810d2-d5ad-4521-a267-ca7dea6fb410",
   "activeVersionId": "854810d2-d5ad-4521-a267-ca7dea6fb410",
-  "versionCounter": 69,
   "triggerCount": 0,
-  "shared": [],
-  "tags": [
+  "shared": [
     {
-      "updatedAt": "2025-12-27T11:51:52.051Z",
-      "createdAt": "2025-12-27T11:51:52.051Z",
-      "id": "3W7RR758UwICVpEC",
-      "name": "bot_command"
+      "updatedAt": "2025-12-25T12:24:14.385Z",
+      "createdAt": "2025-12-25T12:24:14.385Z",
+      "role": "workflow:owner",
+      "workflowId": "51Y9SIV139LvX5jl",
+      "projectId": "66rzfRQbAnEionlx"
     }
   ],
   "activeVersion": {
@@ -1178,16 +1176,14 @@
     "authors": "Sergei Vedishchev",
     "name": "Version 854810d2",
     "description": "",
-    "autosaved": false,
-    "workflowPublishHistory": [
-      {
-        "createdAt": "2026-01-02T13:44:35.658Z",
-        "id": 121,
-        "workflowId": "51Y9SIV139LvX5jl",
-        "versionId": "854810d2-d5ad-4521-a267-ca7dea6fb410",
-        "event": "activated",
-        "userId": "53af7452-7a67-4d31-8a0d-967083ebc818"
-      }
-    ]
-  }
+    "autosaved": false
+  },
+  "tags": [
+    {
+      "updatedAt": "2025-12-27T11:51:52.051Z",
+      "createdAt": "2025-12-27T11:51:52.051Z",
+      "id": "3W7RR758UwICVpEC",
+      "name": "bot_command"
+    }
+  ]
 }
