@@ -3,7 +3,6 @@
   "createdAt": "2025-12-08T21:22:17.172Z",
   "id": "ocCWq7TGjPACPwTL",
   "name": "Reservation status update",
-  "description": null,
   "active": true,
   "isArchived": false,
   "nodes": [
@@ -457,15 +456,14 @@
   },
   "versionId": "9181032c-3352-422e-a457-67cd583fe3d8",
   "activeVersionId": "9181032c-3352-422e-a457-67cd583fe3d8",
-  "versionCounter": 57,
   "triggerCount": 1,
-  "shared": [],
-  "tags": [
+  "shared": [
     {
-      "updatedAt": "2026-01-02T14:03:19.232Z",
-      "createdAt": "2026-01-02T14:03:19.232Z",
-      "id": "umllye9UwUVxl6um",
-      "name": "job"
+      "updatedAt": "2025-12-08T21:22:17.175Z",
+      "createdAt": "2025-12-08T21:22:17.175Z",
+      "role": "workflow:owner",
+      "workflowId": "ocCWq7TGjPACPwTL",
+      "projectId": "66rzfRQbAnEionlx"
     }
   ],
   "activeVersion": {
@@ -912,16 +910,14 @@
     "authors": "Sergei Vedishchev",
     "name": "Version 9181032c",
     "description": "",
-    "autosaved": false,
-    "workflowPublishHistory": [
-      {
-        "createdAt": "2026-01-02T14:02:25.202Z",
-        "id": 122,
-        "workflowId": "ocCWq7TGjPACPwTL",
-        "versionId": "9181032c-3352-422e-a457-67cd583fe3d8",
-        "event": "activated",
-        "userId": "53af7452-7a67-4d31-8a0d-967083ebc818"
-      }
-    ]
-  }
+    "autosaved": false
+  },
+  "tags": [
+    {
+      "updatedAt": "2026-01-02T14:03:19.232Z",
+      "createdAt": "2026-01-02T14:03:19.232Z",
+      "id": "umllye9UwUVxl6um",
+      "name": "job"
+    }
+  ]
 }
