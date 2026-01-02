@@ -3,7 +3,6 @@
   "createdAt": "2025-10-14T10:11:33.990Z",
   "id": "uf7MYoeaspA2V85u",
   "name": "Assistant agent",
-  "description": null,
   "active": true,
   "isArchived": false,
   "nodes": [
@@ -2991,10 +2990,16 @@
   },
   "versionId": "7fc73f0b-2487-41a1-bd39-d5a2caca54f7",
   "activeVersionId": "7fc73f0b-2487-41a1-bd39-d5a2caca54f7",
-  "versionCounter": 725,
   "triggerCount": 1,
-  "shared": [],
-  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2025-10-14T10:11:33.992Z",
+      "createdAt": "2025-10-14T10:11:33.992Z",
+      "role": "workflow:owner",
+      "workflowId": "uf7MYoeaspA2V85u",
+      "projectId": "66rzfRQbAnEionlx"
+    }
+  ],
   "activeVersion": {
     "updatedAt": "2026-01-02T15:00:02.000Z",
     "createdAt": "2026-01-02T14:58:44.323Z",
@@ -5975,16 +5980,7 @@
     "authors": "Sergei Vedishchev",
     "name": "Version 7fc73f0b",
     "description": "",
-    "autosaved": false,
-    "workflowPublishHistory": [
-      {
-        "createdAt": "2026-01-02T15:00:02.291Z",
-        "id": 124,
-        "workflowId": "uf7MYoeaspA2V85u",
-        "versionId": "7fc73f0b-2487-41a1-bd39-d5a2caca54f7",
-        "event": "activated",
-        "userId": "53af7452-7a67-4d31-8a0d-967083ebc818"
-      }
-    ]
-  }
+    "autosaved": false
+  },
+  "tags": []
 }
