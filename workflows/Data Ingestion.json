@@ -3,7 +3,6 @@
   "createdAt": "2025-12-03T22:10:58.360Z",
   "id": "wpQX6RoYdNRMsPZm",
   "name": "Data Ingestion",
-  "description": null,
   "active": true,
   "isArchived": false,
   "nodes": [
@@ -391,10 +390,16 @@
   },
   "versionId": "74d4f794-93b1-475e-b339-2ca5707e2a08",
   "activeVersionId": "74d4f794-93b1-475e-b339-2ca5707e2a08",
-  "versionCounter": 87,
   "triggerCount": 2,
-  "shared": [],
-  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2025-12-03T22:10:58.363Z",
+      "createdAt": "2025-12-03T22:10:58.363Z",
+      "role": "workflow:owner",
+      "workflowId": "wpQX6RoYdNRMsPZm",
+      "projectId": "66rzfRQbAnEionlx"
+    }
+  ],
   "activeVersion": {
     "updatedAt": "2026-01-02T15:06:42.000Z",
     "createdAt": "2025-12-31T10:28:36.718Z",
@@ -779,16 +784,7 @@
     "authors": "Sergei Vedishchev",
     "name": "Version 74d4f794",
     "description": "",
-    "autosaved": false,
-    "workflowPublishHistory": [
-      {
-        "createdAt": "2026-01-02T15:06:42.751Z",
-        "id": 125,
-        "workflowId": "wpQX6RoYdNRMsPZm",
-        "versionId": "74d4f794-93b1-475e-b339-2ca5707e2a08",
-        "event": "activated",
-        "userId": "53af7452-7a67-4d31-8a0d-967083ebc818"
-      }
-    ]
-  }
+    "autosaved": false
+  },
+  "tags": []
 }
