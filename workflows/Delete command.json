@@ -3,7 +3,6 @@
   "createdAt": "2025-12-25T17:19:17.184Z",
   "id": "wYEfXMLutTlrEgBq",
   "name": "Delete command",
-  "description": null,
   "active": true,
   "isArchived": false,
   "nodes": [
@@ -1041,15 +1040,14 @@
   },
   "versionId": "38b0289f-47a8-4e20-aaa7-bc76071a106a",
   "activeVersionId": "38b0289f-47a8-4e20-aaa7-bc76071a106a",
-  "versionCounter": 45,
   "triggerCount": 0,
-  "shared": [],
-  "tags": [
+  "shared": [
     {
-      "updatedAt": "2025-12-27T11:51:52.051Z",
-      "createdAt": "2025-12-27T11:51:52.051Z",
-      "id": "3W7RR758UwICVpEC",
-      "name": "bot_command"
+      "updatedAt": "2025-12-25T17:19:17.186Z",
+      "createdAt": "2025-12-25T17:19:17.186Z",
+      "role": "workflow:owner",
+      "workflowId": "wYEfXMLutTlrEgBq",
+      "projectId": "66rzfRQbAnEionlx"
     }
   ],
   "activeVersion": {
@@ -2083,16 +2081,14 @@
     "authors": "Sergei Vedishchev",
     "name": "Version 38b0289f",
     "description": "",
-    "autosaved": false,
-    "workflowPublishHistory": [
-      {
-        "createdAt": "2025-12-31T11:18:58.607Z",
-        "id": 92,
-        "workflowId": "wYEfXMLutTlrEgBq",
-        "versionId": "38b0289f-47a8-4e20-aaa7-bc76071a106a",
-        "event": "activated",
-        "userId": "53af7452-7a67-4d31-8a0d-967083ebc818"
-      }
-    ]
-  }
+    "autosaved": false
+  },
+  "tags": [
+    {
+      "updatedAt": "2025-12-27T11:51:52.051Z",
+      "createdAt": "2025-12-27T11:51:52.051Z",
+      "id": "3W7RR758UwICVpEC",
+      "name": "bot_command"
+    }
+  ]
 }
