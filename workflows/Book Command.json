@@ -3,7 +3,6 @@
   "createdAt": "2025-12-22T13:22:52.158Z",
   "id": "p5NpS5X1VLPdY3mX",
   "name": "Book Command",
-  "description": null,
   "active": true,
   "isArchived": false,
   "nodes": [
@@ -840,15 +839,14 @@
   },
   "versionId": "4761660a-ab9f-4429-821a-70e44999969c",
   "activeVersionId": "4761660a-ab9f-4429-821a-70e44999969c",
-  "versionCounter": 91,
   "triggerCount": 0,
-  "shared": [],
-  "tags": [
+  "shared": [
     {
-      "updatedAt": "2025-12-27T11:51:52.051Z",
-      "createdAt": "2025-12-27T11:51:52.051Z",
-      "id": "3W7RR758UwICVpEC",
-      "name": "bot_command"
+      "updatedAt": "2025-12-22T13:22:52.160Z",
+      "createdAt": "2025-12-22T13:22:52.160Z",
+      "role": "workflow:owner",
+      "workflowId": "p5NpS5X1VLPdY3mX",
+      "projectId": "66rzfRQbAnEionlx"
     }
   ],
   "activeVersion": {
@@ -1682,16 +1680,14 @@
     "authors": "Sergei Vedishchev",
     "name": "Version 4761660a",
     "description": "",
-    "autosaved": false,
-    "workflowPublishHistory": [
-      {
-        "createdAt": "2025-12-31T11:11:56.353Z",
-        "id": 91,
-        "workflowId": "p5NpS5X1VLPdY3mX",
-        "versionId": "4761660a-ab9f-4429-821a-70e44999969c",
-        "event": "activated",
-        "userId": "53af7452-7a67-4d31-8a0d-967083ebc818"
-      }
-    ]
-  }
+    "autosaved": false
+  },
+  "tags": [
+    {
+      "updatedAt": "2025-12-27T11:51:52.051Z",
+      "createdAt": "2025-12-27T11:51:52.051Z",
+      "id": "3W7RR758UwICVpEC",
+      "name": "bot_command"
+    }
+  ]
 }
