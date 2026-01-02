@@ -1,0 +1,2098 @@
+{
+  "updatedAt": "2026-01-02T13:44:53.127Z",
+  "createdAt": "2025-12-25T17:19:17.184Z",
+  "id": "wYEfXMLutTlrEgBq",
+  "name": "Delete command",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "trigger-delete",
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        -864,
+        176
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst chat_id = input.chat_id;\nconst lang = input.lang || 'en';\nconst reservation_id = (input.arg1 || '').trim();\n\nif (!reservation_id) {\n  return [{ json: {\n    chat_id,\n    lang,\n    error: true,\n    error_key: 'delete_missing_id'\n  }}];\n}\n\nreturn [{ json: {\n  chat_id,\n  lang,\n  user_id: input.user_id,\n  reservation_id: reservation_id\n}}];"
+      },
+      "id": "validate-input",
+      "name": "Validate Input",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -640,
+        176
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "loose"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "check-error",
+              "operator": {
+                "type": "string",
+                "operation": "notExists"
+              },
+              "leftValue": "={{ $json.error }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "check-input-valid",
+      "name": "Check Input Valid",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -416,
+        176
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "list",
+          "value": "users"
+        },
+        "limit": 1,
+        "where": {
+          "values": [
+            {
+              "column": "chat_id",
+              "value": "={{ $json.chat_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-user-credentials",
+      "name": "Get User Credentials",
+      "type": "n8n-nodes-base.postgres",
+      "position": [
+        -176,
+        160
+      ],
+      "typeVersion": 2.6,
+      "credentials": {
+        "postgres": {
+          "id": "3SDluWLUa1vIU50a",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "check-session",
+              "operator": {
+                "type": "string",
+                "operation": "exists"
+              },
+              "leftValue": "={{ $json.result.structuredContent.session_id }}",
+              "rightValue": ""
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-user-credentials",
+      "name": "Check User Credentials",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        512,
+        144
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "user-id",
+              "name": "user_id",
+              "type": "string",
+              "value": "={{ $('Validate Input').item.json.user_id }}"
+            },
+            {
+              "id": "session-id",
+              "name": "session_id",
+              "type": "string",
+              "value": "={{ $json.result.structuredContent.session_id }}"
+            },
+            {
+              "id": "chat-id",
+              "name": "chat_id",
+              "type": "string",
+              "value": "={{ $('Validate Input').first().json.chat_id }}"
+            },
+            {
+              "id": "lang",
+              "name": "lang",
+              "type": "string",
+              "value": "={{ $('Validate Input').first().json.lang }}"
+            },
+            {
+              "id": "reservation-id",
+              "name": "reservation_id",
+              "type": "string",
+              "value": "={{ $('Validate Input').first().json.reservation_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-context",
+      "name": "Set Delete Context",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        752,
+        -64
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "operation": "executeTool",
+        "toolName": "delete_reservation",
+        "toolParameters": "={{ JSON.stringify({ session_id: $json.session_id, booking_id: $json.reservation_id }) }}"
+      },
+      "id": "mcp-delete-reservation",
+      "name": "MCP Delete Reservation",
+      "type": "n8n-nodes-mcp.mcpClient",
+      "position": [
+        1008,
+        -64
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "mcpClientApi": {
+          "id": "G9CyzT9PT67tg4V7",
+          "name": "Twojtenis MCP Client (STDIO)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "check-success",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.result.structuredContent.success }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "check-delete-result",
+      "name": "Check Delete Result",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        1248,
+        -64
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "operation": "deleteTable",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "reservations",
+          "mode": "list",
+          "cachedResultName": "reservations"
+        },
+        "deleteCommand": "delete",
+        "where": {
+          "values": [
+            {
+              "column": "reservation_id",
+              "value": "={{ $('Set Delete Context').item.json.reservation_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "delete-from-db",
+      "name": "Delete from DB",
+      "type": "n8n-nodes-base.postgres",
+      "position": [
+        1504,
+        -80
+      ],
+      "typeVersion": 2.6,
+      "credentials": {
+        "postgres": {
+          "id": "3SDluWLUa1vIU50a",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "list",
+          "value": "translations"
+        },
+        "limit": 1,
+        "where": {
+          "values": [
+            {
+              "column": "key",
+              "value": "delete_success"
+            },
+            {
+              "column": "lang",
+              "value": "={{ $('Validate Input').item.json.lang || 'en' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-success-translation",
+      "name": "Get Success Translation",
+      "type": "n8n-nodes-base.postgres",
+      "position": [
+        2000,
+        -96
+      ],
+      "typeVersion": 2.6,
+      "credentials": {
+        "postgres": {
+          "id": "3SDluWLUa1vIU50a",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "list",
+          "value": "translations"
+        },
+        "limit": 1,
+        "where": {
+          "values": [
+            {
+              "column": "key",
+              "value": "={{ $('Validate Input').first().json.error_key || 'delete_missing_id' }}"
+            },
+            {
+              "column": "lang",
+              "value": "={{ $('Validate Input').first().json.lang || 'en' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-error-translation",
+      "name": "Get Error Translation",
+      "type": "n8n-nodes-base.postgres",
+      "position": [
+        64,
+        464
+      ],
+      "typeVersion": 2.6,
+      "credentials": {
+        "postgres": {
+          "id": "3SDluWLUa1vIU50a",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "list",
+          "value": "translations"
+        },
+        "limit": 1,
+        "where": {
+          "values": [
+            {
+              "column": "key",
+              "value": "delete_no_credentials"
+            },
+            {
+              "column": "lang",
+              "value": "={{ $('Validate Input').first().json.lang || 'en' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-no-creds-translation",
+      "name": "Get No Credentials Translation",
+      "type": "n8n-nodes-base.postgres",
+      "position": [
+        1008,
+        288
+      ],
+      "typeVersion": 2.6,
+      "credentials": {
+        "postgres": {
+          "id": "3SDluWLUa1vIU50a",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "list",
+          "value": "translations"
+        },
+        "limit": 1,
+        "where": {
+          "values": [
+            {
+              "column": "key",
+              "value": "delete_not_found"
+            },
+            {
+              "column": "lang",
+              "value": "={{ $('Set Delete Context').first().json.lang || 'en' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-not-found-translation",
+      "name": "Get Not Found Translation",
+      "type": "n8n-nodes-base.postgres",
+      "position": [
+        1920,
+        64
+      ],
+      "typeVersion": 2.6,
+      "credentials": {
+        "postgres": {
+          "id": "3SDluWLUa1vIU50a",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "chat-id",
+              "name": "chat_id",
+              "type": "string",
+              "value": "={{ $('Set Delete Context').first().json.chat_id }}"
+            },
+            {
+              "id": "message",
+              "name": "message",
+              "type": "string",
+              "value": "={{ $json.text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "format-not-found-message",
+      "name": "Format Not Found Message",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        2208,
+        64
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "list",
+          "value": "translations"
+        },
+        "limit": 1,
+        "where": {
+          "values": [
+            {
+              "column": "key",
+              "value": "delete_error"
+            },
+            {
+              "column": "lang",
+              "value": "={{ $('Validate Input').item.json.lang || 'en' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-api-error-translation",
+      "name": "Get API Error Translation",
+      "type": "n8n-nodes-base.postgres",
+      "position": [
+        1920,
+        224
+      ],
+      "typeVersion": 2.6,
+      "credentials": {
+        "postgres": {
+          "id": "3SDluWLUa1vIU50a",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "chat-id",
+              "name": "chat_id",
+              "type": "string",
+              "value": "={{ $('Set Reservation Data').first().json.chat_id }}"
+            },
+            {
+              "id": "message",
+              "name": "message",
+              "type": "string",
+              "value": "={{ $json.text.replace('{error}', $('MCP Delete Reservation').first().json.result.structuredContent.message || 'Unknown error') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "format-api-error-message",
+      "name": "Format API Error Message",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        2208,
+        224
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Validate Input').item.json.chat_id }}",
+        "text": "={{ $json.message }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "4d6a37ca-9243-49d7-b6fa-98370fc4ff76",
+      "name": "Send a text message",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        2768,
+        464
+      ],
+      "webhookId": "bd78f3ae-f8a6-4282-8e5f-36ab83af99db",
+      "typeVersion": 1.2,
+      "credentials": {
+        "telegramApi": {
+          "id": "pHQDqhsnrwimdaY2",
+          "name": "twoj_badminton_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "313f4611-498f-41a0-9601-e9fa0d20268a",
+              "leftValue": "={{ $json.hash }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "cf9f28bd-1d04-4f47-a310-e0a6ec4fcc69",
+              "leftValue": "={{ $json.hash }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        64,
+        160
+      ],
+      "id": "7f89edf1-b6ad-46b3-99f2-f8adde8fa579",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "4be0db9d-5325-4907-8d4a-95211347dc0f",
+              "leftValue": "={{ $json.success }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1728,
+        -80
+      ],
+      "id": "5a0537ed-41b0-4a2d-bfed-cb403dcbc05e",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const template = $input.first().json.text;\nconst ctx = $('Set Delete Context').first().json;\n\n// Format date for display (DB stores as YYYY-MM-DD)\nlet dateDisplay = ctx.date;\nif (dateDisplay && dateDisplay.includes('-')) {\n  const parts = dateDisplay.split('T')[0].split('-');\n  dateDisplay = `${parts[2]}.${parts[1]}.${parts[0]}`;\n}\n\nconst message = template\n  .replace('{date}', dateDisplay)\n  .replace('{time_start}', ctx.time_start)\n  .replace('{time_end}', ctx.time_end)\n  .replace('{court}', ctx.court);\n\nreturn [{\n  json: {\n    chat_id: ctx.chat_id,\n    message: message\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2208,
+        -96
+      ],
+      "id": "b06fe802-96c2-4ec3-8bb3-00ab96b4abe1",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "chat-id",
+              "name": "chat_id",
+              "type": "string",
+              "value": "={{ $('Validate Input').first().json.chat_id }}"
+            },
+            {
+              "id": "message",
+              "name": "message",
+              "type": "string",
+              "value": "={{ $json.text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "format-no-creds-message",
+      "name": "Format No Credentials Message",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        1248,
+        288
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "chat-id",
+              "name": "chat_id",
+              "type": "string",
+              "value": "={{ $('Validate Input').first().json.chat_id }}"
+            },
+            {
+              "id": "message",
+              "name": "message",
+              "type": "string",
+              "value": "={{ $json.text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "format-error-message",
+      "name": "Format Error Message",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        304,
+        464
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "operation": "executeTool",
+        "toolName": "login",
+        "toolParameters": "={\"email\":\"{{$json.email}}\", \"password\": \"{{ $json.hash }}\"}"
+      },
+      "id": "df48d01b-fcc2-4558-bef6-3a6c0d2c8c5a",
+      "name": "Login",
+      "type": "n8n-nodes-mcp.mcpClient",
+      "typeVersion": 1,
+      "position": [
+        304,
+        144
+      ],
+      "credentials": {
+        "mcpClientApi": {
+          "id": "G9CyzT9PT67tg4V7",
+          "name": "Twojtenis MCP Client (STDIO)"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Validate Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Input": {
+      "main": [
+        [
+          {
+            "node": "Check Input Valid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Input Valid": {
+      "main": [
+        [
+          {
+            "node": "Get User Credentials",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Error Translation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get User Credentials": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check User Credentials": {
+      "main": [
+        [
+          {
+            "node": "Set Delete Context",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get No Credentials Translation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Delete Context": {
+      "main": [
+        [
+          {
+            "node": "MCP Delete Reservation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Delete Reservation": {
+      "main": [
+        [
+          {
+            "node": "Check Delete Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Delete Result": {
+      "main": [
+        [
+          {
+            "node": "Delete from DB",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get API Error Translation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete from DB": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Success Translation": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Error Translation": {
+      "main": [
+        [
+          {
+            "node": "Format Error Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get No Credentials Translation": {
+      "main": [
+        [
+          {
+            "node": "Format No Credentials Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Not Found Translation": {
+      "main": [
+        [
+          {
+            "node": "Format Not Found Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get API Error Translation": {
+      "main": [
+        [
+          {
+            "node": "Format API Error Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format API Error Message": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Not Found Message": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Login",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get No Credentials Translation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Get Success Translation",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Not Found Translation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format No Credentials Message": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Error Message": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Login": {
+      "main": [
+        [
+          {
+            "node": "Check User Credentials",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "versionId": "38b0289f-47a8-4e20-aaa7-bc76071a106a",
+  "activeVersionId": "38b0289f-47a8-4e20-aaa7-bc76071a106a",
+  "versionCounter": 45,
+  "triggerCount": 0,
+  "shared": [],
+  "tags": [
+    {
+      "updatedAt": "2025-12-27T11:51:52.051Z",
+      "createdAt": "2025-12-27T11:51:52.051Z",
+      "id": "3W7RR758UwICVpEC",
+      "name": "bot_command"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2025-12-31T11:18:58.000Z",
+    "createdAt": "2025-12-31T11:18:55.639Z",
+    "versionId": "38b0289f-47a8-4e20-aaa7-bc76071a106a",
+    "workflowId": "wYEfXMLutTlrEgBq",
+    "nodes": [
+      {
+        "parameters": {
+          "inputSource": "passthrough"
+        },
+        "id": "trigger-delete",
+        "name": "When Executed by Another Workflow",
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "position": [
+          -864,
+          176
+        ],
+        "typeVersion": 1.1
+      },
+      {
+        "parameters": {
+          "jsCode": "const input = $input.first().json;\nconst chat_id = input.chat_id;\nconst lang = input.lang || 'en';\nconst reservation_id = (input.arg1 || '').trim();\n\nif (!reservation_id) {\n  return [{ json: {\n    chat_id,\n    lang,\n    error: true,\n    error_key: 'delete_missing_id'\n  }}];\n}\n\nreturn [{ json: {\n  chat_id,\n  lang,\n  user_id: input.user_id,\n  reservation_id: reservation_id\n}}];"
+        },
+        "id": "validate-input",
+        "name": "Validate Input",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          -640,
+          176
+        ],
+        "typeVersion": 2
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "loose"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "check-error",
+                "operator": {
+                  "type": "string",
+                  "operation": "notExists"
+                },
+                "leftValue": "={{ $json.error }}",
+                "rightValue": ""
+              }
+            ]
+          },
+          "looseTypeValidation": true,
+          "options": {}
+        },
+        "id": "check-input-valid",
+        "name": "Check Input Valid",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          -416,
+          176
+        ],
+        "typeVersion": 2.2
+      },
+      {
+        "parameters": {
+          "operation": "select",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "mode": "list",
+            "value": "users"
+          },
+          "limit": 1,
+          "where": {
+            "values": [
+              {
+                "column": "chat_id",
+                "value": "={{ $json.chat_id }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "get-user-credentials",
+        "name": "Get User Credentials",
+        "type": "n8n-nodes-base.postgres",
+        "position": [
+          -176,
+          160
+        ],
+        "typeVersion": 2.6,
+        "credentials": {
+          "postgres": {
+            "id": "3SDluWLUa1vIU50a",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "conditions": [
+              {
+                "id": "check-session",
+                "operator": {
+                  "type": "string",
+                  "operation": "exists"
+                },
+                "leftValue": "={{ $json.result.structuredContent.session_id }}",
+                "rightValue": ""
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "check-user-credentials",
+        "name": "Check User Credentials",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          512,
+          144
+        ],
+        "typeVersion": 2.2
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "user-id",
+                "name": "user_id",
+                "type": "string",
+                "value": "={{ $('Validate Input').item.json.user_id }}"
+              },
+              {
+                "id": "session-id",
+                "name": "session_id",
+                "type": "string",
+                "value": "={{ $json.result.structuredContent.session_id }}"
+              },
+              {
+                "id": "chat-id",
+                "name": "chat_id",
+                "type": "string",
+                "value": "={{ $('Validate Input').first().json.chat_id }}"
+              },
+              {
+                "id": "lang",
+                "name": "lang",
+                "type": "string",
+                "value": "={{ $('Validate Input').first().json.lang }}"
+              },
+              {
+                "id": "reservation-id",
+                "name": "reservation_id",
+                "type": "string",
+                "value": "={{ $('Validate Input').first().json.reservation_id }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "set-context",
+        "name": "Set Delete Context",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          752,
+          -64
+        ],
+        "typeVersion": 3.4
+      },
+      {
+        "parameters": {
+          "operation": "executeTool",
+          "toolName": "delete_reservation",
+          "toolParameters": "={{ JSON.stringify({ session_id: $json.session_id, booking_id: $json.reservation_id }) }}"
+        },
+        "id": "mcp-delete-reservation",
+        "name": "MCP Delete Reservation",
+        "type": "n8n-nodes-mcp.mcpClient",
+        "position": [
+          1008,
+          -64
+        ],
+        "typeVersion": 1,
+        "credentials": {
+          "mcpClientApi": {
+            "id": "G9CyzT9PT67tg4V7",
+            "name": "Twojtenis MCP Client (STDIO)"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "check-success",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                },
+                "leftValue": "={{ $json.result.structuredContent.success }}",
+                "rightValue": ""
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "check-delete-result",
+        "name": "Check Delete Result",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          1248,
+          -64
+        ],
+        "typeVersion": 2.2
+      },
+      {
+        "parameters": {
+          "operation": "deleteTable",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "reservations",
+            "mode": "list",
+            "cachedResultName": "reservations"
+          },
+          "deleteCommand": "delete",
+          "where": {
+            "values": [
+              {
+                "column": "reservation_id",
+                "value": "={{ $('Set Delete Context').item.json.reservation_id }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "delete-from-db",
+        "name": "Delete from DB",
+        "type": "n8n-nodes-base.postgres",
+        "position": [
+          1504,
+          -80
+        ],
+        "typeVersion": 2.6,
+        "credentials": {
+          "postgres": {
+            "id": "3SDluWLUa1vIU50a",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "select",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "mode": "list",
+            "value": "translations"
+          },
+          "limit": 1,
+          "where": {
+            "values": [
+              {
+                "column": "key",
+                "value": "delete_success"
+              },
+              {
+                "column": "lang",
+                "value": "={{ $('Validate Input').item.json.lang || 'en' }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "get-success-translation",
+        "name": "Get Success Translation",
+        "type": "n8n-nodes-base.postgres",
+        "position": [
+          2000,
+          -96
+        ],
+        "typeVersion": 2.6,
+        "credentials": {
+          "postgres": {
+            "id": "3SDluWLUa1vIU50a",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "select",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "mode": "list",
+            "value": "translations"
+          },
+          "limit": 1,
+          "where": {
+            "values": [
+              {
+                "column": "key",
+                "value": "={{ $('Validate Input').first().json.error_key || 'delete_missing_id' }}"
+              },
+              {
+                "column": "lang",
+                "value": "={{ $('Validate Input').first().json.lang || 'en' }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "get-error-translation",
+        "name": "Get Error Translation",
+        "type": "n8n-nodes-base.postgres",
+        "position": [
+          64,
+          464
+        ],
+        "typeVersion": 2.6,
+        "credentials": {
+          "postgres": {
+            "id": "3SDluWLUa1vIU50a",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "select",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "mode": "list",
+            "value": "translations"
+          },
+          "limit": 1,
+          "where": {
+            "values": [
+              {
+                "column": "key",
+                "value": "delete_no_credentials"
+              },
+              {
+                "column": "lang",
+                "value": "={{ $('Validate Input').first().json.lang || 'en' }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "get-no-creds-translation",
+        "name": "Get No Credentials Translation",
+        "type": "n8n-nodes-base.postgres",
+        "position": [
+          1008,
+          288
+        ],
+        "typeVersion": 2.6,
+        "credentials": {
+          "postgres": {
+            "id": "3SDluWLUa1vIU50a",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "select",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "mode": "list",
+            "value": "translations"
+          },
+          "limit": 1,
+          "where": {
+            "values": [
+              {
+                "column": "key",
+                "value": "delete_not_found"
+              },
+              {
+                "column": "lang",
+                "value": "={{ $('Set Delete Context').first().json.lang || 'en' }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "get-not-found-translation",
+        "name": "Get Not Found Translation",
+        "type": "n8n-nodes-base.postgres",
+        "position": [
+          1920,
+          64
+        ],
+        "typeVersion": 2.6,
+        "credentials": {
+          "postgres": {
+            "id": "3SDluWLUa1vIU50a",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "chat-id",
+                "name": "chat_id",
+                "type": "string",
+                "value": "={{ $('Set Delete Context').first().json.chat_id }}"
+              },
+              {
+                "id": "message",
+                "name": "message",
+                "type": "string",
+                "value": "={{ $json.text }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "format-not-found-message",
+        "name": "Format Not Found Message",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          2208,
+          64
+        ],
+        "typeVersion": 3.4
+      },
+      {
+        "parameters": {
+          "operation": "select",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "mode": "list",
+            "value": "translations"
+          },
+          "limit": 1,
+          "where": {
+            "values": [
+              {
+                "column": "key",
+                "value": "delete_error"
+              },
+              {
+                "column": "lang",
+                "value": "={{ $('Validate Input').item.json.lang || 'en' }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "get-api-error-translation",
+        "name": "Get API Error Translation",
+        "type": "n8n-nodes-base.postgres",
+        "position": [
+          1920,
+          224
+        ],
+        "typeVersion": 2.6,
+        "credentials": {
+          "postgres": {
+            "id": "3SDluWLUa1vIU50a",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "chat-id",
+                "name": "chat_id",
+                "type": "string",
+                "value": "={{ $('Set Reservation Data').first().json.chat_id }}"
+              },
+              {
+                "id": "message",
+                "name": "message",
+                "type": "string",
+                "value": "={{ $json.text.replace('{error}', $('MCP Delete Reservation').first().json.result.structuredContent.message || 'Unknown error') }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "format-api-error-message",
+        "name": "Format API Error Message",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          2208,
+          224
+        ],
+        "typeVersion": 3.4
+      },
+      {
+        "parameters": {
+          "chatId": "={{ $('Validate Input').item.json.chat_id }}",
+          "text": "={{ $json.message }}",
+          "additionalFields": {
+            "appendAttribution": false,
+            "parse_mode": "HTML"
+          }
+        },
+        "id": "4d6a37ca-9243-49d7-b6fa-98370fc4ff76",
+        "name": "Send a text message",
+        "type": "n8n-nodes-base.telegram",
+        "position": [
+          2768,
+          464
+        ],
+        "webhookId": "bd78f3ae-f8a6-4282-8e5f-36ab83af99db",
+        "typeVersion": 1.2,
+        "credentials": {
+          "telegramApi": {
+            "id": "pHQDqhsnrwimdaY2",
+            "name": "twoj_badminton_bot"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "313f4611-498f-41a0-9601-e9fa0d20268a",
+                "leftValue": "={{ $json.hash }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "exists",
+                  "singleValue": true
+                }
+              },
+              {
+                "id": "cf9f28bd-1d04-4f47-a310-e0a6ec4fcc69",
+                "leftValue": "={{ $json.hash }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "notEmpty",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          64,
+          160
+        ],
+        "id": "7f89edf1-b6ad-46b3-99f2-f8adde8fa579",
+        "name": "If"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "4be0db9d-5325-4907-8d4a-95211347dc0f",
+                "leftValue": "={{ $json.success }}",
+                "rightValue": false,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          1728,
+          -80
+        ],
+        "id": "5a0537ed-41b0-4a2d-bfed-cb403dcbc05e",
+        "name": "If1"
+      },
+      {
+        "parameters": {
+          "jsCode": "const template = $input.first().json.text;\nconst ctx = $('Set Delete Context').first().json;\n\n// Format date for display (DB stores as YYYY-MM-DD)\nlet dateDisplay = ctx.date;\nif (dateDisplay && dateDisplay.includes('-')) {\n  const parts = dateDisplay.split('T')[0].split('-');\n  dateDisplay = `${parts[2]}.${parts[1]}.${parts[0]}`;\n}\n\nconst message = template\n  .replace('{date}', dateDisplay)\n  .replace('{time_start}', ctx.time_start)\n  .replace('{time_end}', ctx.time_end)\n  .replace('{court}', ctx.court);\n\nreturn [{\n  json: {\n    chat_id: ctx.chat_id,\n    message: message\n  }\n}];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2208,
+          -96
+        ],
+        "id": "b06fe802-96c2-4ec3-8bb3-00ab96b4abe1",
+        "name": "Code in JavaScript"
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "chat-id",
+                "name": "chat_id",
+                "type": "string",
+                "value": "={{ $('Validate Input').first().json.chat_id }}"
+              },
+              {
+                "id": "message",
+                "name": "message",
+                "type": "string",
+                "value": "={{ $json.text }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "format-no-creds-message",
+        "name": "Format No Credentials Message",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1248,
+          288
+        ],
+        "typeVersion": 3.4
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "chat-id",
+                "name": "chat_id",
+                "type": "string",
+                "value": "={{ $('Validate Input').first().json.chat_id }}"
+              },
+              {
+                "id": "message",
+                "name": "message",
+                "type": "string",
+                "value": "={{ $json.text }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "format-error-message",
+        "name": "Format Error Message",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          304,
+          464
+        ],
+        "typeVersion": 3.4
+      },
+      {
+        "parameters": {
+          "operation": "executeTool",
+          "toolName": "login",
+          "toolParameters": "={\"email\":\"{{$json.email}}\", \"password\": \"{{ $json.hash }}\"}"
+        },
+        "id": "df48d01b-fcc2-4558-bef6-3a6c0d2c8c5a",
+        "name": "Login",
+        "type": "n8n-nodes-mcp.mcpClient",
+        "typeVersion": 1,
+        "position": [
+          304,
+          144
+        ],
+        "credentials": {
+          "mcpClientApi": {
+            "id": "G9CyzT9PT67tg4V7",
+            "name": "Twojtenis MCP Client (STDIO)"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "When Executed by Another Workflow": {
+        "main": [
+          [
+            {
+              "node": "Validate Input",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validate Input": {
+        "main": [
+          [
+            {
+              "node": "Check Input Valid",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check Input Valid": {
+        "main": [
+          [
+            {
+              "node": "Get User Credentials",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Get Error Translation",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get User Credentials": {
+        "main": [
+          [
+            {
+              "node": "If",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check User Credentials": {
+        "main": [
+          [
+            {
+              "node": "Set Delete Context",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Get No Credentials Translation",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Set Delete Context": {
+        "main": [
+          [
+            {
+              "node": "MCP Delete Reservation",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "MCP Delete Reservation": {
+        "main": [
+          [
+            {
+              "node": "Check Delete Result",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check Delete Result": {
+        "main": [
+          [
+            {
+              "node": "Delete from DB",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Get API Error Translation",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Delete from DB": {
+        "main": [
+          [
+            {
+              "node": "If1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Success Translation": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Error Translation": {
+        "main": [
+          [
+            {
+              "node": "Format Error Message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get No Credentials Translation": {
+        "main": [
+          [
+            {
+              "node": "Format No Credentials Message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Not Found Translation": {
+        "main": [
+          [
+            {
+              "node": "Format Not Found Message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get API Error Translation": {
+        "main": [
+          [
+            {
+              "node": "Format API Error Message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Format API Error Message": {
+        "main": [
+          [
+            {
+              "node": "Send a text message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Format Not Found Message": {
+        "main": [
+          [
+            {
+              "node": "Send a text message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "If": {
+        "main": [
+          [
+            {
+              "node": "Login",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Get No Credentials Translation",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "If1": {
+        "main": [
+          [
+            {
+              "node": "Get Success Translation",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Get Not Found Translation",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code in JavaScript": {
+        "main": [
+          [
+            {
+              "node": "Send a text message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Format No Credentials Message": {
+        "main": [
+          [
+            {
+              "node": "Send a text message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Format Error Message": {
+        "main": [
+          [
+            {
+              "node": "Send a text message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Login": {
+        "main": [
+          [
+            {
+              "node": "Check User Credentials",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Sergei Vedishchev",
+    "name": "Version 38b0289f",
+    "description": "",
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2025-12-31T11:18:58.607Z",
+        "id": 92,
+        "workflowId": "wYEfXMLutTlrEgBq",
+        "versionId": "38b0289f-47a8-4e20-aaa7-bc76071a106a",
+        "event": "activated",
+        "userId": "53af7452-7a67-4d31-8a0d-967083ebc818"
+      }
+    ]
+  }
+}

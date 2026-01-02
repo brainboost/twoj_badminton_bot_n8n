@@ -1,0 +1,5990 @@
+{
+  "updatedAt": "2026-01-02T14:58:44.322Z",
+  "createdAt": "2025-10-14T10:11:33.990Z",
+  "id": "uf7MYoeaspA2V85u",
+  "name": "Assistant agent",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message",
+          "edited_message",
+          "poll"
+        ],
+        "additionalFields": {
+          "download": true
+        }
+      },
+      "id": "0c402bdc-7fa2-4fa1-96d6-f02853cfdaa1",
+      "name": "Telegram Message Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -992,
+        208
+      ],
+      "webhookId": "55acc711-c248-4ac9-b6cd-e295c2d33f4b",
+      "credentials": {
+        "telegramApi": {
+          "id": "pHQDqhsnrwimdaY2",
+          "name": "twoj_badminton_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $('Telegram Message Trigger').item.json.message.voice.file_id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -144,
+        784
+      ],
+      "id": "66219c83-6371-4cc6-ad43-57cee44f52da",
+      "name": "Get a file",
+      "webhookId": "e0769871-efe3-49da-81a5-2f88a6fdd33f",
+      "credentials": {
+        "telegramApi": {
+          "id": "pHQDqhsnrwimdaY2",
+          "name": "twoj_badminton_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "binaryPropertyName": "=data",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        64,
+        784
+      ],
+      "id": "6f314aef-7ff1-4211-8656-e2c1f8fea374",
+      "name": "Transcribe audio",
+      "credentials": {
+        "openAiApi": {
+          "id": "gmq5u3CqvxIc2nEW",
+          "name": "OpenAi"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        1840,
+        1584
+      ],
+      "id": "3122d37e-a446-4f7c-aba0-76a6564b2ee9",
+      "name": "Calculator"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ce8eebdd-c313-4444-a1bd-dcde56619a0d",
+              "name": "command",
+              "type": "string",
+              "value": "={{\n  $json.text\n    .toLowerCase()\n    .replace(/^\\//, '')\n    .split(/ (.+)/)[0]\n  || ''\n}}"
+            },
+            {
+              "id": "834f7369-52f1-4df3-bfcb-754be0bb11e0",
+              "name": "arg1",
+              "type": "string",
+              "value": "={{\n(() => {\n  const raw = $json.text\n    .toLowerCase()\n    .replace(/^\\//, '')\n    .split(/ (.+)/)[1] || '';\n  \n  if (!raw) return '';\n  \n  const input = raw.trim();\n  \n  // Already YYYY-MM-DD format\n  if (/^\\d{4}-\\d{2}-\\d{2}$/.test(input)) {\n    return input;\n  }\n  \n  // DD.MM.YYYY format (e.g., 19.12.2025)\n  const dotFull = input.match(/^(\\d{1,2})\\.(\\d{1,2})\\.(\\d{4})$/);\n  if (dotFull) {\n    const [, d, m, y] = dotFull;\n    return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;\n  }\n  \n  // DD.MM.YY format (e.g., 19.12.25)\n  const dotShort = input.match(/^(\\d{1,2})\\.(\\d{1,2})\\.(\\d{2})$/);\n  if (dotShort) {\n    const [, d, m, y] = dotShort;\n    const fullYear = parseInt(y) > 50 ? '19' + y : '20' + y;\n    return `${fullYear}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;\n  }\n  \n  // DD/MM/YYYY format\n  const slashFull = input.match(/^(\\d{1,2})\\/(\\d{1,2})\\/(\\d{4})$/);\n  if (slashFull) {\n    const [, d, m, y] = slashFull;\n    return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;\n  }\n  \n  // DD/MM/YY format\n  const slashShort = input.match(/^(\\d{1,2})\\/(\\d{1,2})\\/(\\d{2})$/);\n  if (slashShort) {\n    const [, d, m, y] = slashShort;\n    const fullYear = parseInt(y) > 50 ? '19' + y : '20' + y;\n    return `${fullYear}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;\n  }\n  \n  // Return as-is if no pattern matches\n  return input;\n})()\n}}"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "include": "selected",
+        "includeFields": "chat_id,user_id,username,fullname,lang",
+        "options": {}
+      },
+      "id": "4a575154-b6b2-46fd-bbf2-c1882c73a956",
+      "name": "Cmd Parse",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        656,
+        -512
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "operation": "sanitize",
+        "text": "={{ $json.text ?? \"\" }}",
+        "guardrails": {
+          "pii": {
+            "value": {
+              "type": "selected",
+              "entities": [
+                "PL_PESEL",
+                "CREDIT_CARD",
+                "IP_ADDRESS",
+                "MEDICAL_LICENSE",
+                "CRYPTO"
+              ]
+            }
+          },
+          "urls": {
+            "value": {
+              "allowedUrls": "",
+              "allowedSchemes": [
+                "mailto"
+              ]
+            }
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.guardrails",
+      "typeVersion": 1,
+      "position": [
+        1536,
+        1360
+      ],
+      "id": "0716d4f2-4aa2-45f9-8930-ae2b9f79cdab",
+      "name": "Guardrails"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolWikipedia",
+      "typeVersion": 1,
+      "position": [
+        1968,
+        1584
+      ],
+      "id": "913b9eb7-14e2-4b5a-9f5f-14d93aa0275b",
+      "name": "Wikipedia"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "This is the vector store for documents about badminton. Use full text for retrieving documents, don't compress the input",
+        "qdrantCollection": {
+          "__rl": true,
+          "value": "badm_data",
+          "mode": "list",
+          "cachedResultName": "badm_data"
+        },
+        "topK": 3,
+        "includeDocumentMetadata": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "typeVersion": 1.3,
+      "position": [
+        2096,
+        1584
+      ],
+      "id": "924753ce-2c02-49e1-826b-fe741d84717e",
+      "name": "Badminton knowledge base",
+      "credentials": {
+        "qdrantApi": {
+          "id": "R97Yi6THM8qVyAcv",
+          "name": "QdrantApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "nomic-embed-text:latest"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
+      "typeVersion": 1,
+      "position": [
+        2096,
+        1824
+      ],
+      "id": "d5693f10-1cfd-4ae5-9ae3-17fd5a93997c",
+      "name": "Embeddings Ollama",
+      "credentials": {
+        "ollamaApi": {
+          "id": "OwoNqqKy33Tzlan7",
+          "name": "Ollama local"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "038a18e3-982b-4362-85d9-5cf040b106c2",
+              "name": "text",
+              "value": "={{ $json.result.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        464,
+        784
+      ],
+      "id": "925b1cdf-fbd8-4b01-bcd9-be4177be6c79",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 3,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "beed379a-0109-468d-accd-0c812afc851a",
+              "leftValue": "={{ $json.text }}",
+              "rightValue": "/",
+              "operator": {
+                "type": "string",
+                "operation": "startsWith"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        144,
+        -176
+      ],
+      "id": "fdbe65e1-885c-4c66-bf07-e75474e912cd",
+      "name": "If command"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "list",
+          "value": "translations",
+          "cachedResultName": "translations"
+        },
+        "limit": 1,
+        "where": {
+          "values": [
+            {
+              "column": "key",
+              "value": "ai_error"
+            },
+            {
+              "column": "lang",
+              "value": "={{ $('Set fields').item.json.lang || 'en' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-ai-error-translation",
+      "name": "Get AI Error Translation",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2752,
+        1552
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "3SDluWLUa1vIU50a",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "start-cond",
+                    "leftValue": "={{ $json.command }}",
+                    "rightValue": "start",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "start"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "help-cond",
+                    "leftValue": "={{ $json.command }}",
+                    "rightValue": "help",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "help"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "show-cond",
+                    "leftValue": "={{ $json.command }}",
+                    "rightValue": "show",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "show"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "book-cond",
+                    "leftValue": "={{ $json.command }}",
+                    "rightValue": "book",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "book"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "list-cond",
+                    "leftValue": "={{ $json.command }}",
+                    "rightValue": "list",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "list"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "delete-cond",
+                    "leftValue": "={{ $json.command }}",
+                    "rightValue": "delete",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "delete"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "register-cond",
+                    "leftValue": "={{ $json.command }}",
+                    "rightValue": "register",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "register"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "deleteall-cond",
+                    "leftValue": "={{ $json.command }}",
+                    "rightValue": "deleteall",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "deleteall"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "cmd-switch",
+      "name": "Cmd Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1008,
+        -816
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const message = $input.first().json;\nreturn [{ json: { \n  id: String(message.user_id),\n  chat_id: String(message.chat_id),\n  user_name: String(message.username),\n  full_name: String(message.fullname)\n} }];"
+      },
+      "id": "collect-user-data",
+      "name": "Collect User Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1648,
+        -1200
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "users",
+          "mode": "list",
+          "cachedResultName": "users"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": true,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "user_name",
+              "displayName": "user_name",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "full_name",
+              "displayName": "full_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "id": "save-user-info",
+      "name": "Save User Info",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1984,
+        -1200
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "3SDluWLUa1vIU50a",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "translations",
+          "mode": "list",
+          "cachedResultName": "translations"
+        },
+        "limit": 1,
+        "where": {
+          "values": [
+            {
+              "column": "key",
+              "value": "start"
+            },
+            {
+              "column": "lang",
+              "value": "={{ $('Cmd Parse').first().json.lang || 'en' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-start-translation",
+      "name": "Get Start Translation",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2592,
+        -1200
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "3SDluWLUa1vIU50a",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "translations",
+          "mode": "list",
+          "cachedResultName": "translations"
+        },
+        "limit": 1,
+        "where": {
+          "values": [
+            {
+              "column": "key",
+              "value": "help"
+            },
+            {
+              "column": "lang",
+              "value": "={{ $json.arg1 || $json.lang || 'en' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-help-translation",
+      "name": "Get Help Translation",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1632,
+        -960
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "3SDluWLUa1vIU50a",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "chat-id-start",
+              "name": "chat_id",
+              "type": "string",
+              "value": "={{ $('Cmd Parse').first().json.chat_id }}"
+            },
+            {
+              "id": "message-start",
+              "name": "message",
+              "type": "string",
+              "value": "={{ $json.text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "format-start-message",
+      "name": "Format Start Message",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2816,
+        -1200
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "chat-id-help",
+              "name": "chat_id",
+              "type": "string",
+              "value": "={{ $('Cmd Parse').first().json.chat_id }}"
+            },
+            {
+              "id": "message-help",
+              "name": "message",
+              "type": "string",
+              "value": "={{ $json.text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "format-help-message",
+      "name": "Format Help Message",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2704,
+        -960
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "HFeE52YK9tAzKTpk",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/HFeE52YK9tAzKTpk",
+          "cachedResultName": "Show command agentic"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "chat_id": "={{ $json.chat_id }}",
+            "arg1": "={{ $json.arg1 }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "arg1",
+              "displayName": "arg1",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "id": "call-show-command",
+      "name": "Call Show Command",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1792,
+        -768
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "p5NpS5X1VLPdY3mX",
+          "cachedResultName": "Book command"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "call-book-command",
+      "name": "Call Book Command",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1472,
+        -688
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "796ef0d5-89df-41a2-a8e9-42e203f81a3e",
+              "name": "chat_id",
+              "value": "={{ $json.chat_id || $('Telegram Message Trigger')?.item.json.message?.chat?.id || $json.edited_message?.chat.id }}",
+              "type": "string"
+            },
+            {
+              "id": "585e0088-1f5b-4d98-8c73-aee6b11dbfec",
+              "name": "text",
+              "value": "={{ $json.text || $('Telegram Message Trigger')?.item.json.message?.text || $json.edited_message.text }}",
+              "type": "string"
+            },
+            {
+              "id": "1343ca66-064e-4954-b063-8c15f0a6efaf",
+              "name": "user_id",
+              "value": "={{ $json.chat_id || $json.message?.from.id || $json.edited_message.from.id }}",
+              "type": "string"
+            },
+            {
+              "id": "0027b25c-95b8-48fd-a6ba-c0180e4b3da2",
+              "name": "username",
+              "value": "={{ $json.message?.from.username || $json.edited_message?.from.username }}",
+              "type": "string"
+            },
+            {
+              "id": "9ff7dedd-349e-4697-b2b6-69ece18feb9e",
+              "name": "fullname",
+              "value": "={{ $json.message?.from.first_name || $json.edited_message?.from.first_name }} {{ $json.message?.from.last_name || $json.edited_message?.from.last_name }}",
+              "type": "string"
+            },
+            {
+              "id": "0d316418-5f0f-4afd-82b3-d2c926681d27",
+              "name": "lang",
+              "value": "={{ $json.message?.from.language_code || \"en\"}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -688,
+        304
+      ],
+      "id": "7f47e326-f0e4-4e03-b3c2-f42115b08cc7",
+      "name": "Set fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "6cbf4be1-777d-439e-821b-08185d5846eb",
+              "leftValue": "={{ $('Telegram Message Trigger').item.json.message?.voice }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -464,
+        304
+      ],
+      "id": "ca86e140-67e6-4cd9-80b2-1efe1179158a",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "51Y9SIV139LvX5jl",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/51Y9SIV139LvX5jl",
+          "cachedResultName": "List Bookings Command"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "id": "call-list-command",
+      "name": "Call List Command",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1712,
+        -480
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "w8lC6D3QXh47u6w1",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/w8lC6D3QXh47u6w1",
+          "cachedResultName": "Register command"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "call-register-command",
+      "name": "Call Register Command",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1728,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "wYEfXMLutTlrEgBq",
+          "cachedResultName": "Delete command"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1888,
+        -240
+      ],
+      "id": "837843b8-6ab9-467e-9bec-87dbee047be4",
+      "name": "Call Delete command"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "dc0b16aa-f29a-474f-8285-51d18e336122",
+              "name": "chat_id",
+              "value": "={{ $('Set fields').item.json.chat_id }}",
+              "type": "string"
+            },
+            {
+              "id": "0e3401ee-0d12-423d-a865-83cf5c5e8b3a",
+              "name": "user_id",
+              "value": "={{ $('Set fields').item.json.user_id }}",
+              "type": "string"
+            },
+            {
+              "id": "2b1ac2e1-da8f-4546-a385-4dd86426e72b",
+              "name": "username",
+              "value": "={{ $('Set fields').item.json.username }}",
+              "type": "string"
+            },
+            {
+              "id": "f854f4d1-681e-4384-9a8b-77cb316ccdad",
+              "name": "fullname",
+              "value": "={{ $('Set fields').item.json.fullname }}",
+              "type": "string"
+            },
+            {
+              "id": "367396cb-c5ef-492b-b7f9-71627abefaac",
+              "name": "lang",
+              "value": "={{ $('Set fields').item.json.lang }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1264,
+        592
+      ],
+      "id": "e9f32399-e18d-4ed6-babb-302ea9cd8186",
+      "name": "Set args"
+    },
+    {
+      "parameters": {
+        "operation": "sendChatAction",
+        "chatId": "={{ $json.message?.chat.id || $json.edited_message?.chat.id }}"
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -688,
+        96
+      ],
+      "id": "44df1e02-a88d-49a9-bae2-a337b24cd045",
+      "name": "Send a typing",
+      "webhookId": "2be05714-eb28-4a61-a966-fce0ef53dc79",
+      "credentials": {
+        "telegramApi": {
+          "id": "pHQDqhsnrwimdaY2",
+          "name": "twoj_badminton_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "cnshenyang/qwen3-nothink:14b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmOllama",
+      "typeVersion": 1,
+      "position": [
+        784,
+        992
+      ],
+      "id": "c81cce17-67d8-472c-b8c0-63d3335ff6fb",
+      "name": "Ollama Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "OwoNqqKy33Tzlan7",
+          "name": "Ollama local"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "cnshenyang/qwen3-nothink:14b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        1840,
+        816
+      ],
+      "id": "0aa26026-d7b3-49c2-9386-33137ed1b242",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "OwoNqqKy33Tzlan7",
+          "name": "Ollama local"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chat_id }}",
+        "text": "={{ $json.message }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3392,
+        -976
+      ],
+      "id": "1e07ce1e-c13a-487b-bc80-00bf7cfad219",
+      "name": "Send a text message",
+      "webhookId": "920381ee-565a-43d0-97c6-624c52567f1d",
+      "credentials": {
+        "telegramApi": {
+          "id": "pHQDqhsnrwimdaY2",
+          "name": "twoj_badminton_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Text Classifier').item.json.text }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=# TASK\nParse user message into EXACTLY this JSON format:\n{\"command\": \"<COMMAND>\", \"arg1\": \"<ARGUMENT>\"}\n\nNO other fields. NO nested objects. NO arrays in root. JSON should be valid.\n\n---\n\n# CURRENT DATE\nToday: {{ $today.format('yyyy-MM-dd') }} ({{ $today.format('cccc') }})\nNow: {{ $now.format('yyyy-MM-dd HH:mm') }}\n\n---\n\n# COMMANDS REFERENCE\n\n## 1. show\nPurpose: Display court availability\nTrigger words: show, available, free, schedule, what's open, расписание, покажи, pokaż, wolne\narg1: Date in YYYY-MM-DD format\n\nExamples:\n- \"show tomorrow\" → {\"command\": \"show\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n- \"what's available Saturday\" → {\"command\": \"show\", \"arg1\": \"2026-01-03\"}\n- \"Покажи расписание на субботу\" → {\"command\": \"show\", \"arg1\": \"2026-01-03\"}\n- \"pokaż wolne korty na jutro\" → {\"command\": \"show\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n\n## 2. list\nPurpose: Show user's reservations\nTrigger words: list, my reservations, my bookings, мои брони, moje rezerwacje\narg1: EMPTY string\n\nExamples:\n- \"list my bookings\" → {\"command\": \"list\", \"arg1\": \"\"}\n- \"Покажи мои брони\" → {\"command\": \"list\", \"arg1\": \"\"}\n- \"moje rezerwacje\" → {\"command\": \"list\", \"arg1\": \"\"}\n\n## 3. delete\nPurpose: Cancel ONE reservation by ID\nTrigger words: delete, cancel, remove + ID (NOT \"all\")\narg1: Reservation ID string\n\nExamples:\n- \"cancel 6952ec02dda30\" → {\"command\": \"delete\", \"arg1\": \"6952ec02dda30\"}\n- \"delete booking abc123\" → {\"command\": \"delete\", \"arg1\": \"abc123\"}\n\n## 4. deleteall\nPurpose: Cancel ALL reservations\nTrigger words: delete all, cancel all, remove all, отмени все, usuń wszystko\narg1: EMPTY string\n\nExamples:\n- \"cancel all reservations\" → {\"command\": \"deleteall\", \"arg1\": \"\"}\n- \"Отмени все мои брони\" → {\"command\": \"deleteall\", \"arg1\": \"\"}\n- \"usuń wszystkie rezerwacje\" → {\"command\": \"deleteall\", \"arg1\": \"\"}\n\n## 5. book\nPurpose: Make a court reservation\nTrigger words: book, reserve, забронируй, zarezerwuj\narg1: JSON array with booking details\n\nFormat: [{\"court\":\"N\", \"date\":\"YYYY-MM-DD\", \"time_start\":\"HH:MM\", \"time_end\":\"HH:MM\", \"players_num\":\"4\", \"notes\":\"\"}]\nIMPORTANT: Use backslash '\\' to escape double quotes characters in JSON, see in example below\n\nExamples:\n```\n- \"book court 1 and 2 tomorrow 16:00-17:00\" → {\"command\": \"book\", \"arg1\": \"[{\\\"court\\\":\\\"1\\\", \\\"date\\\":\\\"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\\\", \\\"time_start\\\":\\\"16:00\\\", \\\"time_end\\\":\\\"17:00\\\", \\\"players_num\\\":\\\"4\\\", \\\"notes\\\":\\\"\\\"},{\\\"court\\\":\\\"2\\\", \\\"date\\\":\\\"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\\\", \\\"time_start\\\":\\\"16:00\\\", \\\"time_end\\\":\\\"17:00\\\", \\\"players_num\\\":\\\"4\\\", \\\"notes\\\":\\\"\\\"}]\"}\n```\n\n## 6. register\nPurpose: Save login credentials\nTrigger words: register, sign up, credentials\narg1: \"email password\" as single string\n\nExamples:\n- \"register user@mail.com pass123\" → {\"command\": \"register\", \"arg1\": \"user@mail.com pass123\"}\n\n---\n\n# DATE CONVERSION RULES\n\n| Input | Output |\n|-------|--------|\n| today | {{ $today.format('yyyy-MM-dd') }} |\n| tomorrow | {{ $now.plus({days: 1}).format('yyyy-MM-dd') }} |\n| day after tomorrow | {{ $now.plus({days: 2}).format('yyyy-MM-dd') }} |\n| Saturday | 2026-01-03 (next Saturday) |\n| Sunday | 2026-01-04 (next Sunday) |\n| 27.12 or 27/12 | {{ $now.format('yyyy') }}-12-27 |\n| 15.01.2026 | 2026-01-15 |\n\nRULE: Always use FUTURE dates. Never past.\n\n---\n\n# WRONG vs CORRECT OUTPUT\n\n❌ WRONG (nested parameters):\n{\"command\": \"show\", \"parameters\": {\"date\": \"2026-01-03\"}}\n\n❌ WRONG (extra fields):\n{\"command\": \"show\", \"arg1\": \"2026-01-03\", \"confidence\": 0.9}\n\n✅ CORRECT:\n{\"command\": \"show\", \"arg1\": \"2026-01-03\"}\n\n---\n\n# OUTPUT RULES\n1. Return ONLY the JSON object\n2. EXACTLY two fields: \"command\" and \"arg1\"\n3. NO explanation, NO thinking, NO markdown\n4. arg1 is ALWAYS a string (even if empty or JSON array)"
+            }
+          ]
+        }
+      },
+      "id": "nlp-command-parser",
+      "name": "NLP Command Parser",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.5,
+      "position": [
+        1888,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cmd",
+              "name": "command",
+              "type": "string",
+              "value": "={{ $json.output.command }}"
+            },
+            {
+              "id": "arg",
+              "name": "arg1",
+              "type": "string",
+              "value": "={{ $json.output.arg1 }}"
+            },
+            {
+              "id": "cid",
+              "name": "chat_id",
+              "type": "string",
+              "value": "={{ $('Set args').item.json.chat_id }}"
+            },
+            {
+              "id": "uid",
+              "name": "user_id",
+              "type": "string",
+              "value": "={{ $('Set args').item.json.user_id }}"
+            },
+            {
+              "id": "uname",
+              "name": "username",
+              "type": "string",
+              "value": "={{ $('Set args').item.json.username }}"
+            },
+            {
+              "id": "fname",
+              "name": "fullname",
+              "type": "string",
+              "value": "={{ $('Set args').item.json.fullname }}"
+            },
+            {
+              "id": "lng",
+              "name": "lang",
+              "type": "string",
+              "value": "={{ $('Set args').item.json.lang }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "merge-context-with-parsed",
+      "name": "Merge Context",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2304,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "show-cond",
+                    "leftValue": "={{ $json.command }}",
+                    "rightValue": "show",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "show"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "book-cond",
+                    "leftValue": "={{ $json.command }}",
+                    "rightValue": "book",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "book"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "list-cond",
+                    "leftValue": "={{ $json.command }}",
+                    "rightValue": "list",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "list"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "delete-cond",
+                    "leftValue": "={{ $json.command }}",
+                    "rightValue": "delete",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "delete"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "register-cond",
+                    "leftValue": "={{ $json.command }}",
+                    "rightValue": "register",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "register"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "deleteall-cond",
+                    "leftValue": "={{ $json.command }}",
+                    "rightValue": "deleteall",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "deleteall"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "nlp-command-switch",
+      "name": "NLP Command Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        2592,
+        528
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "w8lC6D3QXh47u6w1",
+          "mode": "id"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "chat_id": "={{ $json.chat_id }}",
+            "user_id": "={{ $json.user_id }}",
+            "username": "={{ $json.username }}",
+            "fullname": "={{ $json.fullname }}",
+            "lang": "={{ $json.lang }}"
+          },
+          "schema": [
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "id": "user_id",
+              "displayName": "user_id",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "id": "username",
+              "displayName": "username",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "id": "fullname",
+              "displayName": "fullname",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "id": "lang",
+              "displayName": "lang",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "nlp-exec-register",
+      "name": "NLP Execute Register",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        2816,
+        736
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Set fields').item.json.chat_id }}",
+        "text": "={{ $json.text }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        272,
+        784
+      ],
+      "id": "a29216dc-52c9-46f1-b7b6-f764a9f1a6ed",
+      "name": "Send a text message1",
+      "webhookId": "f6f2c3e4-089d-4deb-bbfb-eabc0c529e83",
+      "credentials": {
+        "telegramApi": {
+          "id": "pHQDqhsnrwimdaY2",
+          "name": "twoj_badminton_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"$schema\": \"http://json-schema.org/draft-07/schema#\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"command\": {\n      \"type\": \"string\",\n      \"enum\": [\"show\", \"book\", \"list\", \"delete\", \"deleteall\", \"register\"]\n    },\n    \"arg1\": {\n      \"type\": \"string\",\n      \"description\": \"Command argument - either a date (YYYY-MM-DD) or JSON array string for bookings\"\n    }\n  },\n  \"required\": [\"command\"]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        2048,
+        784
+      ],
+      "id": "8c24665d-4700-4148-97dc-f0f62e0bb5a9",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "operation": "sendChatAction",
+        "chatId": "={{ $json.chat_id }}"
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1536,
+        432
+      ],
+      "id": "335f530d-a639-4a8e-83dd-d236f51249ca",
+      "name": "Send a chat action",
+      "webhookId": "ff016420-be64-4d5e-b454-2fc9453945c4",
+      "credentials": {
+        "telegramApi": {
+          "id": "pHQDqhsnrwimdaY2",
+          "name": "twoj_badminton_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "HFeE52YK9tAzKTpk",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/HFeE52YK9tAzKTpk",
+          "cachedResultName": "Show Command"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "chat_id": "={{ $json.chat_id }}",
+            "arg1": "={{ $json.arg1 }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "arg1",
+              "displayName": "arg1",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "id": "nlp-exec-show",
+      "name": "Execute Show",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        2816,
+        -32
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "p5NpS5X1VLPdY3mX",
+          "mode": "id"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "arg1": "={{ $json.arg1 }}",
+            "chat_id": "={{ $json.chat_id }}",
+            "user_id": "={{ $json.user_id }}",
+            "username": "={{ $json.username }}",
+            "fullname": "={{ $json.fullname }}",
+            "lang": "={{ $json.lang }}"
+          },
+          "schema": [
+            {
+              "id": "arg1",
+              "displayName": "arg1",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "id": "user_id",
+              "displayName": "user_id",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "id": "username",
+              "displayName": "username",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "id": "fullname",
+              "displayName": "fullname",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "id": "lang",
+              "displayName": "lang",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "nlp-exec-book",
+      "name": "Execute Book",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        2816,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "51Y9SIV139LvX5jl",
+          "mode": "id"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "chat_id": "={{ $json.chat_id }}",
+            "user_id": "={{ $json.user_id }}",
+            "username": "={{ $json.username }}",
+            "fullname": "={{ $json.fullname }}",
+            "lang": "={{ $json.lang }}"
+          },
+          "schema": [
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "id": "user_id",
+              "displayName": "user_id",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "id": "username",
+              "displayName": "username",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "id": "fullname",
+              "displayName": "fullname",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "id": "lang",
+              "displayName": "lang",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "nlp-exec-list",
+      "name": "Execute List",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        2816,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "wYEfXMLutTlrEgBq",
+          "mode": "id"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "arg1": "={{ $json.arg1 }}",
+            "chat_id": "={{ $json.chat_id }}",
+            "user_id": "={{ $json.user_id }}",
+            "username": "={{ $json.username }}",
+            "fullname": "={{ $json.fullname }}",
+            "lang": "={{ $json.lang }}"
+          },
+          "schema": [
+            {
+              "id": "arg1",
+              "displayName": "arg1",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "id": "user_id",
+              "displayName": "user_id",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "id": "username",
+              "displayName": "username",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "id": "fullname",
+              "displayName": "fullname",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "id": "lang",
+              "displayName": "lang",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "nlp-exec-delete",
+      "name": "Execute Delete",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        2816,
+        544
+      ]
+    },
+    {
+      "parameters": {
+        "query": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Query', ``, 'string') }}",
+        "options": {
+          "search_depth": "basic",
+          "include_domains": []
+        }
+      },
+      "type": "@tavily/n8n-nodes-tavily.tavilyTool",
+      "typeVersion": 1,
+      "position": [
+        2384,
+        1584
+      ],
+      "id": "82ae02fd-570d-4439-9502-ce3e415e7807",
+      "name": "Search in Tavily",
+      "credentials": {
+        "tavilyApi": {
+          "id": "vuVoGqarnbTVjTux",
+          "name": "Tavily account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Set fields').item.json.chat_id }}",
+        "text": "={{ $json.text }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3264,
+        1456
+      ],
+      "id": "6def4a5a-1e35-42f4-9770-475280c7f72f",
+      "name": "Send a text message2",
+      "webhookId": "58500fec-c7d0-47fa-9a46-2d0b6c5bab9e",
+      "credentials": {
+        "telegramApi": {
+          "id": "pHQDqhsnrwimdaY2",
+          "name": "twoj_badminton_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "=492192664"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        1712,
+        1584
+      ],
+      "id": "a74dfcb7-3e35-4397-b81e-c9572a4e223a",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "3SDluWLUa1vIU50a",
+          "name": "Postgres account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "promptType": "guardrails",
+        "options": {
+          "systemMessage": "=# ROLE\nYou are a multilingual AI assistant for Telegram bot \"twoj_badminton_bot\". You help users with badminton information, general conversation, and knowledge lookup.\n\n# CONTEXT\n- Remember the current date and time: **Today is {{ $now.format('cccc') }} the {{ $now.format('yyyy-MM-dd HH:mm') }}**, use this information to provide relevant responses.\n- When needed, reference \"today\", \"tomorrow\", \"this week\" appropriately.\n- Platform: Telegram (messages should be concise).\n- User language: Detect and match automatically.\n\n---\n\n# TOOLS\n\n## 1. Badminton Knowledge Base\n**Purpose**: Semantic search for badminton rules, equipment, BWF documents\n**When to use**: Questions about badminton techniques, rules, equipment, tournaments\n**Query language**: Always use English (translate user's query if needed)\n**Example**: User asks \"jakie są zasady gry w debla?\" → Query: \"doubles rules badminton\"\n\n## 2. Calculator\n**Purpose**: Mathematical operations\n**When to use**: Any numerical calculation requiring precision\n**Example**: Shuttle speed conversion, score calculations\n\n## 3. Tavily Web Search\n**Purpose**: Search information and news from specific domains.\n\n**Domains**:\n- https://badmintonsq.com - Mastering Badminton articles, knowledge hub.\n- https://badmintonstatistics.net - Tournament statistics, players, rankings.\n- https://www.worldbadminton.com/rules - Official BWF laws source.\n- https://www.worldbadminton.com - General Information and list of links.\n- https://bwfbadminton.com - Official BWF site for events, news, and tournaments.\n- https://badmintoneurope.com/ - Official Badminton Europe site - latest news.\n​- https://development.bwfbadminton.com/sport-science/global-research/scientific-papers - Scientific Papers search.\n- https://www.tntsports.co.uk/badminton - Badminton news, results, and videos.\n- https://badmintonhq.co.uk/pages/badminton-hq-reviews - real customers reviews.\n- https://victor-polska.pl - Victor badminton equipment.\n​- https://www.ziba.pl/manufacturer/victor-ziba-pl - Victor equipment in Poland.\n- https://www.badmintonplanet.eu - European badminton products.\n- https://www.badmintoncentral.com/forums - History of tournaments, fan forums.\n- https://www.yonex.com/badminton/ - Yonex official badminton rackets and gear.\n- https://www.reddit.com/r/badminton - Active Reddit community discussions.\n- https://beastbadminton.com - Training videos, drills, reviews and player tips.\n- https://www.badmintonbible.com - Rules, techniques, and fun facts.\n- https://corporate.bwfbadminton.com/events/approved-shuttles - Approved shuttles. \n- https://www.badmintonengland.co.uk - Historical facts, UK news.\n- https://www.britannica.com/sports/badminton - Britannica about badminton.\n- https://pzbad.pl - Polski Związek Badmintona, oficjalna federacja.\n- https://narodowybadminton.pl - Fundacja Narodowy Badminton w Polsce.\n- https://www.badmin.pl - Sklep badmintonowy z rakietami, lotkami i akcesoriami.\n- https://pzbad.pl/turnieje-w-polsce/ - Turnieje badmintonowe w Polsce.\n- https://www.twojtenis.pl/pl - Rezerwacji kortów w Krakowie i w Polsce.\n\n**When to use**: Recent news, tournament results, current events\n**Example**: \"Who won BWL World Championships 2025?\"\n\n## 4. Wikipedia\n**Purpose**: General encyclopedia lookup\n**When to use**: Historical facts, player biographies, general knowledge\n**Example**: \"When was BWF founded?\"\n\n---\n\n# RESPONSE FORMAT\n\n## Structure\n1. Keep responses brief (2-4 sentences typical for Telegram)\n2. Use emojis sparingly for emotional responses 🏸\n3. Include source references when using tools: [Source: document name]\n4. For quoted content, preserve original language\n\n## Language Rules\n- Detect user's language from their message\n- Respond in the same language\n- Translate tool queries to English internally\n- Keep quoted sources in original language with translation if helpful\n\n## Voice Messages\n- Treat as direct speech (do not mention transcription)\n- Respond conversationally as if in spoken dialogue\n\n---\n\n# BEHAVIOR\n\n## Do This ✓\n- Use tools for factual questions (prefer accuracy over speed)\n- Ask one clarifying question when request is ambiguous\n- Reference time naturally: \"today\", \"tomorrow\", \"this week\"\n- Match user's communication style and tone\n- Cite sources when information comes from tools\n\n## Boundaries\n- Stay focused on badminton, sports, and general assistance\n- For political or controversial topics: \"I focus on badminton and general assistance. How can I help with that?\"\n- When no information found: \"I couldn't find this in my available resources. Would you like me to search differently?\"\n\n---\n\n# SPECIAL HANDLING\n\n## Sanitized Text\nUser messages may contain placeholders: <URL>, <LOCATION>, <EMAIL>\n- Treat as real data\n- Never guess original content\n- Reference by placeholder: \"I've noted <LOCATION> for your preferences\"\n\n## Context Memory\n- Maintain conversation context across turns\n- Reference previous messages when relevant\n- Track user preferences mentioned in conversation\n\n---\n\n# EXAMPLES\n\n**User**: Jakie są wymiary kortu do badmintona?\n**Assistant**: Kort do badmintona ma wymiary 13,4m x 6,1m (gra podwójna) lub 13,4m x 5,18m (gra pojedyncza) 🏸 [Źródło: BWF Rules]\n\n**User**: [voice message about shuttle recommendations]\n**Assistant**: For beginners, I'd recommend feather shuttles with speed 77 for indoor play. They offer good durability while you develop your technique.\n\n**User**: What happened at the recent tournament?\n**Assistant**: [Uses Tavily search] The Denmark Open 2024 concluded last week with Viktor Axelsen winning the men's singles title. [Source: badmintoncore.com]"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        1840,
+        1360
+      ],
+      "id": "aa3250fe-7fd3-4956-bdaa-c46d09c0731b",
+      "name": "AI Agent",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Edit Fields1').item.json.chat_id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2816,
+        1312
+      ],
+      "id": "4138fda1-fc08-4a2c-8365-8007b3cca269",
+      "name": "Send a text message3",
+      "webhookId": "27b2e5b6-81ca-46f4-968b-43988b31e86b",
+      "credentials": {
+        "telegramApi": {
+          "id": "pHQDqhsnrwimdaY2",
+          "name": "twoj_badminton_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "768523d4-da5d-4ac9-af61-3ca87f2c8ac6",
+              "name": "chat_id",
+              "value": "={{ $('Set fields').item.json.chat_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "include": "selected",
+        "includeFields": "text,user_id,lang",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1280,
+        1360
+      ],
+      "id": "8c55dd05-482e-440c-8416-7792f4dd1b0c",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "model": "cnshenyang/qwen3-nothink:14b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        1584,
+        1584
+      ],
+      "id": "9c07a09b-ca2a-4704-a865-f1266b40dd5d",
+      "name": "Ollama Chat Model1",
+      "credentials": {
+        "ollamaApi": {
+          "id": "OwoNqqKy33Tzlan7",
+          "name": "Ollama local"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "b7xXjE899CcIb9eo"
+        },
+        "workflowInputs": {
+          "value": {},
+          "schema": [],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "id": "call-deleteall-command",
+      "name": "Call Delete All Command",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1808,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "b7xXjE899CcIb9eo"
+        },
+        "workflowInputs": {
+          "value": {
+            "lang": "={{ $json.lang }}",
+            "chat_id": "={{ $json.chat_id }}",
+            "user_id": "={{ $json.user_id }}",
+            "fullname": "={{ $json.fullname }}",
+            "username": "={{ $json.username }}"
+          },
+          "schema": [
+            {
+              "id": "chat_id",
+              "type": "string",
+              "required": true,
+              "displayName": "chat_id"
+            },
+            {
+              "id": "user_id",
+              "type": "string",
+              "required": true,
+              "displayName": "user_id"
+            },
+            {
+              "id": "username",
+              "type": "string",
+              "required": true,
+              "displayName": "username"
+            },
+            {
+              "id": "fullname",
+              "type": "string",
+              "required": true,
+              "displayName": "fullname"
+            },
+            {
+              "id": "lang",
+              "type": "string",
+              "required": true,
+              "displayName": "lang"
+            }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "nlp-exec-deleteall",
+      "name": "Execute Delete All",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        2816,
+        928
+      ]
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $json.text }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "command",
+              "description": "=User wants the bot to perform an ACTION - viewing court availability, booking courts, listing reservations, canceling reservations, or registering credentials."
+            },
+            {
+              "category": "regular talk",
+              "description": "Conversational messages that do NOT request bot actions: greetings in all languages, questions about badminton rules/equipment/techniques, general chit-chat, requests for information that don't involve court booking operations"
+            }
+          ]
+        },
+        "options": {
+          "systemPromptTemplate": "=Classify user input into exactly one category. Input may be in any language (English, Polish, Russian, etc.).\n\nCategories:\n{categories}\n\nExamples:\n- \"What's available tomorrow?\" → command\n- \"Book court 2 at 18:00\" → command\n- \"Show me my reservations\" → command\n- \"Cancel booking 12345\" → command\n- \"Cancel all my bookings\" → command\n- \"Pokaż wolne korty\" (Show free courts) → command\n- \"Cofnij wszystko\" (Cancel all) → command\n- \"Покажи мои брони\" (Show my bookings) → command\n- \"Покажи расписание в Блониа-спорт на субботу\" → command\n- \"я заболел, отмени все мои брони на завтра\" → command\n- \"Отмени все резервации\" → command\n- \"What racket should I buy?\" → regular talk\n- \"Hello!\" → regular talk\n- \"How do I play badminton?\" → regular talk\n- \"Cześć\" (Hi) → regular talk\n- \"Search for current Champion in single men badminton\" → regular talk \n\nIMPORTANT: Output ONLY the JSON with category. No explanation. One label only."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "typeVersion": 1.1,
+      "position": [
+        784,
+        784
+      ],
+      "id": "15736666-7dff-454d-aeef-a82675a5b553",
+      "name": "Text Classifier"
+    },
+    {
+      "parameters": {
+        "operation": "checkIfEvaluating"
+      },
+      "id": "eval-check-agent",
+      "name": "Check If Evaluating (Agent)",
+      "type": "n8n-nodes-base.evaluation",
+      "typeVersion": 4.8,
+      "position": [
+        2592,
+        1216
+      ]
+    },
+    {
+      "parameters": {
+        "source": "googleSheets",
+        "documentId": {
+          "__rl": true,
+          "value": "1gqyUwCZS0sTYfKEptGWSyFOOiLEs3hfBfwCFKYGlUcY",
+          "mode": "list",
+          "cachedResultName": "agent_tests",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gqyUwCZS0sTYfKEptGWSyFOOiLEs3hfBfwCFKYGlUcY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gqyUwCZS0sTYfKEptGWSyFOOiLEs3hfBfwCFKYGlUcY/edit#gid=0"
+        },
+        "outputs": {
+          "values": [
+            {
+              "outputName": "actual_output",
+              "outputValue": "={{ $json.output }}"
+            }
+          ]
+        }
+      },
+      "id": "eval-output-agent",
+      "name": "Set Outputs (Agent)",
+      "type": "n8n-nodes-base.evaluation",
+      "typeVersion": 4.8,
+      "position": [
+        2816,
+        1120
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "rwNejW7L2Lym8SJi",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "checkIfEvaluating"
+      },
+      "id": "eval-check-response",
+      "name": "Check If Evaluating (Response)",
+      "type": "n8n-nodes-base.evaluation",
+      "typeVersion": 4.8,
+      "position": [
+        3104,
+        -1200
+      ]
+    },
+    {
+      "parameters": {
+        "source": "googleSheets",
+        "documentId": {
+          "__rl": true,
+          "value": "1gqyUwCZS0sTYfKEptGWSyFOOiLEs3hfBfwCFKYGlUcY",
+          "mode": "list",
+          "cachedResultName": "agent_tests",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gqyUwCZS0sTYfKEptGWSyFOOiLEs3hfBfwCFKYGlUcY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gqyUwCZS0sTYfKEptGWSyFOOiLEs3hfBfwCFKYGlUcY/edit#gid=0"
+        }
+      },
+      "id": "eval-output-commands",
+      "name": "Set Outputs (Commands)",
+      "type": "n8n-nodes-base.evaluation",
+      "typeVersion": 4.8,
+      "position": [
+        3392,
+        -1216
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "rwNejW7L2Lym8SJi",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "setMetrics",
+        "expectedAnswer": "={{ $('When fetching a dataset row').item.json.text }}",
+        "actualAnswer": "={{ $json.output }}",
+        "prompt": "=You are an expert factual evaluator assessing the accuracy of answers compared to established ground truths.\n\nEvaluate the factual correctness of a given output compared to the provided ground truth on a scale from 1 to 5. Use detailed reasoning to thoroughly analyze all claims before determining the final score.\n\n# Scoring Criteria\n\n- 5: Highly similar - The output and ground truth are nearly identical, with only minor, insignificant differences.\n- 4: Somewhat similar - The output is largely similar to the ground truth but has few noticeable differences.\n- 3: Moderately similar - There are some evident differences, but the core essence is captured in the output.\n- 2: Slightly similar - The output only captures a few elements of the ground truth and contains several differences.\n- 1: Not similar - The output is significantly different from the ground truth, with few or no matching elements.\n\n# Evaluation Steps\n\n1. Identify and list the key elements present in both the output and the ground truth.\n2. Compare these key elements to evaluate their similarities and differences, considering both content and structure.\n3. Analyze the semantic meaning conveyed by both the output and the ground truth, noting any significant deviations.\n4. Consider factual accuracy of specific details, including names, dates, numbers, and relationships.\n5. Assess whether the output maintains the factual integrity of the ground truth, even if phrased differently.\n6. Determine the overall level of similarity and accuracy according to the defined criteria.\n\n# Output Format\n\nProvide:\n- A detailed analysis of the comparison (extended reasoning)\n- A one-sentence summary highlighting key differences (not similarities)\n- The final similarity score as an integer (1, 2, 3, 4, or 5)\n\nAlways follow the JSON format below and return nothing else:\n{\n  \"extended_reasoning\": \"<detailed step-by-step analysis of factual accuracy and similarity>\",\n  \"reasoning_summary\": \"<one sentence summary focusing on key differences>\",\n  \"score\": <number: integer from 1 to 5>\n}\n\n# Examples\n\n**Example 1:**\n\nInput:\n- Output: \"The cat sat on the mat.\"\n- Ground Truth: \"The feline is sitting on the rug.\"\n\nExpected Output:\n{\n  \"extended_reasoning\": \"I need to compare 'The cat sat on the mat' with 'The feline is sitting on the rug.' First, let me identify the key elements: both describe an animal ('cat' vs 'feline') in a position ('sat' vs 'sitting') on a surface ('mat' vs 'rug'). The subject is semantically identical - 'cat' and 'feline' refer to the same animal. The action is also semantically equivalent - 'sat' and 'sitting' both describe the same position, though one is past tense and one is present continuous. The location differs in specific wording ('mat' vs 'rug') but both refer to floor coverings that serve the same function. The basic structure and meaning of both sentences are preserved, though they use different vocabulary and slightly different tense. The core information being conveyed is the same, but there are noticeable wording differences.\",\n  \"reasoning_summary\": \"The sentences differ in vocabulary choice ('cat' vs 'feline', 'mat' vs 'rug') and verb tense ('sat' vs 'is sitting').\",\n  \"score\": 3\n}\n\n**Example 2:**\n\nInput:\n- Output: \"The quick brown fox jumps over the lazy dog.\"\n- Ground Truth: \"A fast brown animal leaps over a sleeping canine.\"\n\nExpected Output:\n{\n  \"extended_reasoning\": \"I need to compare 'The quick brown fox jumps over the lazy dog' with 'A fast brown animal leaps over a sleeping canine.' Starting with the subjects: 'quick brown fox' vs 'fast brown animal'. Both describe the same entity (a fox is a type of animal) with the same attributes (quick/fast and brown). The action is described as 'jumps' vs 'leaps', which are synonymous verbs describing the same motion. The object in both sentences is a dog, described as 'lazy' in one and 'sleeping' in the other, which are related concepts (a sleeping dog could be perceived as lazy). The structure follows the same pattern: subject + action + over + object. The sentences convey the same scene with slightly different word choices that maintain the core meaning. The level of specificity differs slightly ('fox' vs 'animal', 'dog' vs 'canine'), but the underlying information and imagery remain very similar.\",\n  \"reasoning_summary\": \"The sentences use different but synonymous terminology ('quick' vs 'fast', 'jumps' vs 'leaps', 'lazy' vs 'sleeping') and varying levels of specificity ('fox' vs 'animal', 'dog' vs 'canine').\",\n  \"score\": 4\n}\n\n# Notes\n\n- Focus primarily on factual accuracy and semantic similarity, not writing style or phrasing differences.\n- Identify specific differences rather than making general assessments.\n- Pay special attention to dates, numbers, names, locations, and causal relationships when present.\n- Consider the significance of each difference in the context of the overall information.\n- Be consistent in your scoring approach across different evaluations.",
+        "options": {}
+      },
+      "id": "eval-set-rag-metrics",
+      "name": "Set Metrics (RAG)",
+      "type": "n8n-nodes-base.evaluation",
+      "typeVersion": 4.8,
+      "position": [
+        3040,
+        1008
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "checkIfEvaluating"
+      },
+      "id": "eval-check-ai-error",
+      "name": "Check If Evaluating (AI Error)",
+      "type": "n8n-nodes-base.evaluation",
+      "typeVersion": 4.8,
+      "position": [
+        2976,
+        1552
+      ]
+    },
+    {
+      "parameters": {
+        "source": "googleSheets",
+        "documentId": {
+          "__rl": true,
+          "value": "1gqyUwCZS0sTYfKEptGWSyFOOiLEs3hfBfwCFKYGlUcY",
+          "mode": "list",
+          "cachedResultName": "agent_tests",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gqyUwCZS0sTYfKEptGWSyFOOiLEs3hfBfwCFKYGlUcY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gqyUwCZS0sTYfKEptGWSyFOOiLEs3hfBfwCFKYGlUcY/edit#gid=0"
+        }
+      },
+      "id": "eval-output-error",
+      "name": "Set Outputs (Error)",
+      "type": "n8n-nodes-base.evaluation",
+      "typeVersion": 4.8,
+      "position": [
+        3264,
+        1648
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "rwNejW7L2Lym8SJi",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "source": "googleSheets",
+        "documentId": {
+          "__rl": true,
+          "value": "1gqyUwCZS0sTYfKEptGWSyFOOiLEs3hfBfwCFKYGlUcY",
+          "mode": "list",
+          "cachedResultName": "agent_tests",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gqyUwCZS0sTYfKEptGWSyFOOiLEs3hfBfwCFKYGlUcY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gqyUwCZS0sTYfKEptGWSyFOOiLEs3hfBfwCFKYGlUcY/edit#gid=0"
+        }
+      },
+      "type": "n8n-nodes-base.evaluationTrigger",
+      "typeVersion": 4.7,
+      "position": [
+        -976,
+        464
+      ],
+      "id": "711fa0ee-7a5f-484c-baa0-267758548e26",
+      "name": "When fetching a dataset row",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "rwNejW7L2Lym8SJi",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "source": "googleSheets",
+        "documentId": {
+          "__rl": true,
+          "value": "1gqyUwCZS0sTYfKEptGWSyFOOiLEs3hfBfwCFKYGlUcY",
+          "mode": "list",
+          "cachedResultName": "agent_tests",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gqyUwCZS0sTYfKEptGWSyFOOiLEs3hfBfwCFKYGlUcY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gqyUwCZS0sTYfKEptGWSyFOOiLEs3hfBfwCFKYGlUcY/edit#gid=0"
+        },
+        "outputs": {
+          "values": [
+            {
+              "outputName": "Correctness",
+              "outputValue": "={{ $json.Correctness }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.evaluation",
+      "typeVersion": 4.8,
+      "position": [
+        3408,
+        1008
+      ],
+      "id": "dbb292de-5352-48ce-8ddc-3b324eb18d0c",
+      "name": "Evaluation",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "rwNejW7L2Lym8SJi",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "cnshenyang/qwen3-nothink:14b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        3184,
+        1216
+      ],
+      "id": "26f16e4e-c70f-42d6-99aa-8fac0e0cbafc",
+      "name": "Ollama Chat Model2",
+      "credentials": {
+        "ollamaApi": {
+          "id": "OwoNqqKy33Tzlan7",
+          "name": "Ollama local"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Telegram Message Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set fields",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a typing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file": {
+      "main": [
+        [
+          {
+            "node": "Transcribe audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe audio": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardrails": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wikipedia": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Badminton knowledge base": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Ollama": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Badminton knowledge base",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If command": {
+      "main": [
+        [
+          {
+            "node": "Cmd Parse",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Text Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get AI Error Translation": {
+      "main": [
+        [
+          {
+            "node": "Check If Evaluating (AI Error)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cmd Parse": {
+      "main": [
+        [
+          {
+            "node": "Cmd Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cmd Switch": {
+      "main": [
+        [
+          {
+            "node": "Collect User Data",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Help Translation",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Call Show Command",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Call Book Command",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Call List Command",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Call Delete command",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Call Register Command",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Call Delete All Command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Collect User Data": {
+      "main": [
+        [
+          {
+            "node": "Save User Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save User Info": {
+      "main": [
+        [
+          {
+            "node": "Get Start Translation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Start Translation": {
+      "main": [
+        [
+          {
+            "node": "Format Start Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Help Translation": {
+      "main": [
+        [
+          {
+            "node": "Format Help Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Start Message": {
+      "main": [
+        [
+          {
+            "node": "Check If Evaluating (Response)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Help Message": {
+      "main": [
+        [
+          {
+            "node": "Check If Evaluating (Response)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Show Command": {
+      "main": [
+        []
+      ]
+    },
+    "Call Book Command": {
+      "main": [
+        []
+      ]
+    },
+    "Set fields": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "If command",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call List Command": {
+      "main": [
+        []
+      ]
+    },
+    "Call Register Command": {
+      "main": [
+        []
+      ]
+    },
+    "Call Delete command": {
+      "main": [
+        []
+      ]
+    },
+    "Set args": {
+      "main": [
+        [
+          {
+            "node": "Send a chat action",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "NLP Command Parser",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NLP Command Parser": {
+      "main": [
+        [
+          {
+            "node": "Merge Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Context": {
+      "main": [
+        [
+          {
+            "node": "NLP Command Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NLP Command Switch": {
+      "main": [
+        [
+          {
+            "node": "Execute Show",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute Book",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute List",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute Delete",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "NLP Execute Register",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute Delete All",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NLP Execute Register": {
+      "main": [
+        []
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "NLP Command Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "NLP Command Parser",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Show": {
+      "main": [
+        []
+      ]
+    },
+    "Execute Book": {
+      "main": [
+        []
+      ]
+    },
+    "Execute List": {
+      "main": [
+        []
+      ]
+    },
+    "Execute Delete": {
+      "main": [
+        []
+      ]
+    },
+    "Search in Tavily": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Check If Evaluating (Agent)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get AI Error Translation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Guardrails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Classifier": {
+      "main": [
+        [
+          {
+            "node": "Set args",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Outputs (Agent)": {
+      "main": [
+        [
+          {
+            "node": "Set Metrics (RAG)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check If Evaluating (Agent)": {
+      "main": [
+        [
+          {
+            "node": "Set Outputs (Agent)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check If Evaluating (Response)": {
+      "main": [
+        [
+          {
+            "node": "Set Outputs (Commands)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check If Evaluating (AI Error)": {
+      "main": [
+        [
+          {
+            "node": "Send a text message2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Set Outputs (Error)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When fetching a dataset row": {
+      "main": [
+        [
+          {
+            "node": "Set fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Metrics (RAG)": {
+      "main": [
+        [
+          {
+            "node": "Evaluation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Set Metrics (RAG)",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Delete All": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Warsaw",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateId": "voice_assistant_agent_with_telegram",
+    "templateCredsSetupCompleted": true
+  },
+  "versionId": "7fc73f0b-2487-41a1-bd39-d5a2caca54f7",
+  "activeVersionId": "7fc73f0b-2487-41a1-bd39-d5a2caca54f7",
+  "versionCounter": 725,
+  "triggerCount": 1,
+  "shared": [],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-01-02T15:00:02.000Z",
+    "createdAt": "2026-01-02T14:58:44.323Z",
+    "versionId": "7fc73f0b-2487-41a1-bd39-d5a2caca54f7",
+    "workflowId": "uf7MYoeaspA2V85u",
+    "nodes": [
+      {
+        "parameters": {
+          "updates": [
+            "message",
+            "edited_message",
+            "poll"
+          ],
+          "additionalFields": {
+            "download": true
+          }
+        },
+        "id": "0c402bdc-7fa2-4fa1-96d6-f02853cfdaa1",
+        "name": "Telegram Message Trigger",
+        "type": "n8n-nodes-base.telegramTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          -992,
+          208
+        ],
+        "webhookId": "55acc711-c248-4ac9-b6cd-e295c2d33f4b",
+        "credentials": {
+          "telegramApi": {
+            "id": "pHQDqhsnrwimdaY2",
+            "name": "twoj_badminton_bot"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "file",
+          "fileId": "={{ $('Telegram Message Trigger').item.json.message.voice.file_id }}",
+          "additionalFields": {}
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          -144,
+          784
+        ],
+        "id": "66219c83-6371-4cc6-ad43-57cee44f52da",
+        "name": "Get a file",
+        "webhookId": "e0769871-efe3-49da-81a5-2f88a6fdd33f",
+        "credentials": {
+          "telegramApi": {
+            "id": "pHQDqhsnrwimdaY2",
+            "name": "twoj_badminton_bot"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "audio",
+          "operation": "transcribe",
+          "binaryPropertyName": "=data",
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.openAi",
+        "typeVersion": 1.8,
+        "position": [
+          64,
+          784
+        ],
+        "id": "6f314aef-7ff1-4211-8656-e2c1f8fea374",
+        "name": "Transcribe audio",
+        "credentials": {
+          "openAiApi": {
+            "id": "gmq5u3CqvxIc2nEW",
+            "name": "OpenAi"
+          }
+        }
+      },
+      {
+        "parameters": {},
+        "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+        "typeVersion": 1,
+        "position": [
+          1840,
+          1584
+        ],
+        "id": "3122d37e-a446-4f7c-aba0-76a6564b2ee9",
+        "name": "Calculator"
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "ce8eebdd-c313-4444-a1bd-dcde56619a0d",
+                "name": "command",
+                "type": "string",
+                "value": "={{\n  $json.text\n    .toLowerCase()\n    .replace(/^\\//, '')\n    .split(/ (.+)/)[0]\n  || ''\n}}"
+              },
+              {
+                "id": "834f7369-52f1-4df3-bfcb-754be0bb11e0",
+                "name": "arg1",
+                "type": "string",
+                "value": "={{\n(() => {\n  const raw = $json.text\n    .toLowerCase()\n    .replace(/^\\//, '')\n    .split(/ (.+)/)[1] || '';\n  \n  if (!raw) return '';\n  \n  const input = raw.trim();\n  \n  // Already YYYY-MM-DD format\n  if (/^\\d{4}-\\d{2}-\\d{2}$/.test(input)) {\n    return input;\n  }\n  \n  // DD.MM.YYYY format (e.g., 19.12.2025)\n  const dotFull = input.match(/^(\\d{1,2})\\.(\\d{1,2})\\.(\\d{4})$/);\n  if (dotFull) {\n    const [, d, m, y] = dotFull;\n    return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;\n  }\n  \n  // DD.MM.YY format (e.g., 19.12.25)\n  const dotShort = input.match(/^(\\d{1,2})\\.(\\d{1,2})\\.(\\d{2})$/);\n  if (dotShort) {\n    const [, d, m, y] = dotShort;\n    const fullYear = parseInt(y) > 50 ? '19' + y : '20' + y;\n    return `${fullYear}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;\n  }\n  \n  // DD/MM/YYYY format\n  const slashFull = input.match(/^(\\d{1,2})\\/(\\d{1,2})\\/(\\d{4})$/);\n  if (slashFull) {\n    const [, d, m, y] = slashFull;\n    return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;\n  }\n  \n  // DD/MM/YY format\n  const slashShort = input.match(/^(\\d{1,2})\\/(\\d{1,2})\\/(\\d{2})$/);\n  if (slashShort) {\n    const [, d, m, y] = slashShort;\n    const fullYear = parseInt(y) > 50 ? '19' + y : '20' + y;\n    return `${fullYear}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;\n  }\n  \n  // Return as-is if no pattern matches\n  return input;\n})()\n}}"
+              }
+            ]
+          },
+          "includeOtherFields": true,
+          "include": "selected",
+          "includeFields": "chat_id,user_id,username,fullname,lang",
+          "options": {}
+        },
+        "id": "4a575154-b6b2-46fd-bbf2-c1882c73a956",
+        "name": "Cmd Parse",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          656,
+          -512
+        ],
+        "typeVersion": 3.4
+      },
+      {
+        "parameters": {
+          "operation": "sanitize",
+          "text": "={{ $json.text ?? \"\" }}",
+          "guardrails": {
+            "pii": {
+              "value": {
+                "type": "selected",
+                "entities": [
+                  "PL_PESEL",
+                  "CREDIT_CARD",
+                  "IP_ADDRESS",
+                  "MEDICAL_LICENSE",
+                  "CRYPTO"
+                ]
+              }
+            },
+            "urls": {
+              "value": {
+                "allowedUrls": "",
+                "allowedSchemes": [
+                  "mailto"
+                ]
+              }
+            }
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.guardrails",
+        "typeVersion": 1,
+        "position": [
+          1536,
+          1360
+        ],
+        "id": "0716d4f2-4aa2-45f9-8930-ae2b9f79cdab",
+        "name": "Guardrails"
+      },
+      {
+        "parameters": {},
+        "type": "@n8n/n8n-nodes-langchain.toolWikipedia",
+        "typeVersion": 1,
+        "position": [
+          1968,
+          1584
+        ],
+        "id": "913b9eb7-14e2-4b5a-9f5f-14d93aa0275b",
+        "name": "Wikipedia"
+      },
+      {
+        "parameters": {
+          "mode": "retrieve-as-tool",
+          "toolDescription": "This is the vector store for documents about badminton. Use full text for retrieving documents, don't compress the input",
+          "qdrantCollection": {
+            "__rl": true,
+            "value": "badm_data",
+            "mode": "list",
+            "cachedResultName": "badm_data"
+          },
+          "topK": 3,
+          "includeDocumentMetadata": false,
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+        "typeVersion": 1.3,
+        "position": [
+          2096,
+          1584
+        ],
+        "id": "924753ce-2c02-49e1-826b-fe741d84717e",
+        "name": "Badminton knowledge base",
+        "credentials": {
+          "qdrantApi": {
+            "id": "R97Yi6THM8qVyAcv",
+            "name": "QdrantApi account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "model": "nomic-embed-text:latest"
+        },
+        "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
+        "typeVersion": 1,
+        "position": [
+          2096,
+          1824
+        ],
+        "id": "d5693f10-1cfd-4ae5-9ae3-17fd5a93997c",
+        "name": "Embeddings Ollama",
+        "credentials": {
+          "ollamaApi": {
+            "id": "OwoNqqKy33Tzlan7",
+            "name": "Ollama local"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "038a18e3-982b-4362-85d9-5cf040b106c2",
+                "name": "text",
+                "value": "={{ $json.result.text }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          464,
+          784
+        ],
+        "id": "925b1cdf-fbd8-4b01-bcd9-be4177be6c79",
+        "name": "Edit Fields"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "version": 3,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "conditions": [
+              {
+                "id": "beed379a-0109-468d-accd-0c812afc851a",
+                "leftValue": "={{ $json.text }}",
+                "rightValue": "/",
+                "operator": {
+                  "type": "string",
+                  "operation": "startsWith"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          144,
+          -176
+        ],
+        "id": "fdbe65e1-885c-4c66-bf07-e75474e912cd",
+        "name": "If command"
+      },
+      {
+        "parameters": {
+          "operation": "select",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public",
+            "cachedResultName": "public"
+          },
+          "table": {
+            "__rl": true,
+            "mode": "list",
+            "value": "translations",
+            "cachedResultName": "translations"
+          },
+          "limit": 1,
+          "where": {
+            "values": [
+              {
+                "column": "key",
+                "value": "ai_error"
+              },
+              {
+                "column": "lang",
+                "value": "={{ $('Set fields').item.json.lang || 'en' }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "get-ai-error-translation",
+        "name": "Get AI Error Translation",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          2752,
+          1552
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "3SDluWLUa1vIU50a",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "rules": {
+            "values": [
+              {
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "conditions": [
+                    {
+                      "id": "start-cond",
+                      "leftValue": "={{ $json.command }}",
+                      "rightValue": "start",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                },
+                "renameOutput": true,
+                "outputKey": "start"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "conditions": [
+                    {
+                      "id": "help-cond",
+                      "leftValue": "={{ $json.command }}",
+                      "rightValue": "help",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                },
+                "renameOutput": true,
+                "outputKey": "help"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "conditions": [
+                    {
+                      "id": "show-cond",
+                      "leftValue": "={{ $json.command }}",
+                      "rightValue": "show",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                },
+                "renameOutput": true,
+                "outputKey": "show"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "conditions": [
+                    {
+                      "id": "book-cond",
+                      "leftValue": "={{ $json.command }}",
+                      "rightValue": "book",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                },
+                "renameOutput": true,
+                "outputKey": "book"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "conditions": [
+                    {
+                      "id": "list-cond",
+                      "leftValue": "={{ $json.command }}",
+                      "rightValue": "list",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                },
+                "renameOutput": true,
+                "outputKey": "list"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "conditions": [
+                    {
+                      "id": "delete-cond",
+                      "leftValue": "={{ $json.command }}",
+                      "rightValue": "delete",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                },
+                "renameOutput": true,
+                "outputKey": "delete"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "conditions": [
+                    {
+                      "id": "register-cond",
+                      "leftValue": "={{ $json.command }}",
+                      "rightValue": "register",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                },
+                "renameOutput": true,
+                "outputKey": "register"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "conditions": [
+                    {
+                      "id": "deleteall-cond",
+                      "leftValue": "={{ $json.command }}",
+                      "rightValue": "deleteall",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                },
+                "renameOutput": true,
+                "outputKey": "deleteall"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "cmd-switch",
+        "name": "Cmd Switch",
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3.2,
+        "position": [
+          1008,
+          -816
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const message = $input.first().json;\nreturn [{ json: { \n  id: String(message.user_id),\n  chat_id: String(message.chat_id),\n  user_name: String(message.username),\n  full_name: String(message.fullname)\n} }];"
+        },
+        "id": "collect-user-data",
+        "name": "Collect User Data",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1648,
+          -1200
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "upsert",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "users",
+            "mode": "list",
+            "cachedResultName": "users"
+          },
+          "columns": {
+            "mappingMode": "autoMapInputData",
+            "value": {},
+            "matchingColumns": [
+              "id"
+            ],
+            "schema": [
+              {
+                "id": "id",
+                "displayName": "id",
+                "required": true,
+                "defaultMatch": true,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "chat_id",
+                "displayName": "chat_id",
+                "required": true,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": false
+              },
+              {
+                "id": "user_name",
+                "displayName": "user_name",
+                "required": true,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": false
+              },
+              {
+                "id": "full_name",
+                "displayName": "full_name",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": false
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {}
+        },
+        "id": "save-user-info",
+        "name": "Save User Info",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          1984,
+          -1200
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "3SDluWLUa1vIU50a",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "select",
+          "schema": {
+            "__rl": true,
+            "value": "public",
+            "mode": "list",
+            "cachedResultName": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "translations",
+            "mode": "list",
+            "cachedResultName": "translations"
+          },
+          "limit": 1,
+          "where": {
+            "values": [
+              {
+                "column": "key",
+                "value": "start"
+              },
+              {
+                "column": "lang",
+                "value": "={{ $('Cmd Parse').first().json.lang || 'en' }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "get-start-translation",
+        "name": "Get Start Translation",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          2592,
+          -1200
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "3SDluWLUa1vIU50a",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "select",
+          "schema": {
+            "__rl": true,
+            "value": "public",
+            "mode": "list",
+            "cachedResultName": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "translations",
+            "mode": "list",
+            "cachedResultName": "translations"
+          },
+          "limit": 1,
+          "where": {
+            "values": [
+              {
+                "column": "key",
+                "value": "help"
+              },
+              {
+                "column": "lang",
+                "value": "={{ $json.arg1 || $json.lang || 'en' }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "get-help-translation",
+        "name": "Get Help Translation",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          1632,
+          -960
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "3SDluWLUa1vIU50a",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "chat-id-start",
+                "name": "chat_id",
+                "type": "string",
+                "value": "={{ $('Cmd Parse').first().json.chat_id }}"
+              },
+              {
+                "id": "message-start",
+                "name": "message",
+                "type": "string",
+                "value": "={{ $json.text }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "format-start-message",
+        "name": "Format Start Message",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          2816,
+          -1200
+        ]
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "chat-id-help",
+                "name": "chat_id",
+                "type": "string",
+                "value": "={{ $('Cmd Parse').first().json.chat_id }}"
+              },
+              {
+                "id": "message-help",
+                "name": "message",
+                "type": "string",
+                "value": "={{ $json.text }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "format-help-message",
+        "name": "Format Help Message",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          2704,
+          -960
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "HFeE52YK9tAzKTpk",
+            "mode": "list",
+            "cachedResultUrl": "/workflow/HFeE52YK9tAzKTpk",
+            "cachedResultName": "Show command agentic"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "chat_id": "={{ $json.chat_id }}",
+              "arg1": "={{ $json.arg1 }}"
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "chat_id",
+                "displayName": "chat_id",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string"
+              },
+              {
+                "id": "arg1",
+                "displayName": "arg1",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string"
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {
+            "waitForSubWorkflow": false
+          }
+        },
+        "id": "call-show-command",
+        "name": "Call Show Command",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.3,
+        "position": [
+          1792,
+          -768
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "p5NpS5X1VLPdY3mX",
+            "cachedResultName": "Book command"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {},
+            "matchingColumns": [],
+            "schema": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {
+            "waitForSubWorkflow": true
+          }
+        },
+        "id": "call-book-command",
+        "name": "Call Book Command",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.3,
+        "position": [
+          1472,
+          -688
+        ]
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "796ef0d5-89df-41a2-a8e9-42e203f81a3e",
+                "name": "chat_id",
+                "value": "={{ $json.chat_id || $('Telegram Message Trigger')?.item.json.message?.chat?.id || $json.edited_message?.chat.id }}",
+                "type": "string"
+              },
+              {
+                "id": "585e0088-1f5b-4d98-8c73-aee6b11dbfec",
+                "name": "text",
+                "value": "={{ $json.text || $('Telegram Message Trigger')?.item.json.message?.text || $json.edited_message.text }}",
+                "type": "string"
+              },
+              {
+                "id": "1343ca66-064e-4954-b063-8c15f0a6efaf",
+                "name": "user_id",
+                "value": "={{ $json.chat_id || $json.message?.from.id || $json.edited_message.from.id }}",
+                "type": "string"
+              },
+              {
+                "id": "0027b25c-95b8-48fd-a6ba-c0180e4b3da2",
+                "name": "username",
+                "value": "={{ $json.message?.from.username || $json.edited_message?.from.username }}",
+                "type": "string"
+              },
+              {
+                "id": "9ff7dedd-349e-4697-b2b6-69ece18feb9e",
+                "name": "fullname",
+                "value": "={{ $json.message?.from.first_name || $json.edited_message?.from.first_name }} {{ $json.message?.from.last_name || $json.edited_message?.from.last_name }}",
+                "type": "string"
+              },
+              {
+                "id": "0d316418-5f0f-4afd-82b3-d2c926681d27",
+                "name": "lang",
+                "value": "={{ $json.message?.from.language_code || \"en\"}}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          -688,
+          304
+        ],
+        "id": "7f47e326-f0e4-4e03-b3c2-f42115b08cc7",
+        "name": "Set fields"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "6cbf4be1-777d-439e-821b-08185d5846eb",
+                "leftValue": "={{ $('Telegram Message Trigger').item.json.message?.voice }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "object",
+                  "operation": "notExists",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          -464,
+          304
+        ],
+        "id": "ca86e140-67e6-4cd9-80b2-1efe1179158a",
+        "name": "If"
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "51Y9SIV139LvX5jl",
+            "mode": "list",
+            "cachedResultUrl": "/workflow/51Y9SIV139LvX5jl",
+            "cachedResultName": "List Bookings Command"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {},
+            "matchingColumns": [],
+            "schema": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {
+            "waitForSubWorkflow": false
+          }
+        },
+        "id": "call-list-command",
+        "name": "Call List Command",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.3,
+        "position": [
+          1712,
+          -480
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "w8lC6D3QXh47u6w1",
+            "mode": "list",
+            "cachedResultUrl": "/workflow/w8lC6D3QXh47u6w1",
+            "cachedResultName": "Register command"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {},
+            "matchingColumns": [],
+            "schema": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {
+            "waitForSubWorkflow": true
+          }
+        },
+        "id": "call-register-command",
+        "name": "Call Register Command",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.3,
+        "position": [
+          1728,
+          -80
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "wYEfXMLutTlrEgBq",
+            "cachedResultName": "Delete command"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {},
+            "matchingColumns": [],
+            "schema": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {
+            "waitForSubWorkflow": false
+          }
+        },
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.3,
+        "position": [
+          1888,
+          -240
+        ],
+        "id": "837843b8-6ab9-467e-9bec-87dbee047be4",
+        "name": "Call Delete command"
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "dc0b16aa-f29a-474f-8285-51d18e336122",
+                "name": "chat_id",
+                "value": "={{ $('Set fields').item.json.chat_id }}",
+                "type": "string"
+              },
+              {
+                "id": "0e3401ee-0d12-423d-a865-83cf5c5e8b3a",
+                "name": "user_id",
+                "value": "={{ $('Set fields').item.json.user_id }}",
+                "type": "string"
+              },
+              {
+                "id": "2b1ac2e1-da8f-4546-a385-4dd86426e72b",
+                "name": "username",
+                "value": "={{ $('Set fields').item.json.username }}",
+                "type": "string"
+              },
+              {
+                "id": "f854f4d1-681e-4384-9a8b-77cb316ccdad",
+                "name": "fullname",
+                "value": "={{ $('Set fields').item.json.fullname }}",
+                "type": "string"
+              },
+              {
+                "id": "367396cb-c5ef-492b-b7f9-71627abefaac",
+                "name": "lang",
+                "value": "={{ $('Set fields').item.json.lang }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          1264,
+          592
+        ],
+        "id": "e9f32399-e18d-4ed6-babb-302ea9cd8186",
+        "name": "Set args"
+      },
+      {
+        "parameters": {
+          "operation": "sendChatAction",
+          "chatId": "={{ $json.message?.chat.id || $json.edited_message?.chat.id }}"
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          -688,
+          96
+        ],
+        "id": "44df1e02-a88d-49a9-bae2-a337b24cd045",
+        "name": "Send a typing",
+        "webhookId": "2be05714-eb28-4a61-a966-fce0ef53dc79",
+        "credentials": {
+          "telegramApi": {
+            "id": "pHQDqhsnrwimdaY2",
+            "name": "twoj_badminton_bot"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "model": "cnshenyang/qwen3-nothink:14b",
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmOllama",
+        "typeVersion": 1,
+        "position": [
+          784,
+          992
+        ],
+        "id": "c81cce17-67d8-472c-b8c0-63d3335ff6fb",
+        "name": "Ollama Model",
+        "credentials": {
+          "ollamaApi": {
+            "id": "OwoNqqKy33Tzlan7",
+            "name": "Ollama local"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "model": "cnshenyang/qwen3-nothink:14b",
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+        "typeVersion": 1,
+        "position": [
+          1840,
+          816
+        ],
+        "id": "0aa26026-d7b3-49c2-9386-33137ed1b242",
+        "name": "Ollama Chat Model",
+        "credentials": {
+          "ollamaApi": {
+            "id": "OwoNqqKy33Tzlan7",
+            "name": "Ollama local"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "chatId": "={{ $json.chat_id }}",
+          "text": "={{ $json.message }}",
+          "additionalFields": {
+            "appendAttribution": false,
+            "parse_mode": "HTML"
+          }
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          3392,
+          -976
+        ],
+        "id": "1e07ce1e-c13a-487b-bc80-00bf7cfad219",
+        "name": "Send a text message",
+        "webhookId": "920381ee-565a-43d0-97c6-624c52567f1d",
+        "credentials": {
+          "telegramApi": {
+            "id": "pHQDqhsnrwimdaY2",
+            "name": "twoj_badminton_bot"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "={{ $('Text Classifier').item.json.text }}",
+          "hasOutputParser": true,
+          "messages": {
+            "messageValues": [
+              {
+                "message": "=# TASK\nParse user message into EXACTLY this JSON format:\n{\"command\": \"<COMMAND>\", \"arg1\": \"<ARGUMENT>\"}\n\nNO other fields. NO nested objects. NO arrays in root. JSON should be valid.\n\n---\n\n# CURRENT DATE\nToday: {{ $today.format('yyyy-MM-dd') }} ({{ $today.format('cccc') }})\nNow: {{ $now.format('yyyy-MM-dd HH:mm') }}\n\n---\n\n# COMMANDS REFERENCE\n\n## 1. show\nPurpose: Display court availability\nTrigger words: show, available, free, schedule, what's open, расписание, покажи, pokaż, wolne\narg1: Date in YYYY-MM-DD format\n\nExamples:\n- \"show tomorrow\" → {\"command\": \"show\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n- \"what's available Saturday\" → {\"command\": \"show\", \"arg1\": \"2026-01-03\"}\n- \"Покажи расписание на субботу\" → {\"command\": \"show\", \"arg1\": \"2026-01-03\"}\n- \"pokaż wolne korty na jutro\" → {\"command\": \"show\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n\n## 2. list\nPurpose: Show user's reservations\nTrigger words: list, my reservations, my bookings, мои брони, moje rezerwacje\narg1: EMPTY string\n\nExamples:\n- \"list my bookings\" → {\"command\": \"list\", \"arg1\": \"\"}\n- \"Покажи мои брони\" → {\"command\": \"list\", \"arg1\": \"\"}\n- \"moje rezerwacje\" → {\"command\": \"list\", \"arg1\": \"\"}\n\n## 3. delete\nPurpose: Cancel ONE reservation by ID\nTrigger words: delete, cancel, remove + ID (NOT \"all\")\narg1: Reservation ID string\n\nExamples:\n- \"cancel 6952ec02dda30\" → {\"command\": \"delete\", \"arg1\": \"6952ec02dda30\"}\n- \"delete booking abc123\" → {\"command\": \"delete\", \"arg1\": \"abc123\"}\n\n## 4. deleteall\nPurpose: Cancel ALL reservations\nTrigger words: delete all, cancel all, remove all, отмени все, usuń wszystko\narg1: EMPTY string\n\nExamples:\n- \"cancel all reservations\" → {\"command\": \"deleteall\", \"arg1\": \"\"}\n- \"Отмени все мои брони\" → {\"command\": \"deleteall\", \"arg1\": \"\"}\n- \"usuń wszystkie rezerwacje\" → {\"command\": \"deleteall\", \"arg1\": \"\"}\n\n## 5. book\nPurpose: Make a court reservation\nTrigger words: book, reserve, забронируй, zarezerwuj\narg1: JSON array with booking details\n\nFormat: [{\"court\":\"N\", \"date\":\"YYYY-MM-DD\", \"time_start\":\"HH:MM\", \"time_end\":\"HH:MM\", \"players_num\":\"4\", \"notes\":\"\"}]\nIMPORTANT: Use backslash '\\' to escape double quotes characters in JSON, see in example below\n\nExamples:\n```\n- \"book court 1 and 2 tomorrow 16:00-17:00\" → {\"command\": \"book\", \"arg1\": \"[{\\\"court\\\":\\\"1\\\", \\\"date\\\":\\\"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\\\", \\\"time_start\\\":\\\"16:00\\\", \\\"time_end\\\":\\\"17:00\\\", \\\"players_num\\\":\\\"4\\\", \\\"notes\\\":\\\"\\\"},{\\\"court\\\":\\\"2\\\", \\\"date\\\":\\\"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\\\", \\\"time_start\\\":\\\"16:00\\\", \\\"time_end\\\":\\\"17:00\\\", \\\"players_num\\\":\\\"4\\\", \\\"notes\\\":\\\"\\\"}]\"}\n```\n\n## 6. register\nPurpose: Save login credentials\nTrigger words: register, sign up, credentials\narg1: \"email password\" as single string\n\nExamples:\n- \"register user@mail.com pass123\" → {\"command\": \"register\", \"arg1\": \"user@mail.com pass123\"}\n\n---\n\n# DATE CONVERSION RULES\n\n| Input | Output |\n|-------|--------|\n| today | {{ $today.format('yyyy-MM-dd') }} |\n| tomorrow | {{ $now.plus({days: 1}).format('yyyy-MM-dd') }} |\n| day after tomorrow | {{ $now.plus({days: 2}).format('yyyy-MM-dd') }} |\n| Saturday | 2026-01-03 (next Saturday) |\n| Sunday | 2026-01-04 (next Sunday) |\n| 27.12 or 27/12 | {{ $now.format('yyyy') }}-12-27 |\n| 15.01.2026 | 2026-01-15 |\n\nRULE: Always use FUTURE dates. Never past.\n\n---\n\n# WRONG vs CORRECT OUTPUT\n\n❌ WRONG (nested parameters):\n{\"command\": \"show\", \"parameters\": {\"date\": \"2026-01-03\"}}\n\n❌ WRONG (extra fields):\n{\"command\": \"show\", \"arg1\": \"2026-01-03\", \"confidence\": 0.9}\n\n✅ CORRECT:\n{\"command\": \"show\", \"arg1\": \"2026-01-03\"}\n\n---\n\n# OUTPUT RULES\n1. Return ONLY the JSON object\n2. EXACTLY two fields: \"command\" and \"arg1\"\n3. NO explanation, NO thinking, NO markdown\n4. arg1 is ALWAYS a string (even if empty or JSON array)"
+              }
+            ]
+          }
+        },
+        "id": "nlp-command-parser",
+        "name": "NLP Command Parser",
+        "type": "@n8n/n8n-nodes-langchain.chainLlm",
+        "typeVersion": 1.5,
+        "position": [
+          1888,
+          592
+        ]
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "cmd",
+                "name": "command",
+                "type": "string",
+                "value": "={{ $json.output.command }}"
+              },
+              {
+                "id": "arg",
+                "name": "arg1",
+                "type": "string",
+                "value": "={{ $json.output.arg1 }}"
+              },
+              {
+                "id": "cid",
+                "name": "chat_id",
+                "type": "string",
+                "value": "={{ $('Set args').item.json.chat_id }}"
+              },
+              {
+                "id": "uid",
+                "name": "user_id",
+                "type": "string",
+                "value": "={{ $('Set args').item.json.user_id }}"
+              },
+              {
+                "id": "uname",
+                "name": "username",
+                "type": "string",
+                "value": "={{ $('Set args').item.json.username }}"
+              },
+              {
+                "id": "fname",
+                "name": "fullname",
+                "type": "string",
+                "value": "={{ $('Set args').item.json.fullname }}"
+              },
+              {
+                "id": "lng",
+                "name": "lang",
+                "type": "string",
+                "value": "={{ $('Set args').item.json.lang }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "merge-context-with-parsed",
+        "name": "Merge Context",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          2304,
+          592
+        ]
+      },
+      {
+        "parameters": {
+          "rules": {
+            "values": [
+              {
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "show-cond",
+                      "leftValue": "={{ $json.command }}",
+                      "rightValue": "show",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      }
+                    }
+                  ]
+                },
+                "renameOutput": true,
+                "outputKey": "show"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "book-cond",
+                      "leftValue": "={{ $json.command }}",
+                      "rightValue": "book",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      }
+                    }
+                  ]
+                },
+                "renameOutput": true,
+                "outputKey": "book"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "list-cond",
+                      "leftValue": "={{ $json.command }}",
+                      "rightValue": "list",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      }
+                    }
+                  ]
+                },
+                "renameOutput": true,
+                "outputKey": "list"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "delete-cond",
+                      "leftValue": "={{ $json.command }}",
+                      "rightValue": "delete",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      }
+                    }
+                  ]
+                },
+                "renameOutput": true,
+                "outputKey": "delete"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "register-cond",
+                      "leftValue": "={{ $json.command }}",
+                      "rightValue": "register",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      }
+                    }
+                  ]
+                },
+                "renameOutput": true,
+                "outputKey": "register"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "deleteall-cond",
+                      "leftValue": "={{ $json.command }}",
+                      "rightValue": "deleteall",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      }
+                    }
+                  ]
+                },
+                "renameOutput": true,
+                "outputKey": "deleteall"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "nlp-command-switch",
+        "name": "NLP Command Switch",
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3.2,
+        "position": [
+          2592,
+          528
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "w8lC6D3QXh47u6w1",
+            "mode": "id"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "chat_id": "={{ $json.chat_id }}",
+              "user_id": "={{ $json.user_id }}",
+              "username": "={{ $json.username }}",
+              "fullname": "={{ $json.fullname }}",
+              "lang": "={{ $json.lang }}"
+            },
+            "schema": [
+              {
+                "id": "chat_id",
+                "displayName": "chat_id",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "id": "user_id",
+                "displayName": "user_id",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "id": "username",
+                "displayName": "username",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "id": "fullname",
+                "displayName": "fullname",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "id": "lang",
+                "displayName": "lang",
+                "required": true,
+                "type": "string"
+              }
+            ],
+            "matchingColumns": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {
+            "waitForSubWorkflow": true
+          }
+        },
+        "id": "nlp-exec-register",
+        "name": "NLP Execute Register",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.3,
+        "position": [
+          2816,
+          736
+        ]
+      },
+      {
+        "parameters": {
+          "chatId": "={{ $('Set fields').item.json.chat_id }}",
+          "text": "={{ $json.text }}",
+          "additionalFields": {
+            "appendAttribution": false
+          }
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          272,
+          784
+        ],
+        "id": "a29216dc-52c9-46f1-b7b6-f764a9f1a6ed",
+        "name": "Send a text message1",
+        "webhookId": "f6f2c3e4-089d-4deb-bbfb-eabc0c529e83",
+        "credentials": {
+          "telegramApi": {
+            "id": "pHQDqhsnrwimdaY2",
+            "name": "twoj_badminton_bot"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "schemaType": "manual",
+          "inputSchema": "{\n  \"$schema\": \"http://json-schema.org/draft-07/schema#\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"command\": {\n      \"type\": \"string\",\n      \"enum\": [\"show\", \"book\", \"list\", \"delete\", \"deleteall\", \"register\"]\n    },\n    \"arg1\": {\n      \"type\": \"string\",\n      \"description\": \"Command argument - either a date (YYYY-MM-DD) or JSON array string for bookings\"\n    }\n  },\n  \"required\": [\"command\"]\n}"
+        },
+        "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+        "typeVersion": 1.3,
+        "position": [
+          2048,
+          784
+        ],
+        "id": "8c24665d-4700-4148-97dc-f0f62e0bb5a9",
+        "name": "Structured Output Parser"
+      },
+      {
+        "parameters": {
+          "operation": "sendChatAction",
+          "chatId": "={{ $json.chat_id }}"
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          1536,
+          432
+        ],
+        "id": "335f530d-a639-4a8e-83dd-d236f51249ca",
+        "name": "Send a chat action",
+        "webhookId": "ff016420-be64-4d5e-b454-2fc9453945c4",
+        "credentials": {
+          "telegramApi": {
+            "id": "pHQDqhsnrwimdaY2",
+            "name": "twoj_badminton_bot"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "HFeE52YK9tAzKTpk",
+            "mode": "list",
+            "cachedResultUrl": "/workflow/HFeE52YK9tAzKTpk",
+            "cachedResultName": "Show Command"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "chat_id": "={{ $json.chat_id }}",
+              "arg1": "={{ $json.arg1 }}"
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "chat_id",
+                "displayName": "chat_id",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string"
+              },
+              {
+                "id": "arg1",
+                "displayName": "arg1",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string"
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {
+            "waitForSubWorkflow": false
+          }
+        },
+        "id": "nlp-exec-show",
+        "name": "Execute Show",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.3,
+        "position": [
+          2816,
+          -32
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "p5NpS5X1VLPdY3mX",
+            "mode": "id"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "arg1": "={{ $json.arg1 }}",
+              "chat_id": "={{ $json.chat_id }}",
+              "user_id": "={{ $json.user_id }}",
+              "username": "={{ $json.username }}",
+              "fullname": "={{ $json.fullname }}",
+              "lang": "={{ $json.lang }}"
+            },
+            "schema": [
+              {
+                "id": "arg1",
+                "displayName": "arg1",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "id": "chat_id",
+                "displayName": "chat_id",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "id": "user_id",
+                "displayName": "user_id",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "id": "username",
+                "displayName": "username",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "id": "fullname",
+                "displayName": "fullname",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "id": "lang",
+                "displayName": "lang",
+                "required": true,
+                "type": "string"
+              }
+            ],
+            "matchingColumns": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {
+            "waitForSubWorkflow": true
+          }
+        },
+        "id": "nlp-exec-book",
+        "name": "Execute Book",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.3,
+        "position": [
+          2816,
+          144
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "51Y9SIV139LvX5jl",
+            "mode": "id"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "chat_id": "={{ $json.chat_id }}",
+              "user_id": "={{ $json.user_id }}",
+              "username": "={{ $json.username }}",
+              "fullname": "={{ $json.fullname }}",
+              "lang": "={{ $json.lang }}"
+            },
+            "schema": [
+              {
+                "id": "chat_id",
+                "displayName": "chat_id",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "id": "user_id",
+                "displayName": "user_id",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "id": "username",
+                "displayName": "username",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "id": "fullname",
+                "displayName": "fullname",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "id": "lang",
+                "displayName": "lang",
+                "required": true,
+                "type": "string"
+              }
+            ],
+            "matchingColumns": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {
+            "waitForSubWorkflow": true
+          }
+        },
+        "id": "nlp-exec-list",
+        "name": "Execute List",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.3,
+        "position": [
+          2816,
+          352
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "wYEfXMLutTlrEgBq",
+            "mode": "id"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "arg1": "={{ $json.arg1 }}",
+              "chat_id": "={{ $json.chat_id }}",
+              "user_id": "={{ $json.user_id }}",
+              "username": "={{ $json.username }}",
+              "fullname": "={{ $json.fullname }}",
+              "lang": "={{ $json.lang }}"
+            },
+            "schema": [
+              {
+                "id": "arg1",
+                "displayName": "arg1",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "id": "chat_id",
+                "displayName": "chat_id",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "id": "user_id",
+                "displayName": "user_id",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "id": "username",
+                "displayName": "username",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "id": "fullname",
+                "displayName": "fullname",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "id": "lang",
+                "displayName": "lang",
+                "required": true,
+                "type": "string"
+              }
+            ],
+            "matchingColumns": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {
+            "waitForSubWorkflow": true
+          }
+        },
+        "id": "nlp-exec-delete",
+        "name": "Execute Delete",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.3,
+        "position": [
+          2816,
+          544
+        ]
+      },
+      {
+        "parameters": {
+          "query": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Query', ``, 'string') }}",
+          "options": {
+            "search_depth": "basic",
+            "include_domains": []
+          }
+        },
+        "type": "@tavily/n8n-nodes-tavily.tavilyTool",
+        "typeVersion": 1,
+        "position": [
+          2384,
+          1584
+        ],
+        "id": "82ae02fd-570d-4439-9502-ce3e415e7807",
+        "name": "Search in Tavily",
+        "credentials": {
+          "tavilyApi": {
+            "id": "vuVoGqarnbTVjTux",
+            "name": "Tavily account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "chatId": "={{ $('Set fields').item.json.chat_id }}",
+          "text": "={{ $json.text }}",
+          "additionalFields": {
+            "appendAttribution": false,
+            "parse_mode": "HTML"
+          }
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          3264,
+          1456
+        ],
+        "id": "6def4a5a-1e35-42f4-9770-475280c7f72f",
+        "name": "Send a text message2",
+        "webhookId": "58500fec-c7d0-47fa-9a46-2d0b6c5bab9e",
+        "credentials": {
+          "telegramApi": {
+            "id": "pHQDqhsnrwimdaY2",
+            "name": "twoj_badminton_bot"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "sessionIdType": "customKey",
+          "sessionKey": "=492192664"
+        },
+        "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+        "typeVersion": 1.3,
+        "position": [
+          1712,
+          1584
+        ],
+        "id": "a74dfcb7-3e35-4397-b81e-c9572a4e223a",
+        "name": "Postgres Chat Memory",
+        "credentials": {
+          "postgres": {
+            "id": "3SDluWLUa1vIU50a",
+            "name": "Postgres account"
+          }
+        },
+        "disabled": true
+      },
+      {
+        "parameters": {
+          "promptType": "guardrails",
+          "options": {
+            "systemMessage": "=# ROLE\nYou are a multilingual AI assistant for Telegram bot \"twoj_badminton_bot\". You help users with badminton information, general conversation, and knowledge lookup.\n\n# CONTEXT\n- Remember the current date and time: **Today is {{ $now.format('cccc') }} the {{ $now.format('yyyy-MM-dd HH:mm') }}**, use this information to provide relevant responses.\n- When needed, reference \"today\", \"tomorrow\", \"this week\" appropriately.\n- Platform: Telegram (messages should be concise).\n- User language: Detect and match automatically.\n\n---\n\n# TOOLS\n\n## 1. Badminton Knowledge Base\n**Purpose**: Semantic search for badminton rules, equipment, BWF documents\n**When to use**: Questions about badminton techniques, rules, equipment, tournaments\n**Query language**: Always use English (translate user's query if needed)\n**Example**: User asks \"jakie są zasady gry w debla?\" → Query: \"doubles rules badminton\"\n\n## 2. Calculator\n**Purpose**: Mathematical operations\n**When to use**: Any numerical calculation requiring precision\n**Example**: Shuttle speed conversion, score calculations\n\n## 3. Tavily Web Search\n**Purpose**: Search information and news from specific domains.\n\n**Domains**:\n- https://badmintonsq.com - Mastering Badminton articles, knowledge hub.\n- https://badmintonstatistics.net - Tournament statistics, players, rankings.\n- https://www.worldbadminton.com/rules - Official BWF laws source.\n- https://www.worldbadminton.com - General Information and list of links.\n- https://bwfbadminton.com - Official BWF site for events, news, and tournaments.\n- https://badmintoneurope.com/ - Official Badminton Europe site - latest news.\n​- https://development.bwfbadminton.com/sport-science/global-research/scientific-papers - Scientific Papers search.\n- https://www.tntsports.co.uk/badminton - Badminton news, results, and videos.\n- https://badmintonhq.co.uk/pages/badminton-hq-reviews - real customers reviews.\n- https://victor-polska.pl - Victor badminton equipment.\n​- https://www.ziba.pl/manufacturer/victor-ziba-pl - Victor equipment in Poland.\n- https://www.badmintonplanet.eu - European badminton products.\n- https://www.badmintoncentral.com/forums - History of tournaments, fan forums.\n- https://www.yonex.com/badminton/ - Yonex official badminton rackets and gear.\n- https://www.reddit.com/r/badminton - Active Reddit community discussions.\n- https://beastbadminton.com - Training videos, drills, reviews and player tips.\n- https://www.badmintonbible.com - Rules, techniques, and fun facts.\n- https://corporate.bwfbadminton.com/events/approved-shuttles - Approved shuttles. \n- https://www.badmintonengland.co.uk - Historical facts, UK news.\n- https://www.britannica.com/sports/badminton - Britannica about badminton.\n- https://pzbad.pl - Polski Związek Badmintona, oficjalna federacja.\n- https://narodowybadminton.pl - Fundacja Narodowy Badminton w Polsce.\n- https://www.badmin.pl - Sklep badmintonowy z rakietami, lotkami i akcesoriami.\n- https://pzbad.pl/turnieje-w-polsce/ - Turnieje badmintonowe w Polsce.\n- https://www.twojtenis.pl/pl - Rezerwacji kortów w Krakowie i w Polsce.\n\n**When to use**: Recent news, tournament results, current events\n**Example**: \"Who won BWL World Championships 2025?\"\n\n## 4. Wikipedia\n**Purpose**: General encyclopedia lookup\n**When to use**: Historical facts, player biographies, general knowledge\n**Example**: \"When was BWF founded?\"\n\n---\n\n# RESPONSE FORMAT\n\n## Structure\n1. Keep responses brief (2-4 sentences typical for Telegram)\n2. Use emojis sparingly for emotional responses 🏸\n3. Include source references when using tools: [Source: document name]\n4. For quoted content, preserve original language\n\n## Language Rules\n- Detect user's language from their message\n- Respond in the same language\n- Translate tool queries to English internally\n- Keep quoted sources in original language with translation if helpful\n\n## Voice Messages\n- Treat as direct speech (do not mention transcription)\n- Respond conversationally as if in spoken dialogue\n\n---\n\n# BEHAVIOR\n\n## Do This ✓\n- Use tools for factual questions (prefer accuracy over speed)\n- Ask one clarifying question when request is ambiguous\n- Reference time naturally: \"today\", \"tomorrow\", \"this week\"\n- Match user's communication style and tone\n- Cite sources when information comes from tools\n\n## Boundaries\n- Stay focused on badminton, sports, and general assistance\n- For political or controversial topics: \"I focus on badminton and general assistance. How can I help with that?\"\n- When no information found: \"I couldn't find this in my available resources. Would you like me to search differently?\"\n\n---\n\n# SPECIAL HANDLING\n\n## Sanitized Text\nUser messages may contain placeholders: <URL>, <LOCATION>, <EMAIL>\n- Treat as real data\n- Never guess original content\n- Reference by placeholder: \"I've noted <LOCATION> for your preferences\"\n\n## Context Memory\n- Maintain conversation context across turns\n- Reference previous messages when relevant\n- Track user preferences mentioned in conversation\n\n---\n\n# EXAMPLES\n\n**User**: Jakie są wymiary kortu do badmintona?\n**Assistant**: Kort do badmintona ma wymiary 13,4m x 6,1m (gra podwójna) lub 13,4m x 5,18m (gra pojedyncza) 🏸 [Źródło: BWF Rules]\n\n**User**: [voice message about shuttle recommendations]\n**Assistant**: For beginners, I'd recommend feather shuttles with speed 77 for indoor play. They offer good durability while you develop your technique.\n\n**User**: What happened at the recent tournament?\n**Assistant**: [Uses Tavily search] The Denmark Open 2024 concluded last week with Viktor Axelsen winning the men's singles title. [Source: badmintoncore.com]"
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 3,
+        "position": [
+          1840,
+          1360
+        ],
+        "id": "aa3250fe-7fd3-4956-bdaa-c46d09c0731b",
+        "name": "AI Agent",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "chatId": "={{ $('Edit Fields1').item.json.chat_id }}",
+          "text": "={{ $json.output }}",
+          "additionalFields": {
+            "appendAttribution": false
+          }
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          2816,
+          1312
+        ],
+        "id": "4138fda1-fc08-4a2c-8365-8007b3cca269",
+        "name": "Send a text message3",
+        "webhookId": "27b2e5b6-81ca-46f4-968b-43988b31e86b",
+        "credentials": {
+          "telegramApi": {
+            "id": "pHQDqhsnrwimdaY2",
+            "name": "twoj_badminton_bot"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "768523d4-da5d-4ac9-af61-3ca87f2c8ac6",
+                "name": "chat_id",
+                "value": "={{ $('Set fields').item.json.chat_id }}",
+                "type": "string"
+              }
+            ]
+          },
+          "includeOtherFields": true,
+          "include": "selected",
+          "includeFields": "text,user_id,lang",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          1280,
+          1360
+        ],
+        "id": "8c55dd05-482e-440c-8416-7792f4dd1b0c",
+        "name": "Edit Fields1"
+      },
+      {
+        "parameters": {
+          "model": "cnshenyang/qwen3-nothink:14b",
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+        "typeVersion": 1,
+        "position": [
+          1584,
+          1584
+        ],
+        "id": "9c07a09b-ca2a-4704-a865-f1266b40dd5d",
+        "name": "Ollama Chat Model1",
+        "credentials": {
+          "ollamaApi": {
+            "id": "OwoNqqKy33Tzlan7",
+            "name": "Ollama local"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "b7xXjE899CcIb9eo"
+          },
+          "workflowInputs": {
+            "value": {},
+            "schema": [],
+            "mappingMode": "defineBelow",
+            "matchingColumns": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {
+            "waitForSubWorkflow": false
+          }
+        },
+        "id": "call-deleteall-command",
+        "name": "Call Delete All Command",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.3,
+        "position": [
+          1808,
+          128
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "b7xXjE899CcIb9eo"
+          },
+          "workflowInputs": {
+            "value": {
+              "lang": "={{ $json.lang }}",
+              "chat_id": "={{ $json.chat_id }}",
+              "user_id": "={{ $json.user_id }}",
+              "fullname": "={{ $json.fullname }}",
+              "username": "={{ $json.username }}"
+            },
+            "schema": [
+              {
+                "id": "chat_id",
+                "type": "string",
+                "required": true,
+                "displayName": "chat_id"
+              },
+              {
+                "id": "user_id",
+                "type": "string",
+                "required": true,
+                "displayName": "user_id"
+              },
+              {
+                "id": "username",
+                "type": "string",
+                "required": true,
+                "displayName": "username"
+              },
+              {
+                "id": "fullname",
+                "type": "string",
+                "required": true,
+                "displayName": "fullname"
+              },
+              {
+                "id": "lang",
+                "type": "string",
+                "required": true,
+                "displayName": "lang"
+              }
+            ],
+            "mappingMode": "defineBelow",
+            "matchingColumns": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {
+            "waitForSubWorkflow": true
+          }
+        },
+        "id": "nlp-exec-deleteall",
+        "name": "Execute Delete All",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.3,
+        "position": [
+          2816,
+          928
+        ]
+      },
+      {
+        "parameters": {
+          "inputText": "={{ $json.text }}",
+          "categories": {
+            "categories": [
+              {
+                "category": "command",
+                "description": "=User wants the bot to perform an ACTION - viewing court availability, booking courts, listing reservations, canceling reservations, or registering credentials."
+              },
+              {
+                "category": "regular talk",
+                "description": "Conversational messages that do NOT request bot actions: greetings in all languages, questions about badminton rules/equipment/techniques, general chit-chat, requests for information that don't involve court booking operations"
+              }
+            ]
+          },
+          "options": {
+            "systemPromptTemplate": "=Classify user input into exactly one category. Input may be in any language (English, Polish, Russian, etc.).\n\nCategories:\n{categories}\n\nExamples:\n- \"What's available tomorrow?\" → command\n- \"Book court 2 at 18:00\" → command\n- \"Show me my reservations\" → command\n- \"Cancel booking 12345\" → command\n- \"Cancel all my bookings\" → command\n- \"Pokaż wolne korty\" (Show free courts) → command\n- \"Cofnij wszystko\" (Cancel all) → command\n- \"Покажи мои брони\" (Show my bookings) → command\n- \"Покажи расписание в Блониа-спорт на субботу\" → command\n- \"я заболел, отмени все мои брони на завтра\" → command\n- \"Отмени все резервации\" → command\n- \"What racket should I buy?\" → regular talk\n- \"Hello!\" → regular talk\n- \"How do I play badminton?\" → regular talk\n- \"Cześć\" (Hi) → regular talk\n- \"Search for current Champion in single men badminton\" → regular talk \n\nIMPORTANT: Output ONLY the JSON with category. No explanation. One label only."
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.textClassifier",
+        "typeVersion": 1.1,
+        "position": [
+          784,
+          784
+        ],
+        "id": "15736666-7dff-454d-aeef-a82675a5b553",
+        "name": "Text Classifier"
+      },
+      {
+        "parameters": {
+          "operation": "checkIfEvaluating"
+        },
+        "id": "eval-check-agent",
+        "name": "Check If Evaluating (Agent)",
+        "type": "n8n-nodes-base.evaluation",
+        "typeVersion": 4.8,
+        "position": [
+          2592,
+          1216
+        ]
+      },
+      {
+        "parameters": {
+          "source": "googleSheets",
+          "documentId": {
+            "__rl": true,
+            "value": "1gqyUwCZS0sTYfKEptGWSyFOOiLEs3hfBfwCFKYGlUcY",
+            "mode": "list",
+            "cachedResultName": "agent_tests",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gqyUwCZS0sTYfKEptGWSyFOOiLEs3hfBfwCFKYGlUcY/edit?usp=drivesdk"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "gid=0",
+            "mode": "list",
+            "cachedResultName": "Sheet1",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gqyUwCZS0sTYfKEptGWSyFOOiLEs3hfBfwCFKYGlUcY/edit#gid=0"
+          },
+          "outputs": {
+            "values": [
+              {
+                "outputName": "actual_output",
+                "outputValue": "={{ $json.output }}"
+              }
+            ]
+          }
+        },
+        "id": "eval-output-agent",
+        "name": "Set Outputs (Agent)",
+        "type": "n8n-nodes-base.evaluation",
+        "typeVersion": 4.8,
+        "position": [
+          2816,
+          1120
+        ],
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "rwNejW7L2Lym8SJi",
+            "name": "Google Sheets account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "checkIfEvaluating"
+        },
+        "id": "eval-check-response",
+        "name": "Check If Evaluating (Response)",
+        "type": "n8n-nodes-base.evaluation",
+        "typeVersion": 4.8,
+        "position": [
+          3104,
+          -1200
+        ]
+      },
+      {
+        "parameters": {
+          "source": "googleSheets",
+          "documentId": {
+            "__rl": true,
+            "value": "1gqyUwCZS0sTYfKEptGWSyFOOiLEs3hfBfwCFKYGlUcY",
+            "mode": "list",
+            "cachedResultName": "agent_tests",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gqyUwCZS0sTYfKEptGWSyFOOiLEs3hfBfwCFKYGlUcY/edit?usp=drivesdk"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "gid=0",
+            "mode": "list",
+            "cachedResultName": "Sheet1",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gqyUwCZS0sTYfKEptGWSyFOOiLEs3hfBfwCFKYGlUcY/edit#gid=0"
+          }
+        },
+        "id": "eval-output-commands",
+        "name": "Set Outputs (Commands)",
+        "type": "n8n-nodes-base.evaluation",
+        "typeVersion": 4.8,
+        "position": [
+          3392,
+          -1216
+        ],
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "rwNejW7L2Lym8SJi",
+            "name": "Google Sheets account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "setMetrics",
+          "expectedAnswer": "={{ $('When fetching a dataset row').item.json.text }}",
+          "actualAnswer": "={{ $json.output }}",
+          "prompt": "=You are an expert factual evaluator assessing the accuracy of answers compared to established ground truths.\n\nEvaluate the factual correctness of a given output compared to the provided ground truth on a scale from 1 to 5. Use detailed reasoning to thoroughly analyze all claims before determining the final score.\n\n# Scoring Criteria\n\n- 5: Highly similar - The output and ground truth are nearly identical, with only minor, insignificant differences.\n- 4: Somewhat similar - The output is largely similar to the ground truth but has few noticeable differences.\n- 3: Moderately similar - There are some evident differences, but the core essence is captured in the output.\n- 2: Slightly similar - The output only captures a few elements of the ground truth and contains several differences.\n- 1: Not similar - The output is significantly different from the ground truth, with few or no matching elements.\n\n# Evaluation Steps\n\n1. Identify and list the key elements present in both the output and the ground truth.\n2. Compare these key elements to evaluate their similarities and differences, considering both content and structure.\n3. Analyze the semantic meaning conveyed by both the output and the ground truth, noting any significant deviations.\n4. Consider factual accuracy of specific details, including names, dates, numbers, and relationships.\n5. Assess whether the output maintains the factual integrity of the ground truth, even if phrased differently.\n6. Determine the overall level of similarity and accuracy according to the defined criteria.\n\n# Output Format\n\nProvide:\n- A detailed analysis of the comparison (extended reasoning)\n- A one-sentence summary highlighting key differences (not similarities)\n- The final similarity score as an integer (1, 2, 3, 4, or 5)\n\nAlways follow the JSON format below and return nothing else:\n{\n  \"extended_reasoning\": \"<detailed step-by-step analysis of factual accuracy and similarity>\",\n  \"reasoning_summary\": \"<one sentence summary focusing on key differences>\",\n  \"score\": <number: integer from 1 to 5>\n}\n\n# Examples\n\n**Example 1:**\n\nInput:\n- Output: \"The cat sat on the mat.\"\n- Ground Truth: \"The feline is sitting on the rug.\"\n\nExpected Output:\n{\n  \"extended_reasoning\": \"I need to compare 'The cat sat on the mat' with 'The feline is sitting on the rug.' First, let me identify the key elements: both describe an animal ('cat' vs 'feline') in a position ('sat' vs 'sitting') on a surface ('mat' vs 'rug'). The subject is semantically identical - 'cat' and 'feline' refer to the same animal. The action is also semantically equivalent - 'sat' and 'sitting' both describe the same position, though one is past tense and one is present continuous. The location differs in specific wording ('mat' vs 'rug') but both refer to floor coverings that serve the same function. The basic structure and meaning of both sentences are preserved, though they use different vocabulary and slightly different tense. The core information being conveyed is the same, but there are noticeable wording differences.\",\n  \"reasoning_summary\": \"The sentences differ in vocabulary choice ('cat' vs 'feline', 'mat' vs 'rug') and verb tense ('sat' vs 'is sitting').\",\n  \"score\": 3\n}\n\n**Example 2:**\n\nInput:\n- Output: \"The quick brown fox jumps over the lazy dog.\"\n- Ground Truth: \"A fast brown animal leaps over a sleeping canine.\"\n\nExpected Output:\n{\n  \"extended_reasoning\": \"I need to compare 'The quick brown fox jumps over the lazy dog' with 'A fast brown animal leaps over a sleeping canine.' Starting with the subjects: 'quick brown fox' vs 'fast brown animal'. Both describe the same entity (a fox is a type of animal) with the same attributes (quick/fast and brown). The action is described as 'jumps' vs 'leaps', which are synonymous verbs describing the same motion. The object in both sentences is a dog, described as 'lazy' in one and 'sleeping' in the other, which are related concepts (a sleeping dog could be perceived as lazy). The structure follows the same pattern: subject + action + over + object. The sentences convey the same scene with slightly different word choices that maintain the core meaning. The level of specificity differs slightly ('fox' vs 'animal', 'dog' vs 'canine'), but the underlying information and imagery remain very similar.\",\n  \"reasoning_summary\": \"The sentences use different but synonymous terminology ('quick' vs 'fast', 'jumps' vs 'leaps', 'lazy' vs 'sleeping') and varying levels of specificity ('fox' vs 'animal', 'dog' vs 'canine').\",\n  \"score\": 4\n}\n\n# Notes\n\n- Focus primarily on factual accuracy and semantic similarity, not writing style or phrasing differences.\n- Identify specific differences rather than making general assessments.\n- Pay special attention to dates, numbers, names, locations, and causal relationships when present.\n- Consider the significance of each difference in the context of the overall information.\n- Be consistent in your scoring approach across different evaluations.",
+          "options": {}
+        },
+        "id": "eval-set-rag-metrics",
+        "name": "Set Metrics (RAG)",
+        "type": "n8n-nodes-base.evaluation",
+        "typeVersion": 4.8,
+        "position": [
+          3040,
+          1008
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "checkIfEvaluating"
+        },
+        "id": "eval-check-ai-error",
+        "name": "Check If Evaluating (AI Error)",
+        "type": "n8n-nodes-base.evaluation",
+        "typeVersion": 4.8,
+        "position": [
+          2976,
+          1552
+        ]
+      },
+      {
+        "parameters": {
+          "source": "googleSheets",
+          "documentId": {
+            "__rl": true,
+            "value": "1gqyUwCZS0sTYfKEptGWSyFOOiLEs3hfBfwCFKYGlUcY",
+            "mode": "list",
+            "cachedResultName": "agent_tests",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gqyUwCZS0sTYfKEptGWSyFOOiLEs3hfBfwCFKYGlUcY/edit?usp=drivesdk"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "gid=0",
+            "mode": "list",
+            "cachedResultName": "Sheet1",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gqyUwCZS0sTYfKEptGWSyFOOiLEs3hfBfwCFKYGlUcY/edit#gid=0"
+          }
+        },
+        "id": "eval-output-error",
+        "name": "Set Outputs (Error)",
+        "type": "n8n-nodes-base.evaluation",
+        "typeVersion": 4.8,
+        "position": [
+          3264,
+          1648
+        ],
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "rwNejW7L2Lym8SJi",
+            "name": "Google Sheets account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "source": "googleSheets",
+          "documentId": {
+            "__rl": true,
+            "value": "1gqyUwCZS0sTYfKEptGWSyFOOiLEs3hfBfwCFKYGlUcY",
+            "mode": "list",
+            "cachedResultName": "agent_tests",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gqyUwCZS0sTYfKEptGWSyFOOiLEs3hfBfwCFKYGlUcY/edit?usp=drivesdk"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "gid=0",
+            "mode": "list",
+            "cachedResultName": "Sheet1",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gqyUwCZS0sTYfKEptGWSyFOOiLEs3hfBfwCFKYGlUcY/edit#gid=0"
+          }
+        },
+        "type": "n8n-nodes-base.evaluationTrigger",
+        "typeVersion": 4.7,
+        "position": [
+          -976,
+          464
+        ],
+        "id": "711fa0ee-7a5f-484c-baa0-267758548e26",
+        "name": "When fetching a dataset row",
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "rwNejW7L2Lym8SJi",
+            "name": "Google Sheets account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "source": "googleSheets",
+          "documentId": {
+            "__rl": true,
+            "value": "1gqyUwCZS0sTYfKEptGWSyFOOiLEs3hfBfwCFKYGlUcY",
+            "mode": "list",
+            "cachedResultName": "agent_tests",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gqyUwCZS0sTYfKEptGWSyFOOiLEs3hfBfwCFKYGlUcY/edit?usp=drivesdk"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "gid=0",
+            "mode": "list",
+            "cachedResultName": "Sheet1",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gqyUwCZS0sTYfKEptGWSyFOOiLEs3hfBfwCFKYGlUcY/edit#gid=0"
+          },
+          "outputs": {
+            "values": [
+              {
+                "outputName": "Correctness",
+                "outputValue": "={{ $json.Correctness }}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.evaluation",
+        "typeVersion": 4.8,
+        "position": [
+          3408,
+          1008
+        ],
+        "id": "dbb292de-5352-48ce-8ddc-3b324eb18d0c",
+        "name": "Evaluation",
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "rwNejW7L2Lym8SJi",
+            "name": "Google Sheets account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "model": "cnshenyang/qwen3-nothink:14b",
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+        "typeVersion": 1,
+        "position": [
+          3184,
+          1216
+        ],
+        "id": "26f16e4e-c70f-42d6-99aa-8fac0e0cbafc",
+        "name": "Ollama Chat Model2",
+        "credentials": {
+          "ollamaApi": {
+            "id": "OwoNqqKy33Tzlan7",
+            "name": "Ollama local"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Telegram Message Trigger": {
+        "main": [
+          [
+            {
+              "node": "Set fields",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Send a typing",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get a file": {
+        "main": [
+          [
+            {
+              "node": "Transcribe audio",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Transcribe audio": {
+        "main": [
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Calculator": {
+        "ai_tool": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Guardrails": {
+        "main": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Wikipedia": {
+        "ai_tool": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Badminton knowledge base": {
+        "ai_tool": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Embeddings Ollama": {
+        "ai_embedding": [
+          [
+            {
+              "node": "Badminton knowledge base",
+              "type": "ai_embedding",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Edit Fields": {
+        "main": [
+          [
+            {
+              "node": "Text Classifier",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "If command": {
+        "main": [
+          [
+            {
+              "node": "Cmd Parse",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Text Classifier",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get AI Error Translation": {
+        "main": [
+          [
+            {
+              "node": "Check If Evaluating (AI Error)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Cmd Parse": {
+        "main": [
+          [
+            {
+              "node": "Cmd Switch",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Cmd Switch": {
+        "main": [
+          [
+            {
+              "node": "Collect User Data",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Get Help Translation",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Call Show Command",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Call Book Command",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Call List Command",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Call Delete command",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Call Register Command",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Call Delete All Command",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Collect User Data": {
+        "main": [
+          [
+            {
+              "node": "Save User Info",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Save User Info": {
+        "main": [
+          [
+            {
+              "node": "Get Start Translation",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Start Translation": {
+        "main": [
+          [
+            {
+              "node": "Format Start Message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Help Translation": {
+        "main": [
+          [
+            {
+              "node": "Format Help Message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Format Start Message": {
+        "main": [
+          [
+            {
+              "node": "Check If Evaluating (Response)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Format Help Message": {
+        "main": [
+          [
+            {
+              "node": "Check If Evaluating (Response)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call Show Command": {
+        "main": [
+          []
+        ]
+      },
+      "Call Book Command": {
+        "main": [
+          []
+        ]
+      },
+      "Set fields": {
+        "main": [
+          [
+            {
+              "node": "If",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "If": {
+        "main": [
+          [
+            {
+              "node": "If command",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Get a file",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call List Command": {
+        "main": [
+          []
+        ]
+      },
+      "Call Register Command": {
+        "main": [
+          []
+        ]
+      },
+      "Call Delete command": {
+        "main": [
+          []
+        ]
+      },
+      "Set args": {
+        "main": [
+          [
+            {
+              "node": "Send a chat action",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "NLP Command Parser",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Ollama Model": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Text Classifier",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "NLP Command Parser": {
+        "main": [
+          [
+            {
+              "node": "Merge Context",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Merge Context": {
+        "main": [
+          [
+            {
+              "node": "NLP Command Switch",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "NLP Command Switch": {
+        "main": [
+          [
+            {
+              "node": "Execute Show",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Execute Book",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Execute List",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Execute Delete",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "NLP Execute Register",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Execute Delete All",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "NLP Execute Register": {
+        "main": [
+          []
+        ]
+      },
+      "Ollama Chat Model": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "NLP Command Parser",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Send a text message1": {
+        "main": [
+          [
+            {
+              "node": "Edit Fields",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Structured Output Parser": {
+        "ai_outputParser": [
+          [
+            {
+              "node": "NLP Command Parser",
+              "type": "ai_outputParser",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Execute Show": {
+        "main": [
+          []
+        ]
+      },
+      "Execute Book": {
+        "main": [
+          []
+        ]
+      },
+      "Execute List": {
+        "main": [
+          []
+        ]
+      },
+      "Execute Delete": {
+        "main": [
+          []
+        ]
+      },
+      "Search in Tavily": {
+        "ai_tool": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Postgres Chat Memory": {
+        "ai_memory": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "ai_memory",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "AI Agent": {
+        "main": [
+          [
+            {
+              "node": "Check If Evaluating (Agent)",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Get AI Error Translation",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Edit Fields1": {
+        "main": [
+          [
+            {
+              "node": "Guardrails",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Ollama Chat Model1": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Text Classifier": {
+        "main": [
+          [
+            {
+              "node": "Set args",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Edit Fields1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Set Outputs (Agent)": {
+        "main": [
+          [
+            {
+              "node": "Set Metrics (RAG)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check If Evaluating (Agent)": {
+        "main": [
+          [
+            {
+              "node": "Set Outputs (Agent)",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Send a text message3",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check If Evaluating (Response)": {
+        "main": [
+          [
+            {
+              "node": "Set Outputs (Commands)",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Send a text message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check If Evaluating (AI Error)": {
+        "main": [
+          [
+            {
+              "node": "Send a text message2",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Set Outputs (Error)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "When fetching a dataset row": {
+        "main": [
+          [
+            {
+              "node": "Set fields",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Set Metrics (RAG)": {
+        "main": [
+          [
+            {
+              "node": "Evaluation",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Ollama Chat Model2": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Set Metrics (RAG)",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Execute Delete All": {
+        "main": [
+          []
+        ]
+      }
+    },
+    "authors": "Sergei Vedishchev",
+    "name": "Version 7fc73f0b",
+    "description": "",
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-01-02T15:00:02.291Z",
+        "id": 124,
+        "workflowId": "uf7MYoeaspA2V85u",
+        "versionId": "7fc73f0b-2487-41a1-bd39-d5a2caca54f7",
+        "event": "activated",
+        "userId": "53af7452-7a67-4d31-8a0d-967083ebc818"
+      }
+    ]
+  }
+}

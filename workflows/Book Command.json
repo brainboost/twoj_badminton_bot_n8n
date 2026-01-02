@@ -1,0 +1,1697 @@
+{
+  "updatedAt": "2026-01-02T13:45:11.341Z",
+  "createdAt": "2025-12-22T13:22:52.158Z",
+  "id": "p5NpS5X1VLPdY3mX",
+  "name": "Book Command",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "trigger-book",
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        -528,
+        256
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse the booking JSON from arg1\nconst input = $input.first().json;\nconst chat_id = input.chat_id;\nconst lang = input.lang || 'en';\n\ntry {\n  const bookingsJson = input.arg1;\n  \n  if (!bookingsJson) {\n    throw new Error('No booking data provided');\n  }\n  \n  const bookings = JSON.parse(bookingsJson);\n  \n  if (!Array.isArray(bookings) || bookings.length === 0) {\n    throw new Error('Booking data must be a non-empty array');\n  }\n  \n  const validatedBookings = bookings.map((booking, index) => {\n    if (!booking.court || !booking.date || !booking.time_start || !booking.time_end || !booking.players_num) {\n      throw new Error(`Booking ${index + 1} missing required fields`);\n    }\n    \n    let dateStr = booking.date;\n    let dateMatch = dateStr.match(/^(\\d{1,2})\\.(\\d{1,2})\\.(\\d{2,4})$/);\n    if (dateMatch) {\n      const day = dateMatch[1].padStart(2, '0');\n      const month = dateMatch[2].padStart(2, '0');\n      let year = dateMatch[3];\n      if (year.length === 2) {\n        year = '20' + year;\n      }\n      dateStr = `${day}.${month}.${year}`;\n    }\n    else {\n      dateMatch = dateStr.match(/^(\\d{4})-(\\d{2})-(\\d{2})$/);\n      if (dateMatch) {\n        dateStr = `${dateMatch[3]}.${dateMatch[2]}.${dateMatch[1]}`;\n      }\n    } \n    \n    return {\n      court: booking.court,\n      date: dateStr,\n      time_start: booking.time_start,\n      time_end: booking.time_end,\n      players_num: parseInt(booking.players_num),\n      notes: booking.notes || ''\n    };\n  });\n  \n  return [{ json: {\n    chat_id,\n    lang,\n    bookings: validatedBookings,\n    booking_count: validatedBookings.length\n  }}];\n  \n} catch (error) {\n  return [{ json: {\n    chat_id,\n    lang,\n    error: error.message,\n    error_key: 'book_invalid_json'\n  }}];\n}"
+      },
+      "id": "parse-book-json",
+      "name": "Parse Booking JSON",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -304,
+        256
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "check-error",
+              "operator": {
+                "type": "string",
+                "operation": "notExists"
+              },
+              "leftValue": "={{ $json.error }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "check-booking-parse",
+      "name": "Check Booking Parse",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -112,
+        256
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "list",
+          "value": "users"
+        },
+        "limit": 1,
+        "where": {
+          "values": [
+            {
+              "column": "chat_id",
+              "value": "={{ $json.chat_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-user-credentials",
+      "name": "Get User Credentials",
+      "type": "n8n-nodes-base.postgres",
+      "position": [
+        128,
+        240
+      ],
+      "typeVersion": 2.6,
+      "credentials": {
+        "postgres": {
+          "id": "3SDluWLUa1vIU50a",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "check-session",
+              "operator": {
+                "type": "string",
+                "operation": "exists"
+              },
+              "leftValue": "={{ $json.result.structuredContent.session_id }}",
+              "rightValue": ""
+            },
+            {
+              "id": "4c7b988b-8496-45fd-9efd-822fab76ffe2",
+              "leftValue": "={{ $json.result.structuredContent.session_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-user-credentials",
+      "name": "Check User Credentials",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        608,
+        240
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "session-id",
+              "name": "session_id",
+              "type": "string",
+              "value": "={{ $('Login').item.json.result.structuredContent.session_id }}"
+            },
+            {
+              "id": "chat-id",
+              "name": "chat_id",
+              "type": "string",
+              "value": "={{ $('Parse Booking JSON').first().json.chat_id }}"
+            },
+            {
+              "id": "84deffa2-8f7a-4a01-af39-1cd6d0acf54a",
+              "name": "username",
+              "value": "={{ $('When Executed by Another Workflow').item.json.username }}",
+              "type": "string"
+            },
+            {
+              "id": "lang",
+              "name": "lang",
+              "type": "string",
+              "value": "={{ $('Parse Booking JSON').first().json.lang }}"
+            },
+            {
+              "id": "bookings",
+              "name": "bookings",
+              "type": "array",
+              "value": "={{ $('Parse Booking JSON').first().json.bookings }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-booking-context",
+      "name": "Set Booking Context",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        896,
+        80
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepare court_bookings array for bulk reservation API\nconst context = $('Set Booking Context').first().json;\nconst bookings = context.bookings;\nconst session_id = context.session_id;\n\n// Format bookings for put_bulk_reservation API\nconst court_bookings = bookings.map(booking => ({\n  court: String(booking.court),\n  date: booking.date,\n  time_start: booking.time_start,\n  time_end: booking.time_end\n}));\n\nreturn [{\n  json: {\n    session_id: session_id,\n    court_bookings: court_bookings,\n    original_bookings: bookings,\n    user_id: context.user_id,\n    username: context.username,\n    chat_id: context.chat_id,\n    lang: context.lang\n  }\n}];"
+      },
+      "id": "prepare-bookings-loop",
+      "name": "Prepare Bulk Bookings",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1136,
+        80
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "operation": "executeTool",
+        "toolName": "put_bulk_reservation",
+        "toolParameters": "={{ JSON.stringify({ session_id: $json.session_id, club_id: \"blonia_sport\", sport_id: 84, court_bookings: $json.court_bookings }) }}"
+      },
+      "id": "mcp-bulk-reservation",
+      "name": "MCP Bulk Reservation",
+      "type": "n8n-nodes-mcp.mcpClient",
+      "typeVersion": 1,
+      "position": [
+        1376,
+        80
+      ],
+      "credentials": {
+        "mcpClientApi": {
+          "id": "G9CyzT9PT67tg4V7",
+          "name": "Twojtenis MCP Client (STDIO)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "check-bulk-success",
+              "leftValue": "={{ $json.result.structuredContent.success }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1616,
+        80
+      ],
+      "id": "b675edb4-9347-4d44-bba9-fa3d6e7d38ad",
+      "name": "Check Bulk Result"
+    },
+    {
+      "parameters": {
+        "jsCode": "const original_args = $('When Executed by Another Workflow').first().json.arg1;\nconst bookings = JSON.parse(original_args);\nconst user_id = $('When Executed by Another Workflow').first().json.user_id;\nlet queries = [];\nconst inserted = $input.first().json.result.structuredContent.reservation.bookings;\nfor (let i = 0; i < inserted.length; i++) {\n  const b = bookings[i];\n  const reservation_id = inserted[i].booking_id;\n  if (b.notes){\n    b.notes = b.notes.replace(\"'\", \"''\");\n  }\n  const query = \"INSERT INTO reservations (date, time_start, time_end, court, players_num, user_id, notes, reservation_id) VALUES('\" + b.date + \"','\" + b.time_start + \"','\" + b.time_end + \"','\" + b.court + \"',\" + b.players_num + \",'\" + user_id + \"','\" + b.notes + \"','\" + reservation_id + \"');\";\n  queries.push(query);\n}\n\nreturn [{ json: { queries: queries } }];"
+      },
+      "id": "build-insert-query",
+      "name": "Build Insert Query",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1872,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $json.queries.join('\\n') }}",
+        "options": {}
+      },
+      "id": "save-reservation-db",
+      "name": "Save All Reservations",
+      "type": "n8n-nodes-base.postgres",
+      "position": [
+        2096,
+        0
+      ],
+      "typeVersion": 2.6,
+      "credentials": {
+        "postgres": {
+          "id": "3SDluWLUa1vIU50a",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const bulkContext = $('Prepare Bulk Bookings').first().json;\nconst inserted = $('MCP Bulk Reservation').first().json.result.structuredContent;\nreturn [{\n  json: {\n    chat_id: bulkContext.chat_id,\n    lang: bulkContext.lang,\n    username: bulkContext.username,\n    bookings: bulkContext.original_bookings,\n    inserted: inserted,\n    success: true\n  }\n}];"
+      },
+      "id": "collect-success-results",
+      "name": "Prepare Success Data",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        2336,
+        0
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "list",
+          "value": "translations"
+        },
+        "limit": 1,
+        "where": {
+          "values": [
+            {
+              "column": "key",
+              "value": "book_success"
+            },
+            {
+              "column": "lang",
+              "value": "={{ $json.lang || 'en' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-book-success-translation",
+      "name": "Get Book Success Translation",
+      "type": "n8n-nodes-base.postgres",
+      "position": [
+        2576,
+        0
+      ],
+      "typeVersion": 2.6,
+      "credentials": {
+        "postgres": {
+          "id": "3SDluWLUa1vIU50a",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const template = $input.first().json.text;\nconst context = $('Prepare Success Data').first().json;\nconst bookings = context.bookings;\nconst inserted = context.inserted.reservation.bookings;\nconst username = context.username;\n\nlet messages = [];\nfor (let i = 0; i < inserted.length; i++) {\n  const booking = inserted[i];\n// bookings.forEach( => {booking\n  let msg = template\n    .replace('{id}', booking.booking_id)\n    .replace('{date}', booking.date)\n    .replace('{time_start}', booking.time_start)\n    .replace('{time_end}', booking.time_end)\n    .replace('{court}', booking.court)\n    .replace('{players_num}', bookings[i].players_num)\n    .replace('{fullname}', username)\n    .replace('{notes}', bookings[i].notes || '-');\n  messages.push(\"✅ \" + msg);\n}\n\nreturn [{\n  json: {\n    chat_id: context.chat_id,\n    message: messages.join('\\n\\n---\\n\\n')\n  }\n}];"
+      },
+      "id": "format-success-message",
+      "name": "Format Success Message",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        2816,
+        0
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "bulk-error-msg",
+              "name": "message",
+              "value": "={{ $('MCP Bulk Reservation').first().json.result.structuredContent.message || 'Bulk reservation failed' }}",
+              "type": "string"
+            },
+            {
+              "id": "bulk-error-chat",
+              "name": "chat_id",
+              "value": "={{ $('Prepare Bulk Bookings').first().json.chat_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1872,
+        192
+      ],
+      "id": "c2b57987-7a40-4e5a-9b05-019e44e0fab8",
+      "name": "Return Bulk Error"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "list",
+          "value": "translations"
+        },
+        "limit": 1,
+        "where": {
+          "values": [
+            {
+              "column": "key",
+              "value": "={{ $('Parse Booking JSON').first().json.error_key || 'book_error' }}"
+            },
+            {
+              "column": "lang",
+              "value": "={{ $('Parse Booking JSON').first().json.lang || 'en' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-error-translation",
+      "name": "Get Error Translation",
+      "type": "n8n-nodes-base.postgres",
+      "position": [
+        352,
+        672
+      ],
+      "typeVersion": 2.6,
+      "credentials": {
+        "postgres": {
+          "id": "3SDluWLUa1vIU50a",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "chat-id-err",
+              "name": "chat_id",
+              "type": "string",
+              "value": "={{ $('Parse Booking JSON').first().json.chat_id }}"
+            },
+            {
+              "id": "message-err",
+              "name": "message",
+              "type": "string",
+              "value": "={{ $json.text.replace('{error}', $('Parse Booking JSON').first().json.error) }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "format-error-message",
+      "name": "Format Error Message",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        640,
+        672
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "list",
+          "value": "translations"
+        },
+        "limit": 1,
+        "where": {
+          "values": [
+            {
+              "column": "key",
+              "value": "book_no_credentials"
+            },
+            {
+              "column": "lang",
+              "value": "={{ $('Parse Booking JSON').first().json.lang || 'en' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-no-creds-translation",
+      "name": "Get No Credentials Translation",
+      "type": "n8n-nodes-base.postgres",
+      "position": [
+        880,
+        448
+      ],
+      "typeVersion": 2.6,
+      "credentials": {
+        "postgres": {
+          "id": "3SDluWLUa1vIU50a",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "chat-id-nocreds",
+              "name": "chat_id",
+              "type": "string",
+              "value": "={{ $('Parse Booking JSON').first().json.chat_id }}"
+            },
+            {
+              "id": "message-nocreds",
+              "name": "message",
+              "type": "string",
+              "value": "={{ $json.text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "format-no-creds-message",
+      "name": "Format No Credentials Message",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        1104,
+        448
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('When Executed by Another Workflow').item.json.chat_id }}",
+        "text": "={{ $json.message }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3024,
+        192
+      ],
+      "id": "f1fed62a-bc39-4a06-84d6-2633f7ae8852",
+      "name": "Send a text message",
+      "webhookId": "265b4617-0891-457f-8e48-cb2043a19bb6",
+      "credentials": {
+        "telegramApi": {
+          "id": "pHQDqhsnrwimdaY2",
+          "name": "twoj_badminton_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeTool",
+        "toolName": "login",
+        "toolParameters": "={\"email\":\"{{$json.email}}\", \"password\": \"{{ $json.hash }}\"}"
+      },
+      "id": "54ecba5f-816b-4fec-998d-969356b946c2",
+      "name": "Login",
+      "type": "n8n-nodes-mcp.mcpClient",
+      "typeVersion": 1,
+      "position": [
+        384,
+        240
+      ],
+      "credentials": {
+        "mcpClientApi": {
+          "id": "G9CyzT9PT67tg4V7",
+          "name": "Twojtenis MCP Client (STDIO)"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Parse Booking JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Booking JSON": {
+      "main": [
+        [
+          {
+            "node": "Check Booking Parse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Booking Parse": {
+      "main": [
+        [
+          {
+            "node": "Get User Credentials",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Error Translation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get User Credentials": {
+      "main": [
+        [
+          {
+            "node": "Login",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check User Credentials": {
+      "main": [
+        [
+          {
+            "node": "Set Booking Context",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get No Credentials Translation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Booking Context": {
+      "main": [
+        [
+          {
+            "node": "Prepare Bulk Bookings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Bulk Bookings": {
+      "main": [
+        [
+          {
+            "node": "MCP Bulk Reservation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Bulk Reservation": {
+      "main": [
+        [
+          {
+            "node": "Check Bulk Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Bulk Result": {
+      "main": [
+        [
+          {
+            "node": "Build Insert Query",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Return Bulk Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Insert Query": {
+      "main": [
+        [
+          {
+            "node": "Save All Reservations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save All Reservations": {
+      "main": [
+        [
+          {
+            "node": "Prepare Success Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Success Data": {
+      "main": [
+        [
+          {
+            "node": "Get Book Success Translation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Book Success Translation": {
+      "main": [
+        [
+          {
+            "node": "Format Success Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Success Message": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Return Bulk Error": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Error Translation": {
+      "main": [
+        [
+          {
+            "node": "Format Error Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Error Message": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get No Credentials Translation": {
+      "main": [
+        [
+          {
+            "node": "Format No Credentials Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format No Credentials Message": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Login": {
+      "main": [
+        [
+          {
+            "node": "Check User Credentials",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "versionId": "4761660a-ab9f-4429-821a-70e44999969c",
+  "activeVersionId": "4761660a-ab9f-4429-821a-70e44999969c",
+  "versionCounter": 91,
+  "triggerCount": 0,
+  "shared": [],
+  "tags": [
+    {
+      "updatedAt": "2025-12-27T11:51:52.051Z",
+      "createdAt": "2025-12-27T11:51:52.051Z",
+      "id": "3W7RR758UwICVpEC",
+      "name": "bot_command"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2025-12-31T11:11:56.000Z",
+    "createdAt": "2025-12-31T11:11:41.465Z",
+    "versionId": "4761660a-ab9f-4429-821a-70e44999969c",
+    "workflowId": "p5NpS5X1VLPdY3mX",
+    "nodes": [
+      {
+        "parameters": {
+          "inputSource": "passthrough"
+        },
+        "id": "trigger-book",
+        "name": "When Executed by Another Workflow",
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "position": [
+          -528,
+          256
+        ],
+        "typeVersion": 1.1
+      },
+      {
+        "parameters": {
+          "jsCode": "// Parse the booking JSON from arg1\nconst input = $input.first().json;\nconst chat_id = input.chat_id;\nconst lang = input.lang || 'en';\n\ntry {\n  const bookingsJson = input.arg1;\n  \n  if (!bookingsJson) {\n    throw new Error('No booking data provided');\n  }\n  \n  const bookings = JSON.parse(bookingsJson);\n  \n  if (!Array.isArray(bookings) || bookings.length === 0) {\n    throw new Error('Booking data must be a non-empty array');\n  }\n  \n  const validatedBookings = bookings.map((booking, index) => {\n    if (!booking.court || !booking.date || !booking.time_start || !booking.time_end || !booking.players_num) {\n      throw new Error(`Booking ${index + 1} missing required fields`);\n    }\n    \n    let dateStr = booking.date;\n    let dateMatch = dateStr.match(/^(\\d{1,2})\\.(\\d{1,2})\\.(\\d{2,4})$/);\n    if (dateMatch) {\n      const day = dateMatch[1].padStart(2, '0');\n      const month = dateMatch[2].padStart(2, '0');\n      let year = dateMatch[3];\n      if (year.length === 2) {\n        year = '20' + year;\n      }\n      dateStr = `${day}.${month}.${year}`;\n    }\n    else {\n      dateMatch = dateStr.match(/^(\\d{4})-(\\d{2})-(\\d{2})$/);\n      if (dateMatch) {\n        dateStr = `${dateMatch[3]}.${dateMatch[2]}.${dateMatch[1]}`;\n      }\n    } \n    \n    return {\n      court: booking.court,\n      date: dateStr,\n      time_start: booking.time_start,\n      time_end: booking.time_end,\n      players_num: parseInt(booking.players_num),\n      notes: booking.notes || ''\n    };\n  });\n  \n  return [{ json: {\n    chat_id,\n    lang,\n    bookings: validatedBookings,\n    booking_count: validatedBookings.length\n  }}];\n  \n} catch (error) {\n  return [{ json: {\n    chat_id,\n    lang,\n    error: error.message,\n    error_key: 'book_invalid_json'\n  }}];\n}"
+        },
+        "id": "parse-book-json",
+        "name": "Parse Booking JSON",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          -304,
+          256
+        ],
+        "typeVersion": 2
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "check-error",
+                "operator": {
+                  "type": "string",
+                  "operation": "notExists"
+                },
+                "leftValue": "={{ $json.error }}",
+                "rightValue": ""
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "check-booking-parse",
+        "name": "Check Booking Parse",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          -112,
+          256
+        ],
+        "typeVersion": 2.2
+      },
+      {
+        "parameters": {
+          "operation": "select",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "mode": "list",
+            "value": "users"
+          },
+          "limit": 1,
+          "where": {
+            "values": [
+              {
+                "column": "chat_id",
+                "value": "={{ $json.chat_id }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "get-user-credentials",
+        "name": "Get User Credentials",
+        "type": "n8n-nodes-base.postgres",
+        "position": [
+          128,
+          240
+        ],
+        "typeVersion": 2.6,
+        "credentials": {
+          "postgres": {
+            "id": "3SDluWLUa1vIU50a",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "conditions": [
+              {
+                "id": "check-session",
+                "operator": {
+                  "type": "string",
+                  "operation": "exists"
+                },
+                "leftValue": "={{ $json.result.structuredContent.session_id }}",
+                "rightValue": ""
+              },
+              {
+                "id": "4c7b988b-8496-45fd-9efd-822fab76ffe2",
+                "leftValue": "={{ $json.result.structuredContent.session_id }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "notEmpty",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "check-user-credentials",
+        "name": "Check User Credentials",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          608,
+          240
+        ],
+        "typeVersion": 2.2
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "session-id",
+                "name": "session_id",
+                "type": "string",
+                "value": "={{ $('Login').item.json.result.structuredContent.session_id }}"
+              },
+              {
+                "id": "chat-id",
+                "name": "chat_id",
+                "type": "string",
+                "value": "={{ $('Parse Booking JSON').first().json.chat_id }}"
+              },
+              {
+                "id": "84deffa2-8f7a-4a01-af39-1cd6d0acf54a",
+                "name": "username",
+                "value": "={{ $('When Executed by Another Workflow').item.json.username }}",
+                "type": "string"
+              },
+              {
+                "id": "lang",
+                "name": "lang",
+                "type": "string",
+                "value": "={{ $('Parse Booking JSON').first().json.lang }}"
+              },
+              {
+                "id": "bookings",
+                "name": "bookings",
+                "type": "array",
+                "value": "={{ $('Parse Booking JSON').first().json.bookings }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "set-booking-context",
+        "name": "Set Booking Context",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          896,
+          80
+        ],
+        "typeVersion": 3.4
+      },
+      {
+        "parameters": {
+          "jsCode": "// Prepare court_bookings array for bulk reservation API\nconst context = $('Set Booking Context').first().json;\nconst bookings = context.bookings;\nconst session_id = context.session_id;\n\n// Format bookings for put_bulk_reservation API\nconst court_bookings = bookings.map(booking => ({\n  court: String(booking.court),\n  date: booking.date,\n  time_start: booking.time_start,\n  time_end: booking.time_end\n}));\n\nreturn [{\n  json: {\n    session_id: session_id,\n    court_bookings: court_bookings,\n    original_bookings: bookings,\n    user_id: context.user_id,\n    username: context.username,\n    chat_id: context.chat_id,\n    lang: context.lang\n  }\n}];"
+        },
+        "id": "prepare-bookings-loop",
+        "name": "Prepare Bulk Bookings",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          1136,
+          80
+        ],
+        "typeVersion": 2
+      },
+      {
+        "parameters": {
+          "operation": "executeTool",
+          "toolName": "put_bulk_reservation",
+          "toolParameters": "={{ JSON.stringify({ session_id: $json.session_id, club_id: \"blonia_sport\", sport_id: 84, court_bookings: $json.court_bookings }) }}"
+        },
+        "id": "mcp-bulk-reservation",
+        "name": "MCP Bulk Reservation",
+        "type": "n8n-nodes-mcp.mcpClient",
+        "typeVersion": 1,
+        "position": [
+          1376,
+          80
+        ],
+        "credentials": {
+          "mcpClientApi": {
+            "id": "G9CyzT9PT67tg4V7",
+            "name": "Twojtenis MCP Client (STDIO)"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "check-bulk-success",
+                "leftValue": "={{ $json.result.structuredContent.success }}",
+                "rightValue": true,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          1616,
+          80
+        ],
+        "id": "b675edb4-9347-4d44-bba9-fa3d6e7d38ad",
+        "name": "Check Bulk Result"
+      },
+      {
+        "parameters": {
+          "jsCode": "const original_args = $('When Executed by Another Workflow').first().json.arg1;\nconst bookings = JSON.parse(original_args);\nconst user_id = $('When Executed by Another Workflow').first().json.user_id;\nlet queries = [];\nconst inserted = $input.first().json.result.structuredContent.reservation.bookings;\nfor (let i = 0; i < inserted.length; i++) {\n  const b = bookings[i];\n  const reservation_id = inserted[i].booking_id;\n  if (b.notes){\n    b.notes = b.notes.replace(\"'\", \"''\");\n  }\n  const query = \"INSERT INTO reservations (date, time_start, time_end, court, players_num, user_id, notes, reservation_id) VALUES('\" + b.date + \"','\" + b.time_start + \"','\" + b.time_end + \"','\" + b.court + \"',\" + b.players_num + \",'\" + user_id + \"','\" + b.notes + \"','\" + reservation_id + \"');\";\n  queries.push(query);\n}\n\nreturn [{ json: { queries: queries } }];"
+        },
+        "id": "build-insert-query",
+        "name": "Build Insert Query",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1872,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "{{ $json.queries.join('\\n') }}",
+          "options": {}
+        },
+        "id": "save-reservation-db",
+        "name": "Save All Reservations",
+        "type": "n8n-nodes-base.postgres",
+        "position": [
+          2096,
+          0
+        ],
+        "typeVersion": 2.6,
+        "credentials": {
+          "postgres": {
+            "id": "3SDluWLUa1vIU50a",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const bulkContext = $('Prepare Bulk Bookings').first().json;\nconst inserted = $('MCP Bulk Reservation').first().json.result.structuredContent;\nreturn [{\n  json: {\n    chat_id: bulkContext.chat_id,\n    lang: bulkContext.lang,\n    username: bulkContext.username,\n    bookings: bulkContext.original_bookings,\n    inserted: inserted,\n    success: true\n  }\n}];"
+        },
+        "id": "collect-success-results",
+        "name": "Prepare Success Data",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          2336,
+          0
+        ],
+        "typeVersion": 2
+      },
+      {
+        "parameters": {
+          "operation": "select",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "mode": "list",
+            "value": "translations"
+          },
+          "limit": 1,
+          "where": {
+            "values": [
+              {
+                "column": "key",
+                "value": "book_success"
+              },
+              {
+                "column": "lang",
+                "value": "={{ $json.lang || 'en' }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "get-book-success-translation",
+        "name": "Get Book Success Translation",
+        "type": "n8n-nodes-base.postgres",
+        "position": [
+          2576,
+          0
+        ],
+        "typeVersion": 2.6,
+        "credentials": {
+          "postgres": {
+            "id": "3SDluWLUa1vIU50a",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const template = $input.first().json.text;\nconst context = $('Prepare Success Data').first().json;\nconst bookings = context.bookings;\nconst inserted = context.inserted.reservation.bookings;\nconst username = context.username;\n\nlet messages = [];\nfor (let i = 0; i < inserted.length; i++) {\n  const booking = inserted[i];\n// bookings.forEach( => {booking\n  let msg = template\n    .replace('{id}', booking.booking_id)\n    .replace('{date}', booking.date)\n    .replace('{time_start}', booking.time_start)\n    .replace('{time_end}', booking.time_end)\n    .replace('{court}', booking.court)\n    .replace('{players_num}', bookings[i].players_num)\n    .replace('{fullname}', username)\n    .replace('{notes}', bookings[i].notes || '-');\n  messages.push(\"✅ \" + msg);\n}\n\nreturn [{\n  json: {\n    chat_id: context.chat_id,\n    message: messages.join('\\n\\n---\\n\\n')\n  }\n}];"
+        },
+        "id": "format-success-message",
+        "name": "Format Success Message",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          2816,
+          0
+        ],
+        "typeVersion": 2
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "bulk-error-msg",
+                "name": "message",
+                "value": "={{ $('MCP Bulk Reservation').first().json.result.structuredContent.message || 'Bulk reservation failed' }}",
+                "type": "string"
+              },
+              {
+                "id": "bulk-error-chat",
+                "name": "chat_id",
+                "value": "={{ $('Prepare Bulk Bookings').first().json.chat_id }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          1872,
+          192
+        ],
+        "id": "c2b57987-7a40-4e5a-9b05-019e44e0fab8",
+        "name": "Return Bulk Error"
+      },
+      {
+        "parameters": {
+          "operation": "select",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "mode": "list",
+            "value": "translations"
+          },
+          "limit": 1,
+          "where": {
+            "values": [
+              {
+                "column": "key",
+                "value": "={{ $('Parse Booking JSON').first().json.error_key || 'book_error' }}"
+              },
+              {
+                "column": "lang",
+                "value": "={{ $('Parse Booking JSON').first().json.lang || 'en' }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "get-error-translation",
+        "name": "Get Error Translation",
+        "type": "n8n-nodes-base.postgres",
+        "position": [
+          352,
+          672
+        ],
+        "typeVersion": 2.6,
+        "credentials": {
+          "postgres": {
+            "id": "3SDluWLUa1vIU50a",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "chat-id-err",
+                "name": "chat_id",
+                "type": "string",
+                "value": "={{ $('Parse Booking JSON').first().json.chat_id }}"
+              },
+              {
+                "id": "message-err",
+                "name": "message",
+                "type": "string",
+                "value": "={{ $json.text.replace('{error}', $('Parse Booking JSON').first().json.error) }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "format-error-message",
+        "name": "Format Error Message",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          640,
+          672
+        ],
+        "typeVersion": 3.4
+      },
+      {
+        "parameters": {
+          "operation": "select",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "mode": "list",
+            "value": "translations"
+          },
+          "limit": 1,
+          "where": {
+            "values": [
+              {
+                "column": "key",
+                "value": "book_no_credentials"
+              },
+              {
+                "column": "lang",
+                "value": "={{ $('Parse Booking JSON').first().json.lang || 'en' }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "get-no-creds-translation",
+        "name": "Get No Credentials Translation",
+        "type": "n8n-nodes-base.postgres",
+        "position": [
+          880,
+          448
+        ],
+        "typeVersion": 2.6,
+        "credentials": {
+          "postgres": {
+            "id": "3SDluWLUa1vIU50a",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "chat-id-nocreds",
+                "name": "chat_id",
+                "type": "string",
+                "value": "={{ $('Parse Booking JSON').first().json.chat_id }}"
+              },
+              {
+                "id": "message-nocreds",
+                "name": "message",
+                "type": "string",
+                "value": "={{ $json.text }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "format-no-creds-message",
+        "name": "Format No Credentials Message",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1104,
+          448
+        ],
+        "typeVersion": 3.4
+      },
+      {
+        "parameters": {
+          "chatId": "={{ $('When Executed by Another Workflow').item.json.chat_id }}",
+          "text": "={{ $json.message }}",
+          "additionalFields": {
+            "appendAttribution": false,
+            "parse_mode": "HTML"
+          }
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          3024,
+          192
+        ],
+        "id": "f1fed62a-bc39-4a06-84d6-2633f7ae8852",
+        "name": "Send a text message",
+        "webhookId": "265b4617-0891-457f-8e48-cb2043a19bb6",
+        "credentials": {
+          "telegramApi": {
+            "id": "pHQDqhsnrwimdaY2",
+            "name": "twoj_badminton_bot"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "executeTool",
+          "toolName": "login",
+          "toolParameters": "={\"email\":\"{{$json.email}}\", \"password\": \"{{ $json.hash }}\"}"
+        },
+        "id": "54ecba5f-816b-4fec-998d-969356b946c2",
+        "name": "Login",
+        "type": "n8n-nodes-mcp.mcpClient",
+        "typeVersion": 1,
+        "position": [
+          384,
+          240
+        ],
+        "credentials": {
+          "mcpClientApi": {
+            "id": "G9CyzT9PT67tg4V7",
+            "name": "Twojtenis MCP Client (STDIO)"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "When Executed by Another Workflow": {
+        "main": [
+          [
+            {
+              "node": "Parse Booking JSON",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Parse Booking JSON": {
+        "main": [
+          [
+            {
+              "node": "Check Booking Parse",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check Booking Parse": {
+        "main": [
+          [
+            {
+              "node": "Get User Credentials",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Get Error Translation",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get User Credentials": {
+        "main": [
+          [
+            {
+              "node": "Login",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check User Credentials": {
+        "main": [
+          [
+            {
+              "node": "Set Booking Context",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Get No Credentials Translation",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Set Booking Context": {
+        "main": [
+          [
+            {
+              "node": "Prepare Bulk Bookings",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Prepare Bulk Bookings": {
+        "main": [
+          [
+            {
+              "node": "MCP Bulk Reservation",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "MCP Bulk Reservation": {
+        "main": [
+          [
+            {
+              "node": "Check Bulk Result",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check Bulk Result": {
+        "main": [
+          [
+            {
+              "node": "Build Insert Query",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Return Bulk Error",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build Insert Query": {
+        "main": [
+          [
+            {
+              "node": "Save All Reservations",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Save All Reservations": {
+        "main": [
+          [
+            {
+              "node": "Prepare Success Data",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Prepare Success Data": {
+        "main": [
+          [
+            {
+              "node": "Get Book Success Translation",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Book Success Translation": {
+        "main": [
+          [
+            {
+              "node": "Format Success Message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Format Success Message": {
+        "main": [
+          [
+            {
+              "node": "Send a text message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Return Bulk Error": {
+        "main": [
+          [
+            {
+              "node": "Send a text message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Error Translation": {
+        "main": [
+          [
+            {
+              "node": "Format Error Message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Format Error Message": {
+        "main": [
+          [
+            {
+              "node": "Send a text message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get No Credentials Translation": {
+        "main": [
+          [
+            {
+              "node": "Format No Credentials Message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Format No Credentials Message": {
+        "main": [
+          [
+            {
+              "node": "Send a text message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Login": {
+        "main": [
+          [
+            {
+              "node": "Check User Credentials",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Sergei Vedishchev",
+    "name": "Version 4761660a",
+    "description": "",
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2025-12-31T11:11:56.353Z",
+        "id": 91,
+        "workflowId": "p5NpS5X1VLPdY3mX",
+        "versionId": "4761660a-ab9f-4429-821a-70e44999969c",
+        "event": "activated",
+        "userId": "53af7452-7a67-4d31-8a0d-967083ebc818"
+      }
+    ]
+  }
+}

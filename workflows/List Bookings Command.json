@@ -1,0 +1,1193 @@
+{
+  "updatedAt": "2026-01-02T14:49:47.663Z",
+  "createdAt": "2025-12-25T12:24:14.384Z",
+  "id": "51Y9SIV139LvX5jl",
+  "name": "List Bookings Command",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "trigger-list",
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        -960,
+        176
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "list",
+          "value": "users"
+        },
+        "limit": 1,
+        "where": {
+          "values": [
+            {
+              "column": "chat_id",
+              "value": "={{ $json.chat_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-user-credentials-list",
+      "name": "Get User Credentials",
+      "type": "n8n-nodes-base.postgres",
+      "position": [
+        -736,
+        176
+      ],
+      "typeVersion": 2.6,
+      "credentials": {
+        "postgres": {
+          "id": "3SDluWLUa1vIU50a",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "check-session",
+              "operator": {
+                "type": "string",
+                "operation": "exists"
+              },
+              "leftValue": "={{ $json.result.structuredContent.session_id }}",
+              "rightValue": ""
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-user-creds-list",
+      "name": "Check User Credentials",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -304,
+        176
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "session-id",
+              "name": "session_id",
+              "type": "string",
+              "value": "={{ $json.result.structuredContent.session_id }}"
+            },
+            {
+              "id": "list-chat-id",
+              "name": "chat_id",
+              "type": "string",
+              "value": "={{ $('When Executed by Another Workflow').first().json.chat_id }}"
+            },
+            {
+              "id": "list-lang",
+              "name": "lang",
+              "type": "string",
+              "value": "={{ $('When Executed by Another Workflow').first().json.lang || 'en' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-list-context",
+      "name": "Set List Context",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        0,
+        160
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "operation": "executeTool",
+        "toolName": "get_reservations",
+        "toolParameters": "={\"session_id\":\"{{ $json.session_id }}\"}"
+      },
+      "id": "mcp-get-reservations",
+      "name": "MCP Get Reservations",
+      "type": "n8n-nodes-mcp.mcpClient",
+      "position": [
+        240,
+        160
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "mcpClientApi": {
+          "id": "G9CyzT9PT67tg4V7",
+          "name": "Twojtenis MCP Client (STDIO)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "check-reservations-exist",
+              "operator": {
+                "type": "array",
+                "operation": "notEmpty",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.result.structuredContent.result }}",
+              "rightValue": ""
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-reservations-result",
+      "name": "Check Reservations Result",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        480,
+        160
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "jsCode": "const reservations = $input.first().json.result.structuredContent.result;\nconst context = $('Set List Context').first().json;\n\n// Build formatted message for each reservation\nconst lines = reservations.map((r, i) => {\n  const date = r.date || 'N/A';\n  const time = r.time || 'N/A';\n  const club = r.club_name || 'N/A';\n  const club_no = r.club_num || 'N/A';\n  const bookingId = r.booking_id || 'N/A';\n  \n  return `${i + 1}. <b>${date}</b> ${time}\\n  Club: ${club_no} - ${club}\\n  ID: <code>${bookingId}</code>`;\n});\n\nreturn [{\n  json: {\n    chat_id: context.chat_id,\n    lang: context.lang,\n    reservations: reservations,\n    formatted_list: lines.join('\\n\\n'),\n    count: reservations.length\n  }\n}];"
+      },
+      "id": "format-reservations",
+      "name": "Format Reservations",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        720,
+        144
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "chat-id-success-list",
+              "name": "chat_id",
+              "type": "string",
+              "value": "={{ $('Format Reservations').first().json.chat_id }}"
+            },
+            {
+              "id": "message-success-list",
+              "name": "message",
+              "type": "string",
+              "value": "=📋 <b>{{ $json.count }} reservation(s):</b>\n\n{{ $json.formatted_list }}"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "include": "selected",
+        "includeFields": "reservations",
+        "options": {}
+      },
+      "id": "format-success-msg-list",
+      "name": "Format Success Message",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        960,
+        144
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "list",
+          "value": "translations"
+        },
+        "limit": 1,
+        "where": {
+          "values": [
+            {
+              "column": "key",
+              "value": "list_empty"
+            },
+            {
+              "column": "lang",
+              "value": "={{ $('Set List Context').first().json.lang || 'en' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b758478b-dfc7-436b-8bbd-2563878f60b3",
+      "name": "Get Empty List Translation",
+      "type": "n8n-nodes-base.postgres",
+      "position": [
+        720,
+        304
+      ],
+      "typeVersion": 2.6,
+      "credentials": {
+        "postgres": {
+          "id": "3SDluWLUa1vIU50a",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "chat-id-empty-list",
+              "name": "chat_id",
+              "type": "string",
+              "value": "={{ $('Set List Context').first().json.chat_id }}"
+            },
+            {
+              "id": "message-empty-list",
+              "name": "message",
+              "type": "string",
+              "value": "={{ $json.text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "format-empty-msg-list",
+      "name": "Format Empty Message",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        960,
+        304
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "list",
+          "value": "translations"
+        },
+        "limit": 1,
+        "where": {
+          "values": [
+            {
+              "column": "key",
+              "value": "list_no_credentials"
+            },
+            {
+              "column": "lang",
+              "value": "={{ $('When Executed by Another Workflow').first().json.lang || 'en' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-no-creds-list",
+      "name": "Get No Credentials Translation",
+      "type": "n8n-nodes-base.postgres",
+      "position": [
+        0,
+        400
+      ],
+      "typeVersion": 2.6,
+      "credentials": {
+        "postgres": {
+          "id": "3SDluWLUa1vIU50a",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "chat-id-nocreds-list",
+              "name": "chat_id",
+              "type": "string",
+              "value": "={{ $('When Executed by Another Workflow').first().json.chat_id }}"
+            },
+            {
+              "id": "message-nocreds-list",
+              "name": "message",
+              "type": "string",
+              "value": "={{ $json.text || '❌ Please register your credentials first using /start command.' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "format-no-creds-list",
+      "name": "Format No Credentials Message",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        240,
+        400
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('When Executed by Another Workflow').item.json.chat_id }}",
+        "text": "={{ $json.message }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1200,
+        400
+      ],
+      "id": "1c4e010f-b4fc-430a-829c-1f686010eff0",
+      "name": "Send a text message",
+      "webhookId": "45047eaa-e0e1-4e51-887a-1c8b5115056b",
+      "credentials": {
+        "telegramApi": {
+          "id": "pHQDqhsnrwimdaY2",
+          "name": "twoj_badminton_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeTool",
+        "toolName": "login",
+        "toolParameters": "={\"email\":\"{{$json.email}}\", \"password\": \"{{ $json.hash }}\"}"
+      },
+      "id": "f2a243f0-8e64-41cf-b670-0363b53e8136",
+      "name": "Login",
+      "type": "n8n-nodes-mcp.mcpClient",
+      "typeVersion": 1,
+      "position": [
+        -528,
+        176
+      ],
+      "credentials": {
+        "mcpClientApi": {
+          "id": "G9CyzT9PT67tg4V7",
+          "name": "Twojtenis MCP Client (STDIO)"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Get User Credentials",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get User Credentials": {
+      "main": [
+        [
+          {
+            "node": "Login",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check User Credentials": {
+      "main": [
+        [
+          {
+            "node": "Set List Context",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get No Credentials Translation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set List Context": {
+      "main": [
+        [
+          {
+            "node": "MCP Get Reservations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Get Reservations": {
+      "main": [
+        [
+          {
+            "node": "Check Reservations Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Reservations Result": {
+      "main": [
+        [
+          {
+            "node": "Format Reservations",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Empty List Translation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Reservations": {
+      "main": [
+        [
+          {
+            "node": "Format Success Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Success Message": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Empty List Translation": {
+      "main": [
+        [
+          {
+            "node": "Format Empty Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Empty Message": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get No Credentials Translation": {
+      "main": [
+        [
+          {
+            "node": "Format No Credentials Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format No Credentials Message": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Login": {
+      "main": [
+        [
+          {
+            "node": "Check User Credentials",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "versionId": "854810d2-d5ad-4521-a267-ca7dea6fb410",
+  "activeVersionId": "854810d2-d5ad-4521-a267-ca7dea6fb410",
+  "versionCounter": 69,
+  "triggerCount": 0,
+  "shared": [],
+  "tags": [
+    {
+      "updatedAt": "2025-12-27T11:51:52.051Z",
+      "createdAt": "2025-12-27T11:51:52.051Z",
+      "id": "3W7RR758UwICVpEC",
+      "name": "bot_command"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-01-02T13:44:35.000Z",
+    "createdAt": "2025-12-31T11:23:17.724Z",
+    "versionId": "854810d2-d5ad-4521-a267-ca7dea6fb410",
+    "workflowId": "51Y9SIV139LvX5jl",
+    "nodes": [
+      {
+        "parameters": {
+          "inputSource": "passthrough"
+        },
+        "id": "trigger-list",
+        "name": "When Executed by Another Workflow",
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "position": [
+          -960,
+          176
+        ],
+        "typeVersion": 1.1
+      },
+      {
+        "parameters": {
+          "operation": "select",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "mode": "list",
+            "value": "users"
+          },
+          "limit": 1,
+          "where": {
+            "values": [
+              {
+                "column": "chat_id",
+                "value": "={{ $json.chat_id }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "get-user-credentials-list",
+        "name": "Get User Credentials",
+        "type": "n8n-nodes-base.postgres",
+        "position": [
+          -736,
+          176
+        ],
+        "typeVersion": 2.6,
+        "credentials": {
+          "postgres": {
+            "id": "3SDluWLUa1vIU50a",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "conditions": [
+              {
+                "id": "check-session",
+                "operator": {
+                  "type": "string",
+                  "operation": "exists"
+                },
+                "leftValue": "={{ $json.result.structuredContent.session_id }}",
+                "rightValue": ""
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "check-user-creds-list",
+        "name": "Check User Credentials",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          -304,
+          176
+        ],
+        "typeVersion": 2.2
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "session-id",
+                "name": "session_id",
+                "type": "string",
+                "value": "={{ $json.result.structuredContent.session_id }}"
+              },
+              {
+                "id": "list-chat-id",
+                "name": "chat_id",
+                "type": "string",
+                "value": "={{ $('When Executed by Another Workflow').first().json.chat_id }}"
+              },
+              {
+                "id": "list-lang",
+                "name": "lang",
+                "type": "string",
+                "value": "={{ $('When Executed by Another Workflow').first().json.lang || 'en' }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "set-list-context",
+        "name": "Set List Context",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          0,
+          160
+        ],
+        "typeVersion": 3.4
+      },
+      {
+        "parameters": {
+          "operation": "executeTool",
+          "toolName": "get_reservations",
+          "toolParameters": "={\"session_id\":\"{{ $json.session_id }}\"}"
+        },
+        "id": "mcp-get-reservations",
+        "name": "MCP Get Reservations",
+        "type": "n8n-nodes-mcp.mcpClient",
+        "position": [
+          240,
+          160
+        ],
+        "typeVersion": 1,
+        "credentials": {
+          "mcpClientApi": {
+            "id": "G9CyzT9PT67tg4V7",
+            "name": "Twojtenis MCP Client (STDIO)"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "check-reservations-exist",
+                "operator": {
+                  "type": "array",
+                  "operation": "notEmpty",
+                  "singleValue": true
+                },
+                "leftValue": "={{ $json.result.structuredContent.result }}",
+                "rightValue": ""
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "check-reservations-result",
+        "name": "Check Reservations Result",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          480,
+          160
+        ],
+        "typeVersion": 2.2
+      },
+      {
+        "parameters": {
+          "jsCode": "const reservations = $input.first().json.result.structuredContent.result;\nconst context = $('Set List Context').first().json;\n\n// Build formatted message for each reservation\nconst lines = reservations.map((r, i) => {\n  const date = r.date || 'N/A';\n  const time = r.time || 'N/A';\n  const club = r.club_name || 'N/A';\n  const club_no = r.club_num || 'N/A';\n  const bookingId = r.booking_id || 'N/A';\n  \n  return `${i + 1}. <b>${date}</b> ${time}\\n  Club: ${club_no} - ${club}\\n  ID: <code>${bookingId}</code>`;\n});\n\nreturn [{\n  json: {\n    chat_id: context.chat_id,\n    lang: context.lang,\n    reservations: reservations,\n    formatted_list: lines.join('\\n\\n'),\n    count: reservations.length\n  }\n}];"
+        },
+        "id": "format-reservations",
+        "name": "Format Reservations",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          720,
+          144
+        ],
+        "typeVersion": 2
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "chat-id-success-list",
+                "name": "chat_id",
+                "type": "string",
+                "value": "={{ $('Format Reservations').first().json.chat_id }}"
+              },
+              {
+                "id": "message-success-list",
+                "name": "message",
+                "type": "string",
+                "value": "=📋 <b>{{ $json.count }} reservation(s):</b>\n\n{{ $json.formatted_list }}"
+              }
+            ]
+          },
+          "includeOtherFields": true,
+          "include": "selected",
+          "includeFields": "reservations",
+          "options": {}
+        },
+        "id": "format-success-msg-list",
+        "name": "Format Success Message",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          960,
+          144
+        ],
+        "typeVersion": 3.4
+      },
+      {
+        "parameters": {
+          "operation": "select",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "mode": "list",
+            "value": "translations"
+          },
+          "limit": 1,
+          "where": {
+            "values": [
+              {
+                "column": "key",
+                "value": "list_empty"
+              },
+              {
+                "column": "lang",
+                "value": "={{ $('Set List Context').first().json.lang || 'en' }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "b758478b-dfc7-436b-8bbd-2563878f60b3",
+        "name": "Get Empty List Translation",
+        "type": "n8n-nodes-base.postgres",
+        "position": [
+          720,
+          304
+        ],
+        "typeVersion": 2.6,
+        "credentials": {
+          "postgres": {
+            "id": "3SDluWLUa1vIU50a",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "chat-id-empty-list",
+                "name": "chat_id",
+                "type": "string",
+                "value": "={{ $('Set List Context').first().json.chat_id }}"
+              },
+              {
+                "id": "message-empty-list",
+                "name": "message",
+                "type": "string",
+                "value": "={{ $json.text }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "format-empty-msg-list",
+        "name": "Format Empty Message",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          960,
+          304
+        ],
+        "typeVersion": 3.4
+      },
+      {
+        "parameters": {
+          "operation": "select",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "mode": "list",
+            "value": "translations"
+          },
+          "limit": 1,
+          "where": {
+            "values": [
+              {
+                "column": "key",
+                "value": "list_no_credentials"
+              },
+              {
+                "column": "lang",
+                "value": "={{ $('When Executed by Another Workflow').first().json.lang || 'en' }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "get-no-creds-list",
+        "name": "Get No Credentials Translation",
+        "type": "n8n-nodes-base.postgres",
+        "position": [
+          0,
+          400
+        ],
+        "typeVersion": 2.6,
+        "credentials": {
+          "postgres": {
+            "id": "3SDluWLUa1vIU50a",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "chat-id-nocreds-list",
+                "name": "chat_id",
+                "type": "string",
+                "value": "={{ $('When Executed by Another Workflow').first().json.chat_id }}"
+              },
+              {
+                "id": "message-nocreds-list",
+                "name": "message",
+                "type": "string",
+                "value": "={{ $json.text || '❌ Please register your credentials first using /start command.' }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "format-no-creds-list",
+        "name": "Format No Credentials Message",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          240,
+          400
+        ],
+        "typeVersion": 3.4
+      },
+      {
+        "parameters": {
+          "chatId": "={{ $('When Executed by Another Workflow').item.json.chat_id }}",
+          "text": "={{ $json.message }}",
+          "additionalFields": {
+            "appendAttribution": false,
+            "parse_mode": "HTML"
+          }
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          1200,
+          400
+        ],
+        "id": "1c4e010f-b4fc-430a-829c-1f686010eff0",
+        "name": "Send a text message",
+        "webhookId": "45047eaa-e0e1-4e51-887a-1c8b5115056b",
+        "credentials": {
+          "telegramApi": {
+            "id": "pHQDqhsnrwimdaY2",
+            "name": "twoj_badminton_bot"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "executeTool",
+          "toolName": "login",
+          "toolParameters": "={\"email\":\"{{$json.email}}\", \"password\": \"{{ $json.hash }}\"}"
+        },
+        "id": "f2a243f0-8e64-41cf-b670-0363b53e8136",
+        "name": "Login",
+        "type": "n8n-nodes-mcp.mcpClient",
+        "typeVersion": 1,
+        "position": [
+          -528,
+          176
+        ],
+        "credentials": {
+          "mcpClientApi": {
+            "id": "G9CyzT9PT67tg4V7",
+            "name": "Twojtenis MCP Client (STDIO)"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "When Executed by Another Workflow": {
+        "main": [
+          [
+            {
+              "node": "Get User Credentials",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get User Credentials": {
+        "main": [
+          [
+            {
+              "node": "Login",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check User Credentials": {
+        "main": [
+          [
+            {
+              "node": "Set List Context",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Get No Credentials Translation",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Set List Context": {
+        "main": [
+          [
+            {
+              "node": "MCP Get Reservations",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "MCP Get Reservations": {
+        "main": [
+          [
+            {
+              "node": "Check Reservations Result",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check Reservations Result": {
+        "main": [
+          [
+            {
+              "node": "Format Reservations",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Get Empty List Translation",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Format Reservations": {
+        "main": [
+          [
+            {
+              "node": "Format Success Message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Format Success Message": {
+        "main": [
+          [
+            {
+              "node": "Send a text message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Empty List Translation": {
+        "main": [
+          [
+            {
+              "node": "Format Empty Message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Format Empty Message": {
+        "main": [
+          [
+            {
+              "node": "Send a text message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get No Credentials Translation": {
+        "main": [
+          [
+            {
+              "node": "Format No Credentials Message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Format No Credentials Message": {
+        "main": [
+          [
+            {
+              "node": "Send a text message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Login": {
+        "main": [
+          [
+            {
+              "node": "Check User Credentials",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Sergei Vedishchev",
+    "name": "Version 854810d2",
+    "description": "",
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-01-02T13:44:35.658Z",
+        "id": 121,
+        "workflowId": "51Y9SIV139LvX5jl",
+        "versionId": "854810d2-d5ad-4521-a267-ca7dea6fb410",
+        "event": "activated",
+        "userId": "53af7452-7a67-4d31-8a0d-967083ebc818"
+      }
+    ]
+  }
+}

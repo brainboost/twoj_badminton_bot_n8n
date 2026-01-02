@@ -1,0 +1,68 @@
+# n8n specific
+*.credentials.json
+**/credentials/
+.n8n/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+*.env
+
+# Secrets and sensitive data
+secrets/
+*.secret
+*.key
+*.pem
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+pgdata/
+postgres_data/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE and editor directories
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Node modules (if any JS tools are used)
+node_modules/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+venv/
+.venv/
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+scripts/
+
+# Test data with personal information
+test_data/
+pinned_data/

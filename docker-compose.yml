@@ -1,0 +1,105 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: club-schedules-db
+    restart: unless-stopped
+    
+    environment:
+      # Database credentials - CHANGE THESE!
+      POSTGRES_DB: club_schedules
+      POSTGRES_USER: n8n_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme_strong_password}
+      
+      # Performance tuning
+      POSTGRES_MAX_CONNECTIONS: 100
+      POSTGRES_SHARED_BUFFERS: 256MB
+      POSTGRES_EFFECTIVE_CACHE_SIZE: 1GB
+      POSTGRES_WORK_MEM: 16MB
+      
+      # Timezone
+      TZ: Europe/Warsaw
+    
+    volumes:
+      # Persistent data storage
+      - postgres_data:/var/lib/postgresql/data
+      
+      # Optional: Mount initialization scripts
+      # Uncomment to auto-run schema on first start
+      # - ./init-scripts:/docker-entrypoint-initdb.d:ro
+    
+    ports:
+      # Host:Container port mapping
+      # Change 5432 to avoid conflicts if needed
+      - "5432:5432"
+    
+    networks:
+      - club-schedules-network
+    
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U n8n_user -d club_schedules"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    
+    # Resource limits (adjust based on your server)
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Optional: pgAdmin for database management UI
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: club-schedules-pgadmin
+    restart: unless-stopped
+    
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@example.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+    
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    
+    ports:
+      - "5050:80"
+    
+    networks:
+      - club-schedules-network
+    
+    depends_on:
+      postgres:
+        condition: service_healthy
+    
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+networks:
+  club-schedules-network:
+    driver: bridge
+    name: club-schedules-network
+
+volumes:
+  postgres_data:
+    driver: local
+    name: club_schedules_postgres_data
+  pgadmin_data:
+    driver: local
+    name: club_schedules_pgadmin_data

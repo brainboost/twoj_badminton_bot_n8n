@@ -1,0 +1,360 @@
+{
+  "updatedAt": "2026-01-02T13:45:46.826Z",
+  "createdAt": "2025-12-27T11:51:58.987Z",
+  "id": "HFeE52YK9tAzKTpk",
+  "name": "Show Command",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "chat_id"
+            },
+            {
+              "name": "arg1"
+            }
+          ]
+        }
+      },
+      "id": "44edb8c3-4e24-4419-8d01-32cfe9b573e8",
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        -480,
+        240
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "club_schedules",
+          "mode": "list",
+          "cachedResultName": "club_schedules"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "date",
+              "value": "={{ $json.arg1 || $today }}"
+            }
+          ]
+        },
+        "sort": {
+          "values": [
+            {
+              "column": "time_slot"
+            },
+            {
+              "column": "court_number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5d9763e6-3b39-402e-b0c2-165225b1371d",
+      "name": "Select Schedules",
+      "type": "n8n-nodes-base.postgres",
+      "position": [
+        -240,
+        240
+      ],
+      "typeVersion": 2.6,
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "3SDluWLUa1vIU50a",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const chatId = $('When Executed by Another Workflow').first().json.chat_id;\nconst items = $input.all().map(item => item.json);\nif (!items || items.length === 0 || Object.keys(items[0]).length === 0) {\n  return [{ json: { message: '📭 No schedule data available.', chat_id: chatId } }];\n}\n\n// Extract unique time slots and courts\nconst timeslots = [...new Set(items.map(x => x.time_slot))].sort();\nconst courts = [...new Set(items.map(x => x.court_number))].sort();\n\n// Get the date from first item - fix UTC timezone shift\nlet scheduleDate = 'Unknown date';\nif (items[0]?.date) {\n  const d = new Date(items[0].date);\n  scheduleDate = d.toLocaleDateString('sv-SE', { timeZone: 'Europe/Warsaw' });\n}\n\n// Build header\nlet message = `<b>🏸 Court Schedule</b>\\n`;\nmessage += `<b>📅 ${scheduleDate}</b>\\n\\n`;\n\n// Build monospace table header\nmessage += '<pre>';\nmessage += '🕓     ';\ncourts.forEach(court => {\n  const courtNum = court.replace('Badminton ', '#');\n  message += `${courtNum} `;\n});\nmessage += '\\n';\nmessage += '───────' + '────'.repeat(courts.length) + '\\n';\n\nconst available_times = Object.entries(\n  $input.all().map(i => i.json)\n    .filter(slot => slot.is_available) // ← Filter first\n    .reduce((acc, slot) => {\n      const time = slot.time_slot.slice(0, 5);\n      const court = slot.court_number.replace('Badminton ', '');\n      acc[time] = acc[time] || [];\n      acc[time].push(court);\n      return acc;\n    }, {})\n).map(([time_slot, courts]) => ({ time_slot, courts }));\n\n// Build table rows\ntimeslots.forEach(ts => {\n  let timeDisplay = ts;\n  if (ts.includes('T')) {\n    timeDisplay = ts.substring(11, 16);\n  } else if (ts.length > 5) {\n    timeDisplay = ts.substring(0, 5);\n  }\n  message += timeDisplay + '  ';\n  \n  courts.forEach(court => {\n    const slot = items.find(item => \n      item.time_slot === ts && item.court_number === court\n    );\n    \n    if (slot) {\n        message += slot.is_available ? '✅ ' : '❌ ';\n    } else {\n      message += '⬜ ';\n    }\n  });\n  message += '\\n';\n});\n\nmessage += '</pre>';\nmessage += '\\n✅ Available  ❌ Booked';\n\nreturn [{ json: { message: message, chat_id: chatId, available_times: available_times } }];"
+      },
+      "id": "23333bcf-24de-43e8-8c16-0ac274362f52",
+      "name": "Format Schedule",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        0,
+        240
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chat_id }}",
+        "text": "={{ $json.message }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        208,
+        240
+      ],
+      "id": "8d5bb37f-14b4-4edf-8165-4918f3f75c50",
+      "name": "Send a text message",
+      "webhookId": "cad3c749-3ae3-4850-94f1-524684cd6821",
+      "credentials": {
+        "telegramApi": {
+          "id": "pHQDqhsnrwimdaY2",
+          "name": "twoj_badminton_bot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Select Schedules",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select Schedules": {
+      "main": [
+        [
+          {
+            "node": "Format Schedule",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Schedule": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "versionId": "9d5f58da-6b9c-4273-ad5e-e1e96e587dc7",
+  "activeVersionId": "9d5f58da-6b9c-4273-ad5e-e1e96e587dc7",
+  "versionCounter": 43,
+  "triggerCount": 0,
+  "shared": [],
+  "tags": [
+    {
+      "updatedAt": "2025-12-27T11:51:52.051Z",
+      "createdAt": "2025-12-27T11:51:52.051Z",
+      "id": "3W7RR758UwICVpEC",
+      "name": "bot_command"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2025-12-27T13:34:46.000Z",
+    "createdAt": "2025-12-27T13:34:13.898Z",
+    "versionId": "9d5f58da-6b9c-4273-ad5e-e1e96e587dc7",
+    "workflowId": "HFeE52YK9tAzKTpk",
+    "nodes": [
+      {
+        "parameters": {
+          "workflowInputs": {
+            "values": [
+              {
+                "name": "chat_id"
+              },
+              {
+                "name": "arg1"
+              }
+            ]
+          }
+        },
+        "id": "44edb8c3-4e24-4419-8d01-32cfe9b573e8",
+        "name": "When Executed by Another Workflow",
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "position": [
+          -480,
+          240
+        ],
+        "typeVersion": 1.1
+      },
+      {
+        "parameters": {
+          "operation": "select",
+          "schema": {
+            "__rl": true,
+            "value": "public",
+            "mode": "list",
+            "cachedResultName": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "club_schedules",
+            "mode": "list",
+            "cachedResultName": "club_schedules"
+          },
+          "returnAll": true,
+          "where": {
+            "values": [
+              {
+                "column": "date",
+                "value": "={{ $json.arg1 || $today }}"
+              }
+            ]
+          },
+          "sort": {
+            "values": [
+              {
+                "column": "time_slot"
+              },
+              {
+                "column": "court_number"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "5d9763e6-3b39-402e-b0c2-165225b1371d",
+        "name": "Select Schedules",
+        "type": "n8n-nodes-base.postgres",
+        "position": [
+          -240,
+          240
+        ],
+        "typeVersion": 2.6,
+        "alwaysOutputData": true,
+        "credentials": {
+          "postgres": {
+            "id": "3SDluWLUa1vIU50a",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const chatId = $('When Executed by Another Workflow').first().json.chat_id;\nconst items = $input.all().map(item => item.json);\nif (!items || items.length === 0 || Object.keys(items[0]).length === 0) {\n  return [{ json: { message: '📭 No schedule data available.', chat_id: chatId } }];\n}\n\n// Extract unique time slots and courts\nconst timeslots = [...new Set(items.map(x => x.time_slot))].sort();\nconst courts = [...new Set(items.map(x => x.court_number))].sort();\n\n// Get the date from first item - fix UTC timezone shift\nlet scheduleDate = 'Unknown date';\nif (items[0]?.date) {\n  const d = new Date(items[0].date);\n  scheduleDate = d.toLocaleDateString('sv-SE', { timeZone: 'Europe/Warsaw' });\n}\n\n// Build header\nlet message = `<b>🏸 Court Schedule</b>\\n`;\nmessage += `<b>📅 ${scheduleDate}</b>\\n\\n`;\n\n// Build monospace table header\nmessage += '<pre>';\nmessage += '🕓     ';\ncourts.forEach(court => {\n  const courtNum = court.replace('Badminton ', '#');\n  message += `${courtNum} `;\n});\nmessage += '\\n';\nmessage += '───────' + '────'.repeat(courts.length) + '\\n';\n\nconst available_times = Object.entries(\n  $input.all().map(i => i.json)\n    .filter(slot => slot.is_available) // ← Filter first\n    .reduce((acc, slot) => {\n      const time = slot.time_slot.slice(0, 5);\n      const court = slot.court_number.replace('Badminton ', '');\n      acc[time] = acc[time] || [];\n      acc[time].push(court);\n      return acc;\n    }, {})\n).map(([time_slot, courts]) => ({ time_slot, courts }));\n\n// Build table rows\ntimeslots.forEach(ts => {\n  let timeDisplay = ts;\n  if (ts.includes('T')) {\n    timeDisplay = ts.substring(11, 16);\n  } else if (ts.length > 5) {\n    timeDisplay = ts.substring(0, 5);\n  }\n  message += timeDisplay + '  ';\n  \n  courts.forEach(court => {\n    const slot = items.find(item => \n      item.time_slot === ts && item.court_number === court\n    );\n    \n    if (slot) {\n        message += slot.is_available ? '✅ ' : '❌ ';\n    } else {\n      message += '⬜ ';\n    }\n  });\n  message += '\\n';\n});\n\nmessage += '</pre>';\nmessage += '\\n✅ Available  ❌ Booked';\n\nreturn [{ json: { message: message, chat_id: chatId, available_times: available_times } }];"
+        },
+        "id": "23333bcf-24de-43e8-8c16-0ac274362f52",
+        "name": "Format Schedule",
+        "type": "n8n-nodes-base.code",
+        "position": [
+          0,
+          240
+        ],
+        "typeVersion": 2
+      },
+      {
+        "parameters": {
+          "chatId": "={{ $json.chat_id }}",
+          "text": "={{ $json.message }}",
+          "additionalFields": {
+            "appendAttribution": false,
+            "parse_mode": "HTML"
+          }
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          208,
+          240
+        ],
+        "id": "8d5bb37f-14b4-4edf-8165-4918f3f75c50",
+        "name": "Send a text message",
+        "webhookId": "cad3c749-3ae3-4850-94f1-524684cd6821",
+        "credentials": {
+          "telegramApi": {
+            "id": "pHQDqhsnrwimdaY2",
+            "name": "twoj_badminton_bot"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "When Executed by Another Workflow": {
+        "main": [
+          [
+            {
+              "node": "Select Schedules",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Select Schedules": {
+        "main": [
+          [
+            {
+              "node": "Format Schedule",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Format Schedule": {
+        "main": [
+          [
+            {
+              "node": "Send a text message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Send a text message": {
+        "main": [
+          []
+        ]
+      }
+    },
+    "authors": "Sergei Vedishchev",
+    "name": "Version 9d5f58da",
+    "description": "",
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2025-12-27T13:34:46.087Z",
+        "id": 66,
+        "workflowId": "HFeE52YK9tAzKTpk",
+        "versionId": "9d5f58da-6b9c-4273-ad5e-e1e96e587dc7",
+        "event": "activated",
+        "userId": "53af7452-7a67-4d31-8a0d-967083ebc818"
+      }
+    ]
+  }
+}

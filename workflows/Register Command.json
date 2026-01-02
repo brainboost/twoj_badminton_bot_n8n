@@ -1,0 +1,1140 @@
+{
+  "updatedAt": "2025-12-29T21:06:33.541Z",
+  "createdAt": "2025-12-25T16:16:30.712Z",
+  "id": "w8lC6D3QXh47u6w1",
+  "name": "Register Command",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "arg1"
+            }
+          ]
+        }
+      },
+      "id": "trigger-register",
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -688,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 3,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "check-valid",
+              "leftValue": "={{ $json.isValid }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-args-valid",
+      "name": "Check Args Valid",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -256,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "users",
+          "mode": "list"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "email": "={{ $json.email }}",
+            "hash": "={{ $json.hash }}",
+            "session": "={{ $json.session_id }}",
+            "id": "={{ $json.user_id }}",
+            "created": "={{ $now }}",
+            "user_name": "={{ $json.username }}",
+            "full_name": "={{ $json.fullname }}",
+            "chat_id": "={{ $json.chat_id }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": true,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "user_name",
+              "displayName": "user_name",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "full_name",
+              "displayName": "full_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "hash",
+              "displayName": "hash",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "session",
+              "displayName": "session",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "created",
+              "displayName": "created",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "id": "update-user-credentials",
+      "name": "Update User Credentials",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        672,
+        160
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "3SDluWLUa1vIU50a",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "translations",
+          "mode": "list"
+        },
+        "limit": 1,
+        "where": {
+          "values": [
+            {
+              "column": "key",
+              "value": "register_success"
+            },
+            {
+              "column": "lang",
+              "value": "={{ $('Parse Args').first().json.lang || 'en' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-success-translation",
+      "name": "Get Success Translation",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        912,
+        160
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "3SDluWLUa1vIU50a",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "translations",
+          "mode": "list"
+        },
+        "limit": 1,
+        "where": {
+          "values": [
+            {
+              "column": "key",
+              "value": "register_invalid_args"
+            },
+            {
+              "column": "lang",
+              "value": "={{ $('Parse Args').first().json.lang || 'en' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-invalid-args-translation",
+      "name": "Get Invalid Args Translation",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        512,
+        400
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "3SDluWLUa1vIU50a",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse /register email password from the original text\nconst input = $input.first().json;\nconst argsString = input.arg1.trim();\n\n// Split by whitespace - first part is email, rest is password\nconst parts = argsString.split(/\\s+/);\nconst email = parts[0] || '';\nconst password = parts.slice(1).join(' ') || '';\n\n// Validate\nconst isValid = email.length > 0 && password.length > 0 && email.includes('@');\n\nreturn [{\n  json: {\n    ...input,\n    email: email,\n    hash: password,\n    isValid: isValid,\n    errorType: !email ? 'missing_email' : !password ? 'missing_password' : !email.includes('@') ? 'invalid_email' : null\n  }\n}];"
+      },
+      "id": "parse-register-args",
+      "name": "Parse Args",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -464,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Parse Args').item.json.chat_id }}",
+        "text": "={{ $json.text }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1152,
+        160
+      ],
+      "id": "b380c46a-75ff-4649-98c8-2d23ccbebfe0",
+      "name": "Send a text message",
+      "webhookId": "3a7ddbcf-9049-43e1-9c3f-6a13c334cc23",
+      "credentials": {
+        "telegramApi": {
+          "id": "pHQDqhsnrwimdaY2",
+          "name": "twoj_badminton_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeTool",
+        "toolName": "login",
+        "toolParameters": "={\"email\":\"{{ $json.email }}\", \"password\": \"{{ $json.hash }}\"}"
+      },
+      "id": "mcp-login-register",
+      "name": "MCP Login",
+      "type": "n8n-nodes-mcp.mcpClient",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        176
+      ],
+      "credentials": {
+        "mcpClientApi": {
+          "id": "G9CyzT9PT67tg4V7",
+          "name": "Twojtenis MCP Client (STDIO)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "session-id",
+              "name": "session_id",
+              "type": "string",
+              "value": "={{ $json.result.structuredContent.session_id }}"
+            },
+            {
+              "id": "email",
+              "name": "email",
+              "type": "string",
+              "value": "={{ $('Parse Args').first().json.email }}"
+            },
+            {
+              "id": "hash",
+              "name": "hash",
+              "type": "string",
+              "value": "={{ $('Parse Args').first().json.hash }}"
+            },
+            {
+              "id": "user_id",
+              "name": "user_id",
+              "type": "string",
+              "value": "={{ $('Parse Args').first().json.user_id }}"
+            },
+            {
+              "id": "username",
+              "name": "username",
+              "type": "string",
+              "value": "={{ $('Parse Args').first().json.username }}"
+            },
+            {
+              "id": "fullname",
+              "name": "fullname",
+              "type": "string",
+              "value": "={{ $('Parse Args').first().json.fullname }}"
+            },
+            {
+              "id": "chat_id",
+              "name": "chat_id",
+              "type": "string",
+              "value": "={{ $('Parse Args').first().json.chat_id }}"
+            },
+            {
+              "id": "lang",
+              "name": "lang",
+              "type": "string",
+              "value": "={{ $('Parse Args').first().json.lang }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-session-register",
+      "name": "Set Session Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        432,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "89c50355-df59-42b3-bb9b-09dedbb0ed7d",
+              "leftValue": "={{ $json.result.structuredContent.success }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        192,
+        176
+      ],
+      "id": "d5b10872-46d2-4966-afbd-77db1de97e88",
+      "name": "If"
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Parse Args",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Args Valid": {
+      "main": [
+        [
+          {
+            "node": "MCP Login",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Invalid Args Translation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update User Credentials": {
+      "main": [
+        [
+          {
+            "node": "Get Success Translation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Success Translation": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Invalid Args Translation": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Args": {
+      "main": [
+        [
+          {
+            "node": "Check Args Valid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Login": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Session Data": {
+      "main": [
+        [
+          {
+            "node": "Update User Credentials",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Set Session Data",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Invalid Args Translation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Warsaw",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "versionId": "7f8ebb95-65f8-4f34-8d03-b64567350d33",
+  "activeVersionId": "7f8ebb95-65f8-4f34-8d03-b64567350d33",
+  "versionCounter": 32,
+  "triggerCount": 0,
+  "shared": [],
+  "tags": [
+    {
+      "updatedAt": "2025-12-27T11:51:52.051Z",
+      "createdAt": "2025-12-27T11:51:52.051Z",
+      "id": "3W7RR758UwICVpEC",
+      "name": "bot_command"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2025-12-29T21:05:51.000Z",
+    "createdAt": "2025-12-29T21:05:49.072Z",
+    "versionId": "7f8ebb95-65f8-4f34-8d03-b64567350d33",
+    "workflowId": "w8lC6D3QXh47u6w1",
+    "nodes": [
+      {
+        "parameters": {
+          "workflowInputs": {
+            "values": [
+              {
+                "name": "arg1"
+              }
+            ]
+          }
+        },
+        "id": "trigger-register",
+        "name": "When Executed by Another Workflow",
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1.1,
+        "position": [
+          -688,
+          192
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "version": 3,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "conditions": [
+              {
+                "id": "check-valid",
+                "leftValue": "={{ $json.isValid }}",
+                "rightValue": true,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "check-args-valid",
+        "name": "Check Args Valid",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          -256,
+          192
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "update",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "users",
+            "mode": "list"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "email": "={{ $json.email }}",
+              "hash": "={{ $json.hash }}",
+              "session": "={{ $json.session_id }}",
+              "id": "={{ $json.user_id }}",
+              "created": "={{ $now }}",
+              "user_name": "={{ $json.username }}",
+              "full_name": "={{ $json.fullname }}",
+              "chat_id": "={{ $json.chat_id }}"
+            },
+            "matchingColumns": [
+              "id"
+            ],
+            "schema": [
+              {
+                "id": "id",
+                "displayName": "id",
+                "required": true,
+                "defaultMatch": true,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "chat_id",
+                "displayName": "chat_id",
+                "required": true,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "user_name",
+                "displayName": "user_name",
+                "required": true,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "full_name",
+                "displayName": "full_name",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "email",
+                "displayName": "email",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "hash",
+                "displayName": "hash",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "session",
+                "displayName": "session",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "phone",
+                "displayName": "phone",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "created",
+                "displayName": "created",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "dateTime",
+                "canBeUsedToMatch": true
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {}
+        },
+        "id": "update-user-credentials",
+        "name": "Update User Credentials",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          672,
+          160
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "3SDluWLUa1vIU50a",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "select",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "translations",
+            "mode": "list"
+          },
+          "limit": 1,
+          "where": {
+            "values": [
+              {
+                "column": "key",
+                "value": "register_success"
+              },
+              {
+                "column": "lang",
+                "value": "={{ $('Parse Args').first().json.lang || 'en' }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "get-success-translation",
+        "name": "Get Success Translation",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          912,
+          160
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "3SDluWLUa1vIU50a",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "select",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "translations",
+            "mode": "list"
+          },
+          "limit": 1,
+          "where": {
+            "values": [
+              {
+                "column": "key",
+                "value": "register_invalid_args"
+              },
+              {
+                "column": "lang",
+                "value": "={{ $('Parse Args').first().json.lang || 'en' }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "get-invalid-args-translation",
+        "name": "Get Invalid Args Translation",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          512,
+          400
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "3SDluWLUa1vIU50a",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "// Parse /register email password from the original text\nconst input = $input.first().json;\nconst argsString = input.arg1.trim();\n\n// Split by whitespace - first part is email, rest is password\nconst parts = argsString.split(/\\s+/);\nconst email = parts[0] || '';\nconst password = parts.slice(1).join(' ') || '';\n\n// Validate\nconst isValid = email.length > 0 && password.length > 0 && email.includes('@');\n\nreturn [{\n  json: {\n    ...input,\n    email: email,\n    hash: password,\n    isValid: isValid,\n    errorType: !email ? 'missing_email' : !password ? 'missing_password' : !email.includes('@') ? 'invalid_email' : null\n  }\n}];"
+        },
+        "id": "parse-register-args",
+        "name": "Parse Args",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -464,
+          192
+        ]
+      },
+      {
+        "parameters": {
+          "chatId": "={{ $('Parse Args').item.json.chat_id }}",
+          "text": "={{ $json.text }}",
+          "additionalFields": {
+            "appendAttribution": false,
+            "parse_mode": "HTML"
+          }
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          1152,
+          160
+        ],
+        "id": "b380c46a-75ff-4649-98c8-2d23ccbebfe0",
+        "name": "Send a text message",
+        "webhookId": "3a7ddbcf-9049-43e1-9c3f-6a13c334cc23",
+        "credentials": {
+          "telegramApi": {
+            "id": "pHQDqhsnrwimdaY2",
+            "name": "twoj_badminton_bot"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "executeTool",
+          "toolName": "login",
+          "toolParameters": "={\"email\":\"{{ $json.email }}\", \"password\": \"{{ $json.hash }}\"}"
+        },
+        "id": "mcp-login-register",
+        "name": "MCP Login",
+        "type": "n8n-nodes-mcp.mcpClient",
+        "typeVersion": 1,
+        "position": [
+          -16,
+          176
+        ],
+        "credentials": {
+          "mcpClientApi": {
+            "id": "G9CyzT9PT67tg4V7",
+            "name": "Twojtenis MCP Client (STDIO)"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "session-id",
+                "name": "session_id",
+                "type": "string",
+                "value": "={{ $json.result.structuredContent.session_id }}"
+              },
+              {
+                "id": "email",
+                "name": "email",
+                "type": "string",
+                "value": "={{ $('Parse Args').first().json.email }}"
+              },
+              {
+                "id": "hash",
+                "name": "hash",
+                "type": "string",
+                "value": "={{ $('Parse Args').first().json.hash }}"
+              },
+              {
+                "id": "user_id",
+                "name": "user_id",
+                "type": "string",
+                "value": "={{ $('Parse Args').first().json.user_id }}"
+              },
+              {
+                "id": "username",
+                "name": "username",
+                "type": "string",
+                "value": "={{ $('Parse Args').first().json.username }}"
+              },
+              {
+                "id": "fullname",
+                "name": "fullname",
+                "type": "string",
+                "value": "={{ $('Parse Args').first().json.fullname }}"
+              },
+              {
+                "id": "chat_id",
+                "name": "chat_id",
+                "type": "string",
+                "value": "={{ $('Parse Args').first().json.chat_id }}"
+              },
+              {
+                "id": "lang",
+                "name": "lang",
+                "type": "string",
+                "value": "={{ $('Parse Args').first().json.lang }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "set-session-register",
+        "name": "Set Session Data",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          432,
+          160
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "89c50355-df59-42b3-bb9b-09dedbb0ed7d",
+                "leftValue": "={{ $json.result.structuredContent.success }}",
+                "rightValue": false,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          192,
+          176
+        ],
+        "id": "d5b10872-46d2-4966-afbd-77db1de97e88",
+        "name": "If"
+      }
+    ],
+    "connections": {
+      "When Executed by Another Workflow": {
+        "main": [
+          [
+            {
+              "node": "Parse Args",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check Args Valid": {
+        "main": [
+          [
+            {
+              "node": "MCP Login",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Get Invalid Args Translation",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Update User Credentials": {
+        "main": [
+          [
+            {
+              "node": "Get Success Translation",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Success Translation": {
+        "main": [
+          [
+            {
+              "node": "Send a text message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Invalid Args Translation": {
+        "main": [
+          [
+            {
+              "node": "Send a text message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Parse Args": {
+        "main": [
+          [
+            {
+              "node": "Check Args Valid",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "MCP Login": {
+        "main": [
+          [
+            {
+              "node": "If",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Set Session Data": {
+        "main": [
+          [
+            {
+              "node": "Update User Credentials",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "If": {
+        "main": [
+          [
+            {
+              "node": "Set Session Data",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Get Invalid Args Translation",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Sergei Vedishchev",
+    "name": "Version 7f8ebb95",
+    "description": "",
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2025-12-29T21:05:51.569Z",
+        "id": 85,
+        "workflowId": "w8lC6D3QXh47u6w1",
+        "versionId": "7f8ebb95-65f8-4f34-8d03-b64567350d33",
+        "event": "activated",
+        "userId": "53af7452-7a67-4d31-8a0d-967083ebc818"
+      }
+    ]
+  }
+}
