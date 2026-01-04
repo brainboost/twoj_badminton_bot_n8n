@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-02T14:58:44.322Z",
+  "updatedAt": "2026-01-04T18:01:50.586Z",
   "createdAt": "2025-10-14T10:11:33.990Z",
   "id": "uf7MYoeaspA2V85u",
   "name": "Assistant agent",
@@ -1112,26 +1112,6 @@
     },
     {
       "parameters": {
-        "model": "cnshenyang/qwen3-nothink:14b",
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
-      "typeVersion": 1,
-      "position": [
-        1840,
-        816
-      ],
-      "id": "0aa26026-d7b3-49c2-9386-33137ed1b242",
-      "name": "Ollama Chat Model",
-      "credentials": {
-        "ollamaApi": {
-          "id": "OwoNqqKy33Tzlan7",
-          "name": "Ollama local"
-        }
-      }
-    },
-    {
-      "parameters": {
         "chatId": "={{ $json.chat_id }}",
         "text": "={{ $json.message }}",
         "additionalFields": {
@@ -1154,28 +1134,6 @@
           "name": "twoj_badminton_bot"
         }
       }
-    },
-    {
-      "parameters": {
-        "promptType": "define",
-        "text": "={{ $('Text Classifier').item.json.text }}",
-        "hasOutputParser": true,
-        "messages": {
-          "messageValues": [
-            {
-              "message": "=# TASK\nParse user message into EXACTLY this JSON format:\n{\"command\": \"<COMMAND>\", \"arg1\": \"<ARGUMENT>\"}\n\nNO other fields. NO nested objects. NO arrays in root. JSON should be valid.\n\n---\n\n# CURRENT DATE\nToday: {{ $today.format('yyyy-MM-dd') }} ({{ $today.format('cccc') }})\nNow: {{ $now.format('yyyy-MM-dd HH:mm') }}\n\n---\n\n# COMMANDS REFERENCE\n\n## 1. show\nPurpose: Display court availability\nTrigger words: show, available, free, schedule, what's open, расписание, покажи, pokaż, wolne\narg1: Date in YYYY-MM-DD format\n\nExamples:\n- \"show tomorrow\" → {\"command\": \"show\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n- \"what's available Saturday\" → {\"command\": \"show\", \"arg1\": \"2026-01-03\"}\n- \"Покажи расписание на субботу\" → {\"command\": \"show\", \"arg1\": \"2026-01-03\"}\n- \"pokaż wolne korty na jutro\" → {\"command\": \"show\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n\n## 2. list\nPurpose: Show user's reservations\nTrigger words: list, my reservations, my bookings, мои брони, moje rezerwacje\narg1: EMPTY string\n\nExamples:\n- \"list my bookings\" → {\"command\": \"list\", \"arg1\": \"\"}\n- \"Покажи мои брони\" → {\"command\": \"list\", \"arg1\": \"\"}\n- \"moje rezerwacje\" → {\"command\": \"list\", \"arg1\": \"\"}\n\n## 3. delete\nPurpose: Cancel ONE reservation by ID\nTrigger words: delete, cancel, remove + ID (NOT \"all\")\narg1: Reservation ID string\n\nExamples:\n- \"cancel 6952ec02dda30\" → {\"command\": \"delete\", \"arg1\": \"6952ec02dda30\"}\n- \"delete booking abc123\" → {\"command\": \"delete\", \"arg1\": \"abc123\"}\n\n## 4. deleteall\nPurpose: Cancel ALL reservations\nTrigger words: delete all, cancel all, remove all, отмени все, usuń wszystko\narg1: EMPTY string\n\nExamples:\n- \"cancel all reservations\" → {\"command\": \"deleteall\", \"arg1\": \"\"}\n- \"Отмени все мои брони\" → {\"command\": \"deleteall\", \"arg1\": \"\"}\n- \"usuń wszystkie rezerwacje\" → {\"command\": \"deleteall\", \"arg1\": \"\"}\n\n## 5. book\nPurpose: Make a court reservation\nTrigger words: book, reserve, забронируй, zarezerwuj\narg1: JSON array with booking details\n\nFormat: [{\"court\":\"N\", \"date\":\"YYYY-MM-DD\", \"time_start\":\"HH:MM\", \"time_end\":\"HH:MM\", \"players_num\":\"4\", \"notes\":\"\"}]\nIMPORTANT: Use backslash '\\' to escape double quotes characters in JSON, see in example below\n\nExamples:\n```\n- \"book court 1 and 2 tomorrow 16:00-17:00\" → {\"command\": \"book\", \"arg1\": \"[{\\\"court\\\":\\\"1\\\", \\\"date\\\":\\\"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\\\", \\\"time_start\\\":\\\"16:00\\\", \\\"time_end\\\":\\\"17:00\\\", \\\"players_num\\\":\\\"4\\\", \\\"notes\\\":\\\"\\\"},{\\\"court\\\":\\\"2\\\", \\\"date\\\":\\\"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\\\", \\\"time_start\\\":\\\"16:00\\\", \\\"time_end\\\":\\\"17:00\\\", \\\"players_num\\\":\\\"4\\\", \\\"notes\\\":\\\"\\\"}]\"}\n```\n\n## 6. register\nPurpose: Save login credentials\nTrigger words: register, sign up, credentials\narg1: \"email password\" as single string\n\nExamples:\n- \"register user@mail.com pass123\" → {\"command\": \"register\", \"arg1\": \"user@mail.com pass123\"}\n\n---\n\n# DATE CONVERSION RULES\n\n| Input | Output |\n|-------|--------|\n| today | {{ $today.format('yyyy-MM-dd') }} |\n| tomorrow | {{ $now.plus({days: 1}).format('yyyy-MM-dd') }} |\n| day after tomorrow | {{ $now.plus({days: 2}).format('yyyy-MM-dd') }} |\n| Saturday | 2026-01-03 (next Saturday) |\n| Sunday | 2026-01-04 (next Sunday) |\n| 27.12 or 27/12 | {{ $now.format('yyyy') }}-12-27 |\n| 15.01.2026 | 2026-01-15 |\n\nRULE: Always use FUTURE dates. Never past.\n\n---\n\n# WRONG vs CORRECT OUTPUT\n\n❌ WRONG (nested parameters):\n{\"command\": \"show\", \"parameters\": {\"date\": \"2026-01-03\"}}\n\n❌ WRONG (extra fields):\n{\"command\": \"show\", \"arg1\": \"2026-01-03\", \"confidence\": 0.9}\n\n✅ CORRECT:\n{\"command\": \"show\", \"arg1\": \"2026-01-03\"}\n\n---\n\n# OUTPUT RULES\n1. Return ONLY the JSON object\n2. EXACTLY two fields: \"command\" and \"arg1\"\n3. NO explanation, NO thinking, NO markdown\n4. arg1 is ALWAYS a string (even if empty or JSON array)"
-            }
-          ]
-        }
-      },
-      "id": "nlp-command-parser",
-      "name": "NLP Command Parser",
-      "type": "@n8n/n8n-nodes-langchain.chainLlm",
-      "typeVersion": 1.5,
-      "position": [
-        1888,
-        592
-      ]
     },
     {
       "parameters": {
@@ -1232,7 +1190,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        2304,
+        2512,
         592
       ]
     },
@@ -1393,7 +1351,7 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
       "position": [
-        2592,
+        2800,
         528
       ]
     },
@@ -1458,7 +1416,7 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        2816,
+        3024,
         736
       ]
     },
@@ -1488,27 +1446,13 @@
     },
     {
       "parameters": {
-        "schemaType": "manual",
-        "inputSchema": "{\n  \"$schema\": \"http://json-schema.org/draft-07/schema#\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"command\": {\n      \"type\": \"string\",\n      \"enum\": [\"show\", \"book\", \"list\", \"delete\", \"deleteall\", \"register\"]\n    },\n    \"arg1\": {\n      \"type\": \"string\",\n      \"description\": \"Command argument - either a date (YYYY-MM-DD) or JSON array string for bookings\"\n    }\n  },\n  \"required\": [\"command\"]\n}"
-      },
-      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.3,
-      "position": [
-        2048,
-        784
-      ],
-      "id": "8c24665d-4700-4148-97dc-f0f62e0bb5a9",
-      "name": "Structured Output Parser"
-    },
-    {
-      "parameters": {
         "operation": "sendChatAction",
         "chatId": "={{ $json.chat_id }}"
       },
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        1536,
+        1744,
         432
       ],
       "id": "335f530d-a639-4a8e-83dd-d236f51249ca",
@@ -1569,7 +1513,7 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        2816,
+        3024,
         -32
       ]
     },
@@ -1641,7 +1585,7 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        2816,
+        3024,
         144
       ]
     },
@@ -1706,7 +1650,7 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        2816,
+        3024,
         352
       ]
     },
@@ -1778,7 +1722,7 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        2816,
+        3024,
         544
       ]
     },
@@ -2027,7 +1971,7 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        2816,
+        3024,
         928
       ]
     },
@@ -2173,7 +2117,7 @@
       "typeVersion": 4.8,
       "position": [
         3040,
-        1008
+        1120
       ]
     },
     {
@@ -2285,7 +2229,7 @@
       "typeVersion": 4.8,
       "position": [
         3408,
-        1008
+        1120
       ],
       "id": "dbb292de-5352-48ce-8ddc-3b324eb18d0c",
       "name": "Evaluation",
@@ -2305,7 +2249,7 @@
       "typeVersion": 1,
       "position": [
         3184,
-        1216
+        1312
       ],
       "id": "26f16e4e-c70f-42d6-99aa-8fac0e0cbafc",
       "name": "Ollama Chat Model2",
@@ -2313,6 +2257,113 @@
         "ollamaApi": {
           "id": "OwoNqqKy33Tzlan7",
           "name": "Ollama local"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Text Classifier').item.json.text }}",
+        "hasOutputParser": true,
+        "needsFallback": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=# TASK\nParse user message into this JSON format:\n{\"command\": \"<COMMAND>\", \"arg1\": \"<ARGUMENT>\" or [{\"prop1\":\"value1\"...}, ... {\"prop1\":\"value2\"}] }\nCommand is mandatory. Arguments \"arg1\" is optional.\nNO other fields allowed. NO arrays in root. JSON should be valid.\n\n---\n\n# CURRENT DATE\nToday: {{ $today.format('yyyy-MM-dd') }} ({{ $today.format('cccc') }})\nNow: {{ $now.format('yyyy-MM-dd HH:mm') }}\n\n---\n\n# COMMANDS REFERENCE\n\n## 1. show\nPurpose: Display court availability\nTrigger words: show, available, free, schedule, what's open, расписание, покажи, pokaż, wolne\narg1: Date string in YYYY-MM-DD format\n\nExamples:\n- \"show tomorrow\" → {\"command\": \"show\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n- \"what's available Saturday\" → {\"command\": \"show\", \"arg1\": \"2026-01-03\"}\n- \"Покажи расписание на субботу\" → {\"command\": \"show\", \"arg1\": \"2026-01-03\"}\n- \"pokaż wolne korty na jutro\" → {\"command\": \"show\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n\n## 2. list\nPurpose: Show user's reservations\nTrigger words: list, my reservations, my bookings, мои брони, moje rezerwacje. \nNo arguments.\n\nExamples:\n- \"list my bookings\" → {\"command\": \"list\"}\n- \"Покажи мои брони\" → {\"command\": \"list\"}\n- \"moje rezerwacje\" → {\"command\": \"list\"}\n\n## 3. delete\nPurpose: Cancel ONE reservation by ID\nTrigger words: delete, cancel, remove + ID (NOT \"all\")\narg1: Reservation ID string\n\nExamples:\n- \"cancel 6952ec02dda30\" → {\"command\": \"delete\", \"arg1\": \"6952ec02dda30\"}\n- \"delete booking abc123\" → {\"command\": \"delete\", \"arg1\": \"abc123\"}\n\n## 4. deleteall\nPurpose: Cancel ALL reservations\nTrigger words: delete all, cancel all, remove all, отмени все, usuń wszystko. \nNo arguments.\n\nExamples:\n- \"cancel all reservations\" → {\"command\": \"deleteall\"}\n- \"Отмени все мои брони\" → {\"command\": \"deleteall\"}\n- \"usuń wszystkie rezerwacje\" → {\"command\": \"deleteall\"}\n\n## 5. book\nPurpose: Make a court reservation\nTrigger words: book, reserve, забронируй, zarezerwuj.\nArgument:\narg1 - JSON array with booking details, each item has mandatory fields: \"court\", \"date\", \"time_start\", \"time_end\", \"players_num\", \"notes\".\n\nFormat: [{ \"court\": \"N\", \"date\": \"YYYY-MM-DD\", \"time_start\": \"HH:MM\", \"time_end\": \"HH:MM\", \"players_num\": \"4\", \"notes\": \"\" },\n...\n]\n\n\nExamples:\n- \"Book court 1 and 2 for tomorrow 16:00-17:00\" → `{\"command\": \"book\", \"arg1\": [{\"court\":\"1\", \"date\":\"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\", \"time_start\":\"16:00\", \"time_end\":\"17:00\", \"players_num\":\"4\", \"notes\":\"\"},{\"court\":\"2\", \"date\":\"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\", \"time_start\":\"16:00\", \"time_end\":\"17:00\", \"players_num\":\"4\", \"notes\":\"\"}]}`\n\n\n## 6. register\nPurpose: Save login credentials\nTrigger words: register, sign up, credentials\narg1: \"email password\" as single string\n\nExamples:\n- \"register user@mail.com pass123\" → {\"command\": \"register\", \"arg1\": \"user@mail.com pass123\"}\n\n---\n\n# DATE CONVERSION RULES\n\n| Input | Output |\n|-------|--------|\n| today | {{ $today.format('yyyy-MM-dd') }} |\n| tomorrow | {{ $now.plus({days: 1}).format('yyyy-MM-dd') }} |\n| day after tomorrow | {{ $now.plus({days: 2}).format('yyyy-MM-dd') }} |\n| Saturday | 2026-01-03 (next Saturday) |\n| Sunday | 2026-01-04 (next Sunday) |\n| 27.12 or 27/12 | {{ $now.format('yyyy') }}-12-27 |\n| 15.01.2026 | 2026-01-15 |\n\nRULE: Always use FUTURE dates. Never use dates in the past.\n\n---\n\n# WRONG vs CORRECT OUTPUT\n\n❌ WRONG (nested parameters):\n`{\"command\": \"show\", \"parameters\": {\"date\": \"2026-01-03\"}}`\n\n❌ WRONG (extra fields):\n`{\"command\": \"show\", \"arg1\": \"2026-01-03\", \"confidence\": 0.9, \"arg_json\": []}`\n\n✅ CORRECT:\n`{\"command\": \"list\"}`\n\n✅ CORRECT:\n`{\"command\": \"show\", \"arg1\": \"2026-01-03\"}`\n\n✅ CORRECT:\n`{\"command\": \"book\", \"arg1\": [{ \"court\": \"3\", \"date\": \"2026-01-10\", \"time_start\": \"15:00\", \"time_end\": \"17:00\", \"players_num\": \"4\", \"notes\": \"\" }]}`\n\n✅ CORRECT:\n`{\"command\": \"deleteall\"}`\n\n---\n\n# OUTPUT RULES\n1. Return ONLY valid JSON\n2. EXACTLY two fields: \"command\" and \"arg1\" or \"arg_json\"\n3. NO explanation, NO thinking, NO markdown\n4. arg1 is ALWAYS a string or a JSON array (if exists)"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.8,
+      "position": [
+        2032,
+        592
+      ],
+      "id": "1a5277f2-62ea-4c18-a882-e431def2d443",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "={\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"Command Processor\",\n  \"type\": \"object\",\n  \"required\": [\n    \"command\"\n  ],\n  \"properties\": {\n    \"command\": {\n      \"enum\": [\n        \"show\",\n        \"list\",\n        \"delete\",\n        \"deleteall\",\n        \"book\",\n        \"register\"\n      ]\n    }\n  },\n  \"allOf\": [\n    {\n      \"comment\": \"Case 1: 'book' requires an array of booking objects\",\n      \"if\": {\n        \"properties\": {\n          \"command\": {\n            \"const\": \"book\"\n          }\n        }\n      },\n      \"then\": {\n        \"properties\": {\n          \"arg1\": {\n            \"type\": \"array\",\n            \"items\": {\n              \"type\": \"object\",\n              \"properties\": {\n                \"court\": {\n                  \"type\": \"string\"\n                },\n                \"date\": {\n                  \"type\": \"string\",\n                  \"format\": \"date\"\n                },\n                \"time_start\": {\n                  \"type\": \"string\"\n                },\n                \"time_end\": {\n                  \"type\": \"string\"\n                },\n                \"players_num\": {\n                  \"type\": \"string\"\n                },\n                \"notes\": {\n                  \"type\": \"string\"\n                }\n              },\n              \"required\": [\n                \"court\",\n                \"date\",\n                \"time_start\",\n                \"time_end\"\n              ]\n            }\n          }\n        },\n        \"required\": [\n          \"arg1\"\n        ]\n      }\n    },\n    {\n      \"comment\": \"Case 2: 'show' or 'delete' require a string (date/ID)\",\n      \"if\": {\n        \"properties\": {\n          \"command\": {\n            \"enum\": [\n              \"show\",\n              \"delete\"\n            ]\n          }\n        }\n      },\n      \"then\": {\n        \"properties\": {\n          \"arg1\": {\n            \"type\": \"string\"\n          }\n        },\n        \"required\": [\n          \"arg1\"\n        ]\n      }\n    },\n    {\n      \"comment\": \"Case 3: 'list', 'deleteall', 'register' usually have no arg1\",\n      \"if\": {\n        \"properties\": {\n          \"command\": {\n            \"enum\": [\n              \"list\",\n              \"deleteall\",\n              \"register\"\n            ]\n          }\n        }\n      },\n      \"then\": {\n        \"not\": {\n          \"required\": [\n            \"arg1\"\n          ]\n        }\n      }\n    }\n  ]\n}",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        2112,
+        800
+      ],
+      "id": "fd11d4a8-90b2-4ce9-9451-29bc14ccf1a1",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "model": "cnshenyang/qwen3-nothink:14b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        1904,
+        800
+      ],
+      "id": "14e5a540-a2b5-4ae1-a4e0-805e680f8632",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "OwoNqqKy33Tzlan7",
+          "name": "Ollama local"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "cnshenyang/qwen3-nothink:14b",
+        "options": {
+          "format": "json"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmOllama",
+      "typeVersion": 1,
+      "position": [
+        2112,
+        992
+      ],
+      "id": "8c1a80e5-56e4-4951-b69b-3b9826599a75",
+      "name": "Ollama Model1",
+      "credentials": {
+        "ollamaApi": {
+          "id": "OwoNqqKy33Tzlan7",
+          "name": "Ollama local"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "glm-4.5-air",
+          "mode": "list",
+          "cachedResultName": "glm-4.5-air"
+        },
+        "responsesApiEnabled": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        2016,
+        800
+      ],
+      "id": "764d6a14-f52b-41e3-832d-0e22ae1b8595",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "ciQFZjyEyaubkBmg",
+          "name": "z.ai"
         }
       }
     }
@@ -2651,7 +2702,7 @@
             "index": 0
           },
           {
-            "node": "NLP Command Parser",
+            "node": "Basic LLM Chain",
             "type": "main",
             "index": 0
           }
@@ -2664,17 +2715,6 @@
           {
             "node": "Text Classifier",
             "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "NLP Command Parser": {
-      "main": [
-        [
-          {
-            "node": "Merge Context",
-            "type": "main",
             "index": 0
           }
         ]
@@ -2742,34 +2782,12 @@
         []
       ]
     },
-    "Ollama Chat Model": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "NLP Command Parser",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Send a text message1": {
       "main": [
         [
           {
             "node": "Edit Fields",
             "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Structured Output Parser": {
-      "ai_outputParser": [
-        [
-          {
-            "node": "NLP Command Parser",
-            "type": "ai_outputParser",
             "index": 0
           }
         ]
@@ -2975,6 +2993,61 @@
       "main": [
         []
       ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Merge Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Structured Output Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -2988,8 +3061,8 @@
     "templateId": "voice_assistant_agent_with_telegram",
     "templateCredsSetupCompleted": true
   },
-  "versionId": "7fc73f0b-2487-41a1-bd39-d5a2caca54f7",
-  "activeVersionId": "7fc73f0b-2487-41a1-bd39-d5a2caca54f7",
+  "versionId": "25982790-5c77-4a36-b6c8-71c3b3f130b4",
+  "activeVersionId": "25982790-5c77-4a36-b6c8-71c3b3f130b4",
   "triggerCount": 1,
   "shared": [
     {
@@ -3001,9 +3074,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-01-02T15:00:02.000Z",
-    "createdAt": "2026-01-02T14:58:44.323Z",
-    "versionId": "7fc73f0b-2487-41a1-bd39-d5a2caca54f7",
+    "updatedAt": "2026-01-04T18:02:19.000Z",
+    "createdAt": "2026-01-04T18:01:50.587Z",
+    "versionId": "25982790-5c77-4a36-b6c8-71c3b3f130b4",
     "workflowId": "uf7MYoeaspA2V85u",
     "nodes": [
       {
@@ -4112,26 +4185,6 @@
       },
       {
         "parameters": {
-          "model": "cnshenyang/qwen3-nothink:14b",
-          "options": {}
-        },
-        "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
-        "typeVersion": 1,
-        "position": [
-          1840,
-          816
-        ],
-        "id": "0aa26026-d7b3-49c2-9386-33137ed1b242",
-        "name": "Ollama Chat Model",
-        "credentials": {
-          "ollamaApi": {
-            "id": "OwoNqqKy33Tzlan7",
-            "name": "Ollama local"
-          }
-        }
-      },
-      {
-        "parameters": {
           "chatId": "={{ $json.chat_id }}",
           "text": "={{ $json.message }}",
           "additionalFields": {
@@ -4154,28 +4207,6 @@
             "name": "twoj_badminton_bot"
           }
         }
-      },
-      {
-        "parameters": {
-          "promptType": "define",
-          "text": "={{ $('Text Classifier').item.json.text }}",
-          "hasOutputParser": true,
-          "messages": {
-            "messageValues": [
-              {
-                "message": "=# TASK\nParse user message into EXACTLY this JSON format:\n{\"command\": \"<COMMAND>\", \"arg1\": \"<ARGUMENT>\"}\n\nNO other fields. NO nested objects. NO arrays in root. JSON should be valid.\n\n---\n\n# CURRENT DATE\nToday: {{ $today.format('yyyy-MM-dd') }} ({{ $today.format('cccc') }})\nNow: {{ $now.format('yyyy-MM-dd HH:mm') }}\n\n---\n\n# COMMANDS REFERENCE\n\n## 1. show\nPurpose: Display court availability\nTrigger words: show, available, free, schedule, what's open, расписание, покажи, pokaż, wolne\narg1: Date in YYYY-MM-DD format\n\nExamples:\n- \"show tomorrow\" → {\"command\": \"show\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n- \"what's available Saturday\" → {\"command\": \"show\", \"arg1\": \"2026-01-03\"}\n- \"Покажи расписание на субботу\" → {\"command\": \"show\", \"arg1\": \"2026-01-03\"}\n- \"pokaż wolne korty na jutro\" → {\"command\": \"show\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n\n## 2. list\nPurpose: Show user's reservations\nTrigger words: list, my reservations, my bookings, мои брони, moje rezerwacje\narg1: EMPTY string\n\nExamples:\n- \"list my bookings\" → {\"command\": \"list\", \"arg1\": \"\"}\n- \"Покажи мои брони\" → {\"command\": \"list\", \"arg1\": \"\"}\n- \"moje rezerwacje\" → {\"command\": \"list\", \"arg1\": \"\"}\n\n## 3. delete\nPurpose: Cancel ONE reservation by ID\nTrigger words: delete, cancel, remove + ID (NOT \"all\")\narg1: Reservation ID string\n\nExamples:\n- \"cancel 6952ec02dda30\" → {\"command\": \"delete\", \"arg1\": \"6952ec02dda30\"}\n- \"delete booking abc123\" → {\"command\": \"delete\", \"arg1\": \"abc123\"}\n\n## 4. deleteall\nPurpose: Cancel ALL reservations\nTrigger words: delete all, cancel all, remove all, отмени все, usuń wszystko\narg1: EMPTY string\n\nExamples:\n- \"cancel all reservations\" → {\"command\": \"deleteall\", \"arg1\": \"\"}\n- \"Отмени все мои брони\" → {\"command\": \"deleteall\", \"arg1\": \"\"}\n- \"usuń wszystkie rezerwacje\" → {\"command\": \"deleteall\", \"arg1\": \"\"}\n\n## 5. book\nPurpose: Make a court reservation\nTrigger words: book, reserve, забронируй, zarezerwuj\narg1: JSON array with booking details\n\nFormat: [{\"court\":\"N\", \"date\":\"YYYY-MM-DD\", \"time_start\":\"HH:MM\", \"time_end\":\"HH:MM\", \"players_num\":\"4\", \"notes\":\"\"}]\nIMPORTANT: Use backslash '\\' to escape double quotes characters in JSON, see in example below\n\nExamples:\n```\n- \"book court 1 and 2 tomorrow 16:00-17:00\" → {\"command\": \"book\", \"arg1\": \"[{\\\"court\\\":\\\"1\\\", \\\"date\\\":\\\"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\\\", \\\"time_start\\\":\\\"16:00\\\", \\\"time_end\\\":\\\"17:00\\\", \\\"players_num\\\":\\\"4\\\", \\\"notes\\\":\\\"\\\"},{\\\"court\\\":\\\"2\\\", \\\"date\\\":\\\"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\\\", \\\"time_start\\\":\\\"16:00\\\", \\\"time_end\\\":\\\"17:00\\\", \\\"players_num\\\":\\\"4\\\", \\\"notes\\\":\\\"\\\"}]\"}\n```\n\n## 6. register\nPurpose: Save login credentials\nTrigger words: register, sign up, credentials\narg1: \"email password\" as single string\n\nExamples:\n- \"register user@mail.com pass123\" → {\"command\": \"register\", \"arg1\": \"user@mail.com pass123\"}\n\n---\n\n# DATE CONVERSION RULES\n\n| Input | Output |\n|-------|--------|\n| today | {{ $today.format('yyyy-MM-dd') }} |\n| tomorrow | {{ $now.plus({days: 1}).format('yyyy-MM-dd') }} |\n| day after tomorrow | {{ $now.plus({days: 2}).format('yyyy-MM-dd') }} |\n| Saturday | 2026-01-03 (next Saturday) |\n| Sunday | 2026-01-04 (next Sunday) |\n| 27.12 or 27/12 | {{ $now.format('yyyy') }}-12-27 |\n| 15.01.2026 | 2026-01-15 |\n\nRULE: Always use FUTURE dates. Never past.\n\n---\n\n# WRONG vs CORRECT OUTPUT\n\n❌ WRONG (nested parameters):\n{\"command\": \"show\", \"parameters\": {\"date\": \"2026-01-03\"}}\n\n❌ WRONG (extra fields):\n{\"command\": \"show\", \"arg1\": \"2026-01-03\", \"confidence\": 0.9}\n\n✅ CORRECT:\n{\"command\": \"show\", \"arg1\": \"2026-01-03\"}\n\n---\n\n# OUTPUT RULES\n1. Return ONLY the JSON object\n2. EXACTLY two fields: \"command\" and \"arg1\"\n3. NO explanation, NO thinking, NO markdown\n4. arg1 is ALWAYS a string (even if empty or JSON array)"
-              }
-            ]
-          }
-        },
-        "id": "nlp-command-parser",
-        "name": "NLP Command Parser",
-        "type": "@n8n/n8n-nodes-langchain.chainLlm",
-        "typeVersion": 1.5,
-        "position": [
-          1888,
-          592
-        ]
       },
       {
         "parameters": {
@@ -4232,7 +4263,7 @@
         "type": "n8n-nodes-base.set",
         "typeVersion": 3.4,
         "position": [
-          2304,
+          2512,
           592
         ]
       },
@@ -4393,7 +4424,7 @@
         "type": "n8n-nodes-base.switch",
         "typeVersion": 3.2,
         "position": [
-          2592,
+          2800,
           528
         ]
       },
@@ -4458,7 +4489,7 @@
         "type": "n8n-nodes-base.executeWorkflow",
         "typeVersion": 1.3,
         "position": [
-          2816,
+          3024,
           736
         ]
       },
@@ -4488,27 +4519,13 @@
       },
       {
         "parameters": {
-          "schemaType": "manual",
-          "inputSchema": "{\n  \"$schema\": \"http://json-schema.org/draft-07/schema#\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"command\": {\n      \"type\": \"string\",\n      \"enum\": [\"show\", \"book\", \"list\", \"delete\", \"deleteall\", \"register\"]\n    },\n    \"arg1\": {\n      \"type\": \"string\",\n      \"description\": \"Command argument - either a date (YYYY-MM-DD) or JSON array string for bookings\"\n    }\n  },\n  \"required\": [\"command\"]\n}"
-        },
-        "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-        "typeVersion": 1.3,
-        "position": [
-          2048,
-          784
-        ],
-        "id": "8c24665d-4700-4148-97dc-f0f62e0bb5a9",
-        "name": "Structured Output Parser"
-      },
-      {
-        "parameters": {
           "operation": "sendChatAction",
           "chatId": "={{ $json.chat_id }}"
         },
         "type": "n8n-nodes-base.telegram",
         "typeVersion": 1.2,
         "position": [
-          1536,
+          1744,
           432
         ],
         "id": "335f530d-a639-4a8e-83dd-d236f51249ca",
@@ -4569,7 +4586,7 @@
         "type": "n8n-nodes-base.executeWorkflow",
         "typeVersion": 1.3,
         "position": [
-          2816,
+          3024,
           -32
         ]
       },
@@ -4641,7 +4658,7 @@
         "type": "n8n-nodes-base.executeWorkflow",
         "typeVersion": 1.3,
         "position": [
-          2816,
+          3024,
           144
         ]
       },
@@ -4706,7 +4723,7 @@
         "type": "n8n-nodes-base.executeWorkflow",
         "typeVersion": 1.3,
         "position": [
-          2816,
+          3024,
           352
         ]
       },
@@ -4778,7 +4795,7 @@
         "type": "n8n-nodes-base.executeWorkflow",
         "typeVersion": 1.3,
         "position": [
-          2816,
+          3024,
           544
         ]
       },
@@ -5027,7 +5044,7 @@
         "type": "n8n-nodes-base.executeWorkflow",
         "typeVersion": 1.3,
         "position": [
-          2816,
+          3024,
           928
         ]
       },
@@ -5173,7 +5190,7 @@
         "typeVersion": 4.8,
         "position": [
           3040,
-          1008
+          1120
         ]
       },
       {
@@ -5285,7 +5302,7 @@
         "typeVersion": 4.8,
         "position": [
           3408,
-          1008
+          1120
         ],
         "id": "dbb292de-5352-48ce-8ddc-3b324eb18d0c",
         "name": "Evaluation",
@@ -5305,7 +5322,7 @@
         "typeVersion": 1,
         "position": [
           3184,
-          1216
+          1312
         ],
         "id": "26f16e4e-c70f-42d6-99aa-8fac0e0cbafc",
         "name": "Ollama Chat Model2",
@@ -5313,6 +5330,113 @@
           "ollamaApi": {
             "id": "OwoNqqKy33Tzlan7",
             "name": "Ollama local"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "={{ $('Text Classifier').item.json.text }}",
+          "hasOutputParser": true,
+          "needsFallback": true,
+          "messages": {
+            "messageValues": [
+              {
+                "message": "=# TASK\nParse user message into this JSON format:\n{\"command\": \"<COMMAND>\", \"arg1\": \"<ARGUMENT>\" or [{\"prop1\":\"value1\"...}, ... {\"prop1\":\"value2\"}] }\nCommand is mandatory. Arguments \"arg1\" is optional.\nNO other fields allowed. NO arrays in root. JSON should be valid.\n\n---\n\n# CURRENT DATE\nToday: {{ $today.format('yyyy-MM-dd') }} ({{ $today.format('cccc') }})\nNow: {{ $now.format('yyyy-MM-dd HH:mm') }}\n\n---\n\n# COMMANDS REFERENCE\n\n## 1. show\nPurpose: Display court availability\nTrigger words: show, available, free, schedule, what's open, расписание, покажи, pokaż, wolne\narg1: Date string in YYYY-MM-DD format\n\nExamples:\n- \"show tomorrow\" → {\"command\": \"show\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n- \"what's available Saturday\" → {\"command\": \"show\", \"arg1\": \"2026-01-03\"}\n- \"Покажи расписание на субботу\" → {\"command\": \"show\", \"arg1\": \"2026-01-03\"}\n- \"pokaż wolne korty na jutro\" → {\"command\": \"show\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n\n## 2. list\nPurpose: Show user's reservations\nTrigger words: list, my reservations, my bookings, мои брони, moje rezerwacje. \nNo arguments.\n\nExamples:\n- \"list my bookings\" → {\"command\": \"list\"}\n- \"Покажи мои брони\" → {\"command\": \"list\"}\n- \"moje rezerwacje\" → {\"command\": \"list\"}\n\n## 3. delete\nPurpose: Cancel ONE reservation by ID\nTrigger words: delete, cancel, remove + ID (NOT \"all\")\narg1: Reservation ID string\n\nExamples:\n- \"cancel 6952ec02dda30\" → {\"command\": \"delete\", \"arg1\": \"6952ec02dda30\"}\n- \"delete booking abc123\" → {\"command\": \"delete\", \"arg1\": \"abc123\"}\n\n## 4. deleteall\nPurpose: Cancel ALL reservations\nTrigger words: delete all, cancel all, remove all, отмени все, usuń wszystko. \nNo arguments.\n\nExamples:\n- \"cancel all reservations\" → {\"command\": \"deleteall\"}\n- \"Отмени все мои брони\" → {\"command\": \"deleteall\"}\n- \"usuń wszystkie rezerwacje\" → {\"command\": \"deleteall\"}\n\n## 5. book\nPurpose: Make a court reservation\nTrigger words: book, reserve, забронируй, zarezerwuj.\nArgument:\narg1 - JSON array with booking details, each item has mandatory fields: \"court\", \"date\", \"time_start\", \"time_end\", \"players_num\", \"notes\".\n\nFormat: [{ \"court\": \"N\", \"date\": \"YYYY-MM-DD\", \"time_start\": \"HH:MM\", \"time_end\": \"HH:MM\", \"players_num\": \"4\", \"notes\": \"\" },\n...\n]\n\n\nExamples:\n- \"Book court 1 and 2 for tomorrow 16:00-17:00\" → `{\"command\": \"book\", \"arg1\": [{\"court\":\"1\", \"date\":\"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\", \"time_start\":\"16:00\", \"time_end\":\"17:00\", \"players_num\":\"4\", \"notes\":\"\"},{\"court\":\"2\", \"date\":\"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\", \"time_start\":\"16:00\", \"time_end\":\"17:00\", \"players_num\":\"4\", \"notes\":\"\"}]}`\n\n\n## 6. register\nPurpose: Save login credentials\nTrigger words: register, sign up, credentials\narg1: \"email password\" as single string\n\nExamples:\n- \"register user@mail.com pass123\" → {\"command\": \"register\", \"arg1\": \"user@mail.com pass123\"}\n\n---\n\n# DATE CONVERSION RULES\n\n| Input | Output |\n|-------|--------|\n| today | {{ $today.format('yyyy-MM-dd') }} |\n| tomorrow | {{ $now.plus({days: 1}).format('yyyy-MM-dd') }} |\n| day after tomorrow | {{ $now.plus({days: 2}).format('yyyy-MM-dd') }} |\n| Saturday | 2026-01-03 (next Saturday) |\n| Sunday | 2026-01-04 (next Sunday) |\n| 27.12 or 27/12 | {{ $now.format('yyyy') }}-12-27 |\n| 15.01.2026 | 2026-01-15 |\n\nRULE: Always use FUTURE dates. Never use dates in the past.\n\n---\n\n# WRONG vs CORRECT OUTPUT\n\n❌ WRONG (nested parameters):\n`{\"command\": \"show\", \"parameters\": {\"date\": \"2026-01-03\"}}`\n\n❌ WRONG (extra fields):\n`{\"command\": \"show\", \"arg1\": \"2026-01-03\", \"confidence\": 0.9, \"arg_json\": []}`\n\n✅ CORRECT:\n`{\"command\": \"list\"}`\n\n✅ CORRECT:\n`{\"command\": \"show\", \"arg1\": \"2026-01-03\"}`\n\n✅ CORRECT:\n`{\"command\": \"book\", \"arg1\": [{ \"court\": \"3\", \"date\": \"2026-01-10\", \"time_start\": \"15:00\", \"time_end\": \"17:00\", \"players_num\": \"4\", \"notes\": \"\" }]}`\n\n✅ CORRECT:\n`{\"command\": \"deleteall\"}`\n\n---\n\n# OUTPUT RULES\n1. Return ONLY valid JSON\n2. EXACTLY two fields: \"command\" and \"arg1\" or \"arg_json\"\n3. NO explanation, NO thinking, NO markdown\n4. arg1 is ALWAYS a string or a JSON array (if exists)"
+              }
+            ]
+          },
+          "batching": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.chainLlm",
+        "typeVersion": 1.8,
+        "position": [
+          2032,
+          592
+        ],
+        "id": "1a5277f2-62ea-4c18-a882-e431def2d443",
+        "name": "Basic LLM Chain"
+      },
+      {
+        "parameters": {
+          "schemaType": "manual",
+          "inputSchema": "={\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"Command Processor\",\n  \"type\": \"object\",\n  \"required\": [\n    \"command\"\n  ],\n  \"properties\": {\n    \"command\": {\n      \"enum\": [\n        \"show\",\n        \"list\",\n        \"delete\",\n        \"deleteall\",\n        \"book\",\n        \"register\"\n      ]\n    }\n  },\n  \"allOf\": [\n    {\n      \"comment\": \"Case 1: 'book' requires an array of booking objects\",\n      \"if\": {\n        \"properties\": {\n          \"command\": {\n            \"const\": \"book\"\n          }\n        }\n      },\n      \"then\": {\n        \"properties\": {\n          \"arg1\": {\n            \"type\": \"array\",\n            \"items\": {\n              \"type\": \"object\",\n              \"properties\": {\n                \"court\": {\n                  \"type\": \"string\"\n                },\n                \"date\": {\n                  \"type\": \"string\",\n                  \"format\": \"date\"\n                },\n                \"time_start\": {\n                  \"type\": \"string\"\n                },\n                \"time_end\": {\n                  \"type\": \"string\"\n                },\n                \"players_num\": {\n                  \"type\": \"string\"\n                },\n                \"notes\": {\n                  \"type\": \"string\"\n                }\n              },\n              \"required\": [\n                \"court\",\n                \"date\",\n                \"time_start\",\n                \"time_end\"\n              ]\n            }\n          }\n        },\n        \"required\": [\n          \"arg1\"\n        ]\n      }\n    },\n    {\n      \"comment\": \"Case 2: 'show' or 'delete' require a string (date/ID)\",\n      \"if\": {\n        \"properties\": {\n          \"command\": {\n            \"enum\": [\n              \"show\",\n              \"delete\"\n            ]\n          }\n        }\n      },\n      \"then\": {\n        \"properties\": {\n          \"arg1\": {\n            \"type\": \"string\"\n          }\n        },\n        \"required\": [\n          \"arg1\"\n        ]\n      }\n    },\n    {\n      \"comment\": \"Case 3: 'list', 'deleteall', 'register' usually have no arg1\",\n      \"if\": {\n        \"properties\": {\n          \"command\": {\n            \"enum\": [\n              \"list\",\n              \"deleteall\",\n              \"register\"\n            ]\n          }\n        }\n      },\n      \"then\": {\n        \"not\": {\n          \"required\": [\n            \"arg1\"\n          ]\n        }\n      }\n    }\n  ]\n}",
+          "autoFix": true
+        },
+        "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+        "typeVersion": 1.3,
+        "position": [
+          2112,
+          800
+        ],
+        "id": "fd11d4a8-90b2-4ce9-9451-29bc14ccf1a1",
+        "name": "Structured Output Parser"
+      },
+      {
+        "parameters": {
+          "model": "cnshenyang/qwen3-nothink:14b",
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+        "typeVersion": 1,
+        "position": [
+          1904,
+          800
+        ],
+        "id": "14e5a540-a2b5-4ae1-a4e0-805e680f8632",
+        "name": "Ollama Chat Model",
+        "credentials": {
+          "ollamaApi": {
+            "id": "OwoNqqKy33Tzlan7",
+            "name": "Ollama local"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "model": "cnshenyang/qwen3-nothink:14b",
+          "options": {
+            "format": "json"
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmOllama",
+        "typeVersion": 1,
+        "position": [
+          2112,
+          992
+        ],
+        "id": "8c1a80e5-56e4-4951-b69b-3b9826599a75",
+        "name": "Ollama Model1",
+        "credentials": {
+          "ollamaApi": {
+            "id": "OwoNqqKy33Tzlan7",
+            "name": "Ollama local"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "value": "glm-4.5-air",
+            "mode": "list",
+            "cachedResultName": "glm-4.5-air"
+          },
+          "responsesApiEnabled": false,
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+        "typeVersion": 1.3,
+        "position": [
+          2016,
+          800
+        ],
+        "id": "764d6a14-f52b-41e3-832d-0e22ae1b8595",
+        "name": "OpenAI Chat Model",
+        "credentials": {
+          "openAiApi": {
+            "id": "ciQFZjyEyaubkBmg",
+            "name": "z.ai"
           }
         }
       }
@@ -5651,7 +5775,7 @@
               "index": 0
             },
             {
-              "node": "NLP Command Parser",
+              "node": "Basic LLM Chain",
               "type": "main",
               "index": 0
             }
@@ -5664,17 +5788,6 @@
             {
               "node": "Text Classifier",
               "type": "ai_languageModel",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "NLP Command Parser": {
-        "main": [
-          [
-            {
-              "node": "Merge Context",
-              "type": "main",
               "index": 0
             }
           ]
@@ -5742,34 +5855,12 @@
           []
         ]
       },
-      "Ollama Chat Model": {
-        "ai_languageModel": [
-          [
-            {
-              "node": "NLP Command Parser",
-              "type": "ai_languageModel",
-              "index": 0
-            }
-          ]
-        ]
-      },
       "Send a text message1": {
         "main": [
           [
             {
               "node": "Edit Fields",
               "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Structured Output Parser": {
-        "ai_outputParser": [
-          [
-            {
-              "node": "NLP Command Parser",
-              "type": "ai_outputParser",
               "index": 0
             }
           ]
@@ -5975,10 +6066,65 @@
         "main": [
           []
         ]
+      },
+      "Basic LLM Chain": {
+        "main": [
+          [
+            {
+              "node": "Merge Context",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Structured Output Parser": {
+        "ai_outputParser": [
+          [
+            {
+              "node": "Basic LLM Chain",
+              "type": "ai_outputParser",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Ollama Chat Model": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Basic LLM Chain",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Ollama Model1": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Structured Output Parser",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "OpenAI Chat Model": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Basic LLM Chain",
+              "type": "ai_languageModel",
+              "index": 1
+            }
+          ]
+        ]
       }
     },
     "authors": "Sergei Vedishchev",
-    "name": "Version 7fc73f0b",
+    "name": "Version 25982790",
     "description": "",
     "autosaved": false
   },
