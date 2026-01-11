@@ -1,0 +1,385 @@
+{
+  "updatedAt": "2026-01-11T18:41:52.008Z",
+  "createdAt": "2026-01-11T18:29:43.968Z",
+  "id": "ZLkal1BIG7llifwz",
+  "name": "Help Command",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "translations",
+          "mode": "list",
+          "cachedResultName": "translations"
+        },
+        "limit": 1,
+        "where": {
+          "values": [
+            {
+              "column": "key",
+              "value": "help"
+            },
+            {
+              "column": "lang",
+              "value": "={{ $json.arg1 || $json.lang || 'en' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-help-translation",
+      "name": "Get Help Translation",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1648,
+        -960
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "3SDluWLUa1vIU50a",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "chat-id-help",
+              "name": "chat_id",
+              "type": "string",
+              "value": "={{ $('Start').first().json.chat_id_firstItem }}"
+            },
+            {
+              "id": "message-help",
+              "name": "message",
+              "type": "string",
+              "value": "={{ $json.text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "format-help-message",
+      "name": "Format Help Message",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1872,
+        -960
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chat_id }}",
+        "text": "={{ $json.message }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2096,
+        -960
+      ],
+      "id": "1e07ce1e-c13a-487b-bc80-00bf7cfad219",
+      "name": "Send a text message",
+      "webhookId": "920381ee-565a-43d0-97c6-624c52567f1d",
+      "credentials": {
+        "telegramApi": {
+          "id": "pHQDqhsnrwimdaY2",
+          "name": "twoj_badminton_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "arg1",
+              "type": "any"
+            },
+            {
+              "name": "lang",
+              "type": "any"
+            },
+            {
+              "name": "chat_id_firstItem",
+              "type": "any"
+            }
+          ]
+        }
+      },
+      "id": "7a67ec9f-21b2-495a-adbb-aae54667c05c",
+      "typeVersion": 1.1,
+      "name": "Start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        1424,
+        -960
+      ]
+    }
+  ],
+  "connections": {
+    "Get Help Translation": {
+      "main": [
+        [
+          {
+            "node": "Format Help Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Help Message": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Get Help Translation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "versionId": "c461622e-9e02-4e47-806f-b653c12b8478",
+  "activeVersionId": "5190bd09-b107-4f48-a2a8-110ee37eb767",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-01-11T18:29:43.973Z",
+      "createdAt": "2026-01-11T18:29:43.973Z",
+      "role": "workflow:owner",
+      "workflowId": "ZLkal1BIG7llifwz",
+      "projectId": "66rzfRQbAnEionlx"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-01-11T18:29:43.975Z",
+    "createdAt": "2026-01-11T18:29:43.975Z",
+    "versionId": "5190bd09-b107-4f48-a2a8-110ee37eb767",
+    "workflowId": "ZLkal1BIG7llifwz",
+    "nodes": [
+      {
+        "parameters": {
+          "resource": "database",
+          "operation": "select",
+          "schema": {
+            "__rl": true,
+            "value": "public",
+            "mode": "list",
+            "cachedResultName": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "translations",
+            "mode": "list",
+            "cachedResultName": "translations"
+          },
+          "returnAll": false,
+          "limit": 1,
+          "where": {
+            "values": [
+              {
+                "column": "key",
+                "condition": "equal",
+                "value": "help"
+              },
+              {
+                "column": "lang",
+                "condition": "equal",
+                "value": "={{ $json.arg1 || $json.lang || 'en' }}"
+              }
+            ]
+          },
+          "combineConditions": "AND",
+          "sort": {},
+          "options": {}
+        },
+        "id": "get-help-translation",
+        "name": "Get Help Translation",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          1632,
+          -960
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "3SDluWLUa1vIU50a",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "mode": "manual",
+          "duplicateItem": false,
+          "assignments": {
+            "assignments": [
+              {
+                "id": "chat-id-help",
+                "name": "chat_id",
+                "type": "string",
+                "value": "={{ $('Start').first().json.chat_id_firstItem }}"
+              },
+              {
+                "id": "message-help",
+                "name": "message",
+                "type": "string",
+                "value": "={{ $json.text }}"
+              }
+            ]
+          },
+          "includeOtherFields": false,
+          "options": {}
+        },
+        "id": "format-help-message",
+        "name": "Format Help Message",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          2704,
+          -960
+        ]
+      },
+      {
+        "parameters": {
+          "preBuiltAgentsCalloutTelegram": "",
+          "resource": "message",
+          "operation": "sendMessage",
+          "chatId": "={{ $json.chat_id }}",
+          "text": "={{ $json.message }}",
+          "replyMarkup": "none",
+          "additionalFields": {
+            "appendAttribution": false,
+            "parse_mode": "HTML"
+          }
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          2928,
+          -960
+        ],
+        "id": "1e07ce1e-c13a-487b-bc80-00bf7cfad219",
+        "name": "Send a text message",
+        "webhookId": "920381ee-565a-43d0-97c6-624c52567f1d",
+        "credentials": {
+          "telegramApi": {
+            "id": "pHQDqhsnrwimdaY2",
+            "name": "twoj_badminton_bot"
+          }
+        }
+      },
+      {
+        "id": "7a67ec9f-21b2-495a-adbb-aae54667c05c",
+        "typeVersion": 1.1,
+        "name": "Start",
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "position": [
+          1424,
+          -960
+        ],
+        "parameters": {
+          "workflowInputs": {
+            "values": [
+              {
+                "name": "arg1",
+                "type": "any"
+              },
+              {
+                "name": "lang",
+                "type": "any"
+              },
+              {
+                "name": "chat_id_firstItem",
+                "type": "any"
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Get Help Translation": {
+        "main": [
+          [
+            {
+              "node": "Format Help Message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Format Help Message": {
+        "main": [
+          [
+            {
+              "node": "Send a text message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Start": {
+        "main": [
+          [
+            {
+              "node": "Get Help Translation",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Sergei Vedishchev",
+    "name": null,
+    "description": null,
+    "autosaved": false
+  },
+  "tags": [
+    {
+      "updatedAt": "2025-12-27T11:51:52.051Z",
+      "createdAt": "2025-12-27T11:51:52.051Z",
+      "id": "3W7RR758UwICVpEC",
+      "name": "bot_command"
+    }
+  ]
+}
