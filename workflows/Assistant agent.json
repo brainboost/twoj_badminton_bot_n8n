@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-04T18:01:50.586Z",
+  "updatedAt": "2026-01-07T16:00:07.909Z",
   "createdAt": "2025-10-14T10:11:33.990Z",
   "id": "uf7MYoeaspA2V85u",
   "name": "Assistant agent",
@@ -22,8 +22,8 @@
       "type": "n8n-nodes-base.telegramTrigger",
       "typeVersion": 1.2,
       "position": [
-        -992,
-        208
+        -1008,
+        304
       ],
       "webhookId": "55acc711-c248-4ac9-b6cd-e295c2d33f4b",
       "credentials": {
@@ -1077,8 +1077,8 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        -688,
-        96
+        -768,
+        112
       ],
       "id": "44df1e02-a88d-49a9-bae2-a337b24cd045",
       "name": "Send a typing",
@@ -2187,8 +2187,8 @@
       "type": "n8n-nodes-base.evaluationTrigger",
       "typeVersion": 4.7,
       "position": [
-        -976,
-        464
+        -1024,
+        576
       ],
       "id": "711fa0ee-7a5f-484c-baa0-267758548e26",
       "name": "When fetching a dataset row",
@@ -3061,7 +3061,7 @@
     "templateId": "voice_assistant_agent_with_telegram",
     "templateCredsSetupCompleted": true
   },
-  "versionId": "25982790-5c77-4a36-b6c8-71c3b3f130b4",
+  "versionId": "391f03dd-0f81-44b1-90d0-4b700e1b2e8e",
   "activeVersionId": "25982790-5c77-4a36-b6c8-71c3b3f130b4",
   "triggerCount": 1,
   "shared": [
