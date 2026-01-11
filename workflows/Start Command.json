@@ -1,0 +1,592 @@
+{
+  "updatedAt": "2026-01-11T18:41:41.380Z",
+  "createdAt": "2026-01-11T18:37:02.843Z",
+  "id": "f87vmsseGzVtHF8j",
+  "name": "Start Command",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "const message = $input.first().json;\nreturn [{ json: { \n  id: String(message.user_id),\n  chat_id: String(message.chat_id),\n  user_name: String(message.username),\n  full_name: String(message.fullname)\n} }];"
+      },
+      "id": "collect-user-data",
+      "name": "Collect User Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1664,
+        -1200
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "users",
+          "mode": "list",
+          "cachedResultName": "users"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": true,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "user_name",
+              "displayName": "user_name",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "full_name",
+              "displayName": "full_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "id": "save-user-info",
+      "name": "Save User Info",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1888,
+        -1200
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "3SDluWLUa1vIU50a",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "translations",
+          "mode": "list",
+          "cachedResultName": "translations"
+        },
+        "limit": 1,
+        "where": {
+          "values": [
+            {
+              "column": "key",
+              "value": "start"
+            },
+            {
+              "column": "lang",
+              "value": "={{ $('Start').first().json.lang_firstItem || 'en' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-start-translation",
+      "name": "Get Start Translation",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2112,
+        -1200
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "3SDluWLUa1vIU50a",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "chat-id-start",
+              "name": "chat_id",
+              "type": "string",
+              "value": "={{ $('Start').first().json.chat_id_firstItem }}"
+            },
+            {
+              "id": "message-start",
+              "name": "message",
+              "type": "string",
+              "value": "={{ $json.text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "format-start-message",
+      "name": "Format Start Message",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2336,
+        -1200
+      ]
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "lang_firstItem",
+              "type": "any"
+            },
+            {
+              "name": "chat_id_firstItem",
+              "type": "any"
+            }
+          ]
+        }
+      },
+      "id": "22ed35b5-36e5-451e-9751-9421f5d7a36e",
+      "typeVersion": 1.1,
+      "name": "Start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        1440,
+        -1200
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chat_id }}",
+        "text": "={{ $json.message }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2560,
+        -1200
+      ],
+      "id": "0c5ea916-f6cc-402c-90de-5577995eeaa1",
+      "name": "Send a text message",
+      "webhookId": "920381ee-565a-43d0-97c6-624c52567f1d",
+      "credentials": {
+        "telegramApi": {
+          "id": "pHQDqhsnrwimdaY2",
+          "name": "twoj_badminton_bot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Collect User Data": {
+      "main": [
+        [
+          {
+            "node": "Save User Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save User Info": {
+      "main": [
+        [
+          {
+            "node": "Get Start Translation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Start Translation": {
+      "main": [
+        [
+          {
+            "node": "Format Start Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Start Message": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Collect User Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "versionId": "32970e57-045c-4f33-bc02-164371f2cb84",
+  "activeVersionId": "32970e57-045c-4f33-bc02-164371f2cb84",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-01-11T18:37:02.846Z",
+      "createdAt": "2026-01-11T18:37:02.846Z",
+      "role": "workflow:owner",
+      "workflowId": "f87vmsseGzVtHF8j",
+      "projectId": "66rzfRQbAnEionlx"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-01-11T19:14:11.000Z",
+    "createdAt": "2026-01-11T18:41:24.441Z",
+    "versionId": "32970e57-045c-4f33-bc02-164371f2cb84",
+    "workflowId": "f87vmsseGzVtHF8j",
+    "nodes": [
+      {
+        "parameters": {
+          "jsCode": "const message = $input.first().json;\nreturn [{ json: { \n  id: String(message.user_id),\n  chat_id: String(message.chat_id),\n  user_name: String(message.username),\n  full_name: String(message.fullname)\n} }];"
+        },
+        "id": "collect-user-data",
+        "name": "Collect User Data",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1664,
+          -1200
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "upsert",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "users",
+            "mode": "list",
+            "cachedResultName": "users"
+          },
+          "columns": {
+            "mappingMode": "autoMapInputData",
+            "value": {},
+            "matchingColumns": [
+              "id"
+            ],
+            "schema": [
+              {
+                "id": "id",
+                "displayName": "id",
+                "required": true,
+                "defaultMatch": true,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "chat_id",
+                "displayName": "chat_id",
+                "required": true,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": false
+              },
+              {
+                "id": "user_name",
+                "displayName": "user_name",
+                "required": true,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": false
+              },
+              {
+                "id": "full_name",
+                "displayName": "full_name",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": false
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {}
+        },
+        "id": "save-user-info",
+        "name": "Save User Info",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          1888,
+          -1200
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "3SDluWLUa1vIU50a",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "select",
+          "schema": {
+            "__rl": true,
+            "value": "public",
+            "mode": "list",
+            "cachedResultName": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "translations",
+            "mode": "list",
+            "cachedResultName": "translations"
+          },
+          "limit": 1,
+          "where": {
+            "values": [
+              {
+                "column": "key",
+                "value": "start"
+              },
+              {
+                "column": "lang",
+                "value": "={{ $('Start').first().json.lang_firstItem || 'en' }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "get-start-translation",
+        "name": "Get Start Translation",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          2112,
+          -1200
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "3SDluWLUa1vIU50a",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "chat-id-start",
+                "name": "chat_id",
+                "type": "string",
+                "value": "={{ $('Start').first().json.chat_id_firstItem }}"
+              },
+              {
+                "id": "message-start",
+                "name": "message",
+                "type": "string",
+                "value": "={{ $json.text }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "format-start-message",
+        "name": "Format Start Message",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          2336,
+          -1200
+        ]
+      },
+      {
+        "parameters": {
+          "workflowInputs": {
+            "values": [
+              {
+                "name": "lang_firstItem",
+                "type": "any"
+              },
+              {
+                "name": "chat_id_firstItem",
+                "type": "any"
+              }
+            ]
+          }
+        },
+        "id": "22ed35b5-36e5-451e-9751-9421f5d7a36e",
+        "typeVersion": 1.1,
+        "name": "Start",
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "position": [
+          1440,
+          -1200
+        ]
+      },
+      {
+        "parameters": {
+          "chatId": "={{ $json.chat_id }}",
+          "text": "={{ $json.message }}",
+          "additionalFields": {
+            "appendAttribution": false,
+            "parse_mode": "HTML"
+          }
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          2560,
+          -1200
+        ],
+        "id": "0c5ea916-f6cc-402c-90de-5577995eeaa1",
+        "name": "Send a text message",
+        "webhookId": "920381ee-565a-43d0-97c6-624c52567f1d",
+        "credentials": {
+          "telegramApi": {
+            "id": "pHQDqhsnrwimdaY2",
+            "name": "twoj_badminton_bot"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Collect User Data": {
+        "main": [
+          [
+            {
+              "node": "Save User Info",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Save User Info": {
+        "main": [
+          [
+            {
+              "node": "Get Start Translation",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Start Translation": {
+        "main": [
+          [
+            {
+              "node": "Format Start Message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Format Start Message": {
+        "main": [
+          [
+            {
+              "node": "Send a text message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Start": {
+        "main": [
+          [
+            {
+              "node": "Collect User Data",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Sergei Vedishchev",
+    "name": "Version 32970e57",
+    "description": "",
+    "autosaved": false
+  },
+  "tags": [
+    {
+      "updatedAt": "2025-12-27T11:51:52.051Z",
+      "createdAt": "2025-12-27T11:51:52.051Z",
+      "id": "3W7RR758UwICVpEC",
+      "name": "bot_command"
+    }
+  ]
+}
