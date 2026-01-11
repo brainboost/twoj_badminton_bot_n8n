@@ -1,0 +1,2717 @@
+{
+  "updatedAt": "2026-01-11T20:35:59.144Z",
+  "createdAt": "2026-01-11T18:21:47.330Z",
+  "id": "QbD3Epml4ANF9vr0",
+  "name": "Command Parser",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "model": "cnshenyang/qwen3-nothink:14b",
+        "options": {
+          "format": "json"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmOllama",
+      "typeVersion": 1,
+      "position": [
+        1712,
+        1232
+      ],
+      "id": "8c1a80e5-56e4-4951-b69b-3b9826599a75",
+      "name": "Ollama Model1",
+      "credentials": {
+        "ollamaApi": {
+          "id": "OwoNqqKy33Tzlan7",
+          "name": "Ollama local"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "b7xXjE899CcIb9eo"
+        },
+        "workflowInputs": {
+          "value": {
+            "lang": "={{ $json.lang }}",
+            "chat_id": "={{ $json.chat_id }}",
+            "user_id": "={{ $json.user_id }}",
+            "fullname": "={{ $json.fullname }}",
+            "username": "={{ $json.username }}"
+          },
+          "schema": [
+            {
+              "id": "chat_id",
+              "type": "string",
+              "required": true,
+              "displayName": "chat_id"
+            },
+            {
+              "id": "user_id",
+              "type": "string",
+              "required": true,
+              "displayName": "user_id"
+            },
+            {
+              "id": "username",
+              "type": "string",
+              "required": true,
+              "displayName": "username"
+            },
+            {
+              "id": "fullname",
+              "type": "string",
+              "required": true,
+              "displayName": "fullname"
+            },
+            {
+              "id": "lang",
+              "type": "string",
+              "required": true,
+              "displayName": "lang"
+            }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "nlp-exec-deleteall",
+      "name": "Execute Delete All",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        3408,
+        864
+      ]
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "={\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"Command Processor\",\n  \"type\": \"object\",\n  \"required\": [\n    \"command\"\n  ],\n  \"properties\": {\n    \"command\": {\n      \"enum\": [\n        \"show\",\n        \"list\",\n        \"delete\",\n        \"deleteall\",\n        \"book\",\n        \"register\"\n      ]\n    }\n  },\n  \"allOf\": [\n    {\n      \"comment\": \"Case 1: 'book' requires an array of booking objects\",\n      \"if\": {\n        \"properties\": {\n          \"command\": {\n            \"const\": \"book\"\n          }\n        }\n      },\n      \"then\": {\n        \"properties\": {\n          \"arg1\": {\n            \"type\": \"array\",\n            \"items\": {\n              \"type\": \"object\",\n              \"properties\": {\n                \"court\": {\n                  \"type\": \"string\"\n                },\n                \"date\": {\n                  \"type\": \"string\",\n                  \"format\": \"date\"\n                },\n                \"time_start\": {\n                  \"type\": \"string\"\n                },\n                \"time_end\": {\n                  \"type\": \"string\"\n                },\n                \"players_num\": {\n                  \"type\": \"string\"\n                },\n                \"notes\": {\n                  \"type\": \"string\"\n                }\n              },\n              \"required\": [\n                \"court\",\n                \"date\",\n                \"time_start\",\n                \"time_end\"\n              ]\n            }\n          }\n        },\n        \"required\": [\n          \"arg1\"\n        ]\n      }\n    },\n    {\n      \"comment\": \"Case 2: 'show' or 'delete' require a string (date/ID)\",\n      \"if\": {\n        \"properties\": {\n          \"command\": {\n            \"enum\": [\n              \"show\",\n              \"delete\"\n            ]\n          }\n        }\n      },\n      \"then\": {\n        \"properties\": {\n          \"arg1\": {\n            \"type\": \"string\"\n          }\n        },\n        \"required\": [\n          \"arg1\"\n        ]\n      }\n    },\n    {\n      \"comment\": \"Case 3: 'list', 'deleteall', 'register' usually have no arg1\",\n      \"if\": {\n        \"properties\": {\n          \"command\": {\n            \"enum\": [\n              \"list\",\n              \"deleteall\",\n              \"register\"\n            ]\n          }\n        }\n      },\n      \"then\": {\n        \"not\": {\n          \"required\": [\n            \"arg1\"\n          ]\n        }\n      }\n    }\n  ]\n}",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1712,
+        1040
+      ],
+      "id": "fd11d4a8-90b2-4ce9-9451-29bc14ccf1a1",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "model": "cnshenyang/qwen3-nothink:14b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        1504,
+        1040
+      ],
+      "id": "14e5a540-a2b5-4ae1-a4e0-805e680f8632",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "OwoNqqKy33Tzlan7",
+          "name": "Ollama local"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "glm-4.5-air",
+          "mode": "list",
+          "cachedResultName": "glm-4.5-air"
+        },
+        "responsesApiEnabled": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1616,
+        1040
+      ],
+      "id": "764d6a14-f52b-41e3-832d-0e22ae1b8595",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "ciQFZjyEyaubkBmg",
+          "name": "z.ai"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "w8lC6D3QXh47u6w1",
+          "mode": "id"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "chat_id": "={{ $json.chat_id }}",
+            "user_id": "={{ $json.user_id }}",
+            "username": "={{ $json.username }}",
+            "fullname": "={{ $json.fullname }}",
+            "lang": "={{ $json.lang }}"
+          },
+          "schema": [
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "id": "user_id",
+              "displayName": "user_id",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "id": "username",
+              "displayName": "username",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "id": "fullname",
+              "displayName": "fullname",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "id": "lang",
+              "displayName": "lang",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "nlp-exec-register",
+      "name": "NLP Execute Register",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        3248,
+        704
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "dc0b16aa-f29a-474f-8285-51d18e336122",
+              "name": "chat_id",
+              "value": "={{ $json.chat_id }}",
+              "type": "string"
+            },
+            {
+              "id": "0e3401ee-0d12-423d-a865-83cf5c5e8b3a",
+              "name": "user_id",
+              "value": "={{ $json.user_id }}",
+              "type": "string"
+            },
+            {
+              "id": "2b1ac2e1-da8f-4546-a385-4dd86426e72b",
+              "name": "username",
+              "value": "={{ $json.username }}",
+              "type": "string"
+            },
+            {
+              "id": "f854f4d1-681e-4384-9a8b-77cb316ccdad",
+              "name": "fullname",
+              "value": "={{ $json.fullname }}",
+              "type": "string"
+            },
+            {
+              "id": "367396cb-c5ef-492b-b7f9-71627abefaac",
+              "name": "lang",
+              "value": "={{ $json.lang }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1120,
+        608
+      ],
+      "id": "e9f32399-e18d-4ed6-babb-302ea9cd8186",
+      "name": "Set args"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cmd",
+              "name": "command",
+              "type": "string",
+              "value": "={{ $json.command }}"
+            },
+            {
+              "id": "arg",
+              "name": "arg1",
+              "type": "string",
+              "value": "={{ $json.arg1 }}"
+            },
+            {
+              "id": "cid",
+              "name": "chat_id",
+              "type": "string",
+              "value": "={{ $json.chat_id }}"
+            },
+            {
+              "id": "uid",
+              "name": "user_id",
+              "type": "string",
+              "value": "={{ $json.user_id }}"
+            },
+            {
+              "id": "uname",
+              "name": "username",
+              "type": "string",
+              "value": "={{ $json.username }}"
+            },
+            {
+              "id": "fname",
+              "name": "fullname",
+              "type": "string",
+              "value": "={{ $json.fullname }}"
+            },
+            {
+              "id": "lng",
+              "name": "lang",
+              "type": "string",
+              "value": "={{ $json.lang }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "merge-context-with-parsed",
+      "name": "Merge Context",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2400,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Start').item.json.text }}",
+        "hasOutputParser": true,
+        "needsFallback": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=# TASK\nParse user message into this JSON format:\n{\"command\": \"<COMMAND>\", \"arg1\": \"<ARGUMENT>\" or [{\"prop1\":\"value1\"...}, ... {\"prop1\":\"value2\"}] }\nCommand is mandatory. Arguments \"arg1\" is optional.\nNO other fields allowed. NO arrays in root. JSON should be valid.\n\n---\n\n# CURRENT DATE\nToday: {{ $today.format('yyyy-MM-dd') }} ({{ $today.format('cccc') }})\nNow: {{ $now.format('yyyy-MM-dd HH:mm') }}\n\n---\n\n# COMMANDS REFERENCE\n\n## 1. show\nPurpose: Display court availability\nTrigger words: show, available, free, schedule, what's open, расписание, покажи, pokaż, wolne\narg1: Date string in YYYY-MM-DD format\n\nExamples:\n- \"show tomorrow\" → {\"command\": \"show\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n- \"what's available Saturday\" → {\"command\": \"show\", \"arg1\": \"2026-01-03\"}\n- \"Покажи расписание на субботу\" → {\"command\": \"show\", \"arg1\": \"2026-01-03\"}\n- \"pokaż wolne korty na jutro\" → {\"command\": \"show\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n\n## 2. list\nPurpose: Show user's reservations\nTrigger words: list, my reservations, my bookings, мои брони, moje rezerwacje. \nNo arguments.\n\nExamples:\n- \"list my bookings\" → {\"command\": \"list\"}\n- \"Покажи мои брони\" → {\"command\": \"list\"}\n- \"moje rezerwacje\" → {\"command\": \"list\"}\n\n## 3. delete\nPurpose: Cancel ONE reservation by ID\nTrigger words: delete, cancel, remove + ID (NOT \"all\")\narg1: Reservation ID string\n\nExamples:\n- \"cancel 6952ec02dda30\" → {\"command\": \"delete\", \"arg1\": \"6952ec02dda30\"}\n- \"delete booking abc123\" → {\"command\": \"delete\", \"arg1\": \"abc123\"}\n\n## 4. deleteall\nPurpose: Cancel ALL reservations\nTrigger words: delete all, cancel all, remove all, отмени все, usuń wszystko. \nNo arguments.\n\nExamples:\n- \"cancel all reservations\" → {\"command\": \"deleteall\"}\n- \"Отмени все мои брони\" → {\"command\": \"deleteall\"}\n- \"usuń wszystkie rezerwacje\" → {\"command\": \"deleteall\"}\n\n## 5. book\nPurpose: Make a court reservation\nTrigger words: book, reserve, забронируй, zarezerwuj.\nArgument:\narg1 - JSON array with booking details, each item has mandatory fields: \"court\", \"date\", \"time_start\", \"time_end\", \"players_num\", \"notes\".\n\nFormat: [{ \"court\": \"N\", \"date\": \"YYYY-MM-DD\", \"time_start\": \"HH:MM\", \"time_end\": \"HH:MM\", \"players_num\": \"4\", \"notes\": \"\" },\n...\n]\n\n\nExamples:\n- \"Book court 1 and 2 for tomorrow 16:00-17:00\" → `{\"command\": \"book\", \"arg1\": [{\"court\":\"1\", \"date\":\"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\", \"time_start\":\"16:00\", \"time_end\":\"17:00\", \"players_num\":\"4\", \"notes\":\"\"},{\"court\":\"2\", \"date\":\"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\", \"time_start\":\"16:00\", \"time_end\":\"17:00\", \"players_num\":\"4\", \"notes\":\"\"}]}`\n\n\n## 6. register\nPurpose: Save login credentials\nTrigger words: register, sign up, credentials\narg1: \"email password\" as single string\n\nExamples:\n- \"register user@mail.com pass123\" → {\"command\": \"register\", \"arg1\": \"user@mail.com pass123\"}\n\n---\n\n# DATE CONVERSION RULES\n\n| Input | Output |\n|-------|--------|\n| today | {{ $today.format('yyyy-MM-dd') }} |\n| tomorrow | {{ $today.plus({days: 1}).format('yyyy-MM-dd') }} |\n| day after tomorrow | {{ $today.plus({days: 2}).format('yyyy-MM-dd') }} |\n| Saturday | {{ $today.plus({week: 1}).beginningOf('week').plus({day: 5}).format('yyyy-MM-dd') }} (next Saturday) |\n| Sunday | {{ $today.plus({week: 1}).beginningOf('week').plus({day: 6}).format('yyyy-MM-dd') }} (next Sunday) |\n| 27.12  | {{ $today.format('yyyy') }}-12-27 |\n| 15.01.26 | 2026-01-15 |\n| 15 числа | {{ $today.format('yyyy') }}-{{ 15 > $today.format('dd')? $today.format('MM'): $today.plus({month: 1}).format('MM') }}-15 |\n\nRULE: Always use FUTURE dates. Never use dates in the past.\n\n---\n\n# WRONG vs CORRECT OUTPUT\n\n❌ WRONG (nested parameters):\n`{\"command\": \"show\", \"parameters\": {\"date\": \"2026-01-03\"}}`\n\n❌ WRONG (extra fields):\n`{\"command\": \"show\", \"arg1\": \"2026-01-03\", \"confidence\": 0.9, \"arg_json\": []}`\n\n✅ CORRECT:\n`{\"command\": \"list\"}`\n\n✅ CORRECT:\n`{\"command\": \"show\", \"arg1\": \"2026-01-03\"}`\n\n✅ CORRECT:\n`{\"command\": \"book\", \"arg1\": [{ \"court\": \"3\", \"date\": \"2026-01-10\", \"time_start\": \"15:00\", \"time_end\": \"17:00\", \"players_num\": \"4\", \"notes\": \"\" }]}`\n\n✅ CORRECT:\n`{\"command\": \"deleteall\"}`\n\n---\n\n# OUTPUT RULES\n1. Return ONLY valid JSON\n2. EXACTLY two fields: \"command\" and \"arg1\" or \"arg_json\"\n3. NO explanation, NO thinking, NO markdown\n4. arg1 is ALWAYS a string or a JSON array (if exists)"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.8,
+      "position": [
+        1648,
+        832
+      ],
+      "id": "1a5277f2-62ea-4c18-a882-e431def2d443",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "wYEfXMLutTlrEgBq",
+          "mode": "id"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "arg1": "={{ $json.arg1 }}",
+            "chat_id": "={{ $json.chat_id }}",
+            "user_id": "={{ $json.user_id }}",
+            "username": "={{ $json.username }}",
+            "fullname": "={{ $json.fullname }}",
+            "lang": "={{ $json.lang }}"
+          },
+          "schema": [
+            {
+              "id": "arg1",
+              "displayName": "arg1",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "id": "user_id",
+              "displayName": "user_id",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "id": "username",
+              "displayName": "username",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "id": "fullname",
+              "displayName": "fullname",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "id": "lang",
+              "displayName": "lang",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "nlp-exec-delete",
+      "name": "Execute Delete",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        3008,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "show-cond",
+                    "leftValue": "={{ $json.command }}",
+                    "rightValue": "show",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "show"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "book-cond",
+                    "leftValue": "={{ $json.command }}",
+                    "rightValue": "book",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "book"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "list-cond",
+                    "leftValue": "={{ $json.command }}",
+                    "rightValue": "list",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "list"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "delete-cond",
+                    "leftValue": "={{ $json.command }}",
+                    "rightValue": "delete",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "delete"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "register-cond",
+                    "leftValue": "={{ $json.command }}",
+                    "rightValue": "register",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "register"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "deleteall-cond",
+                    "leftValue": "={{ $json.command }}",
+                    "rightValue": "deleteall",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "deleteall"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "be0039d9-287b-4cc5-9562-28e220b9f9de",
+                    "leftValue": "={{ $json.command }}",
+                    "rightValue": "help",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "help"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "9269504a-9f4d-4fdb-8f45-094551edeb9c",
+                    "leftValue": "={{ $json.command }}",
+                    "rightValue": "start",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "start"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "nlp-command-switch",
+      "name": "NLP Command Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        2672,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "sendChatAction",
+        "chatId": "={{ $json.chat_id }}"
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1200,
+        384
+      ],
+      "id": "335f530d-a639-4a8e-83dd-d236f51249ca",
+      "name": "Send a chat action",
+      "webhookId": "ff016420-be64-4d5e-b454-2fc9453945c4",
+      "credentials": {
+        "telegramApi": {
+          "id": "pHQDqhsnrwimdaY2",
+          "name": "twoj_badminton_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "51Y9SIV139LvX5jl",
+          "mode": "id"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "chat_id": "={{ $json.chat_id }}",
+            "user_id": "={{ $json.user_id }}",
+            "username": "={{ $json.username }}",
+            "fullname": "={{ $json.fullname }}",
+            "lang": "={{ $json.lang }}"
+          },
+          "schema": [
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "id": "user_id",
+              "displayName": "user_id",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "id": "username",
+              "displayName": "username",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "id": "fullname",
+              "displayName": "fullname",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "id": "lang",
+              "displayName": "lang",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "id": "nlp-exec-list",
+      "name": "Execute List",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        3232,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "p5NpS5X1VLPdY3mX",
+          "mode": "id"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "arg1": "={{ $json.arg1 }}",
+            "chat_id": "={{ $json.chat_id }}",
+            "user_id": "={{ $json.user_id }}",
+            "username": "={{ $json.username }}",
+            "fullname": "={{ $json.fullname }}",
+            "lang": "={{ $json.lang }}"
+          },
+          "schema": [
+            {
+              "id": "arg1",
+              "displayName": "arg1",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "id": "user_id",
+              "displayName": "user_id",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "id": "username",
+              "displayName": "username",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "id": "fullname",
+              "displayName": "fullname",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "id": "lang",
+              "displayName": "lang",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "nlp-exec-book",
+      "name": "Execute Book",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        3376,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "HFeE52YK9tAzKTpk",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/HFeE52YK9tAzKTpk",
+          "cachedResultName": "Show Command"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "chat_id": "={{ $json.chat_id }}",
+            "arg1": "={{ $json.arg1 }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "arg1",
+              "displayName": "arg1",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "id": "nlp-exec-show",
+      "name": "Execute Show",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        3168,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "chat_id",
+              "type": "any"
+            },
+            {
+              "name": "user_id",
+              "type": "any"
+            },
+            {
+              "name": "username",
+              "type": "any"
+            },
+            {
+              "name": "fullname",
+              "type": "any"
+            },
+            {
+              "name": "lang",
+              "type": "any"
+            },
+            {
+              "name": "text",
+              "type": "any"
+            }
+          ]
+        }
+      },
+      "id": "cb088e16-c752-4c44-b17c-37a8576ca5a7",
+      "typeVersion": 1.1,
+      "name": "Start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        928,
+        608
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "ZLkal1BIG7llifwz",
+          "mode": "list"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "arg1": "={{ $json.arg1 }}",
+            "lang": "={{ $json.lang }}",
+            "chat_id_firstItem": "={{ $('Cmd Parse').first().json.chat_id }}"
+          },
+          "matchingColumns": [
+            "arg1",
+            "lang",
+            "chat_id_firstItem"
+          ],
+          "schema": [
+            {
+              "id": "arg1",
+              "displayName": "arg1",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "lang",
+              "displayName": "lang",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "chat_id_firstItem",
+              "displayName": "chat_id_firstItem",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        3040,
+        880
+      ],
+      "name": "Call Help Command",
+      "id": "0c589faa-0104-4125-a9fc-6d26e80df0c3"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "f87vmsseGzVtHF8j",
+          "mode": "list"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "lang_firstItem": "={{ $('Cmd Parse').first().json.lang }}",
+            "chat_id_firstItem": "={{ $('Cmd Parse').first().json.chat_id }}"
+          },
+          "matchingColumns": [
+            "lang_firstItem",
+            "chat_id_firstItem"
+          ],
+          "schema": [
+            {
+              "id": "lang_firstItem",
+              "displayName": "lang_firstItem",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "chat_id_firstItem",
+              "displayName": "chat_id_firstItem",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        3120,
+        1088
+      ],
+      "name": "Call Start Command",
+      "id": "b4d550fd-b135-4049-962c-85166f686ab4"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "beed379a-0109-468d-accd-0c812afc851a",
+              "leftValue": "={{ $('Start').item.json.text }}",
+              "rightValue": "/",
+              "operator": {
+                "type": "string",
+                "operation": "startsWith"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1344,
+        608
+      ],
+      "id": "c0677153-9ced-4bc7-93cf-481fad13394f",
+      "name": "If command"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ce8eebdd-c313-4444-a1bd-dcde56619a0d",
+              "name": "command",
+              "type": "string",
+              "value": "={{\n  $json.text\n    .toLowerCase()\n    .replace(/^\\//, '')\n    .split(/ (.+)/)[0]\n  || ''\n}}"
+            },
+            {
+              "id": "834f7369-52f1-4df3-bfcb-754be0bb11e0",
+              "name": "arg1",
+              "type": "string",
+              "value": "={{\n(() => {\n  const raw = $json.text\n    .toLowerCase()\n    .replace(/^\\//, '')\n    .split(/ (.+)/)[1] || '';\n  \n  if (!raw) return '';\n  \n  const input = raw.trim();\n  \n  // Already YYYY-MM-DD format\n  if (/^\\d{4}-\\d{2}-\\d{2}$/.test(input)) {\n    return input;\n  }\n  \n  // DD.MM.YYYY format (e.g., 19.12.2025)\n  const dotFull = input.match(/^(\\d{1,2})\\.(\\d{1,2})\\.(\\d{4})$/);\n  if (dotFull) {\n    const [, d, m, y] = dotFull;\n    return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;\n  }\n  \n  // DD.MM.YY format (e.g., 19.12.25)\n  const dotShort = input.match(/^(\\d{1,2})\\.(\\d{1,2})\\.(\\d{2})$/);\n  if (dotShort) {\n    const [, d, m, y] = dotShort;\n    const fullYear = parseInt(y) > 50 ? '19' + y : '20' + y;\n    return `${fullYear}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;\n  }\n  \n  // DD/MM/YYYY format\n  const slashFull = input.match(/^(\\d{1,2})\\/(\\d{1,2})\\/(\\d{4})$/);\n  if (slashFull) {\n    const [, d, m, y] = slashFull;\n    return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;\n  }\n  \n  // DD/MM/YY format\n  const slashShort = input.match(/^(\\d{1,2})\\/(\\d{1,2})\\/(\\d{2})$/);\n  if (slashShort) {\n    const [, d, m, y] = slashShort;\n    const fullYear = parseInt(y) > 50 ? '19' + y : '20' + y;\n    return `${fullYear}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;\n  }\n  \n  // Return as-is if no pattern matches\n  return input;\n})()\n}}"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "include": "selected",
+        "includeFields": "chat_id,user_id,username,fullname,lang",
+        "options": {}
+      },
+      "id": "da92508e-a9c4-4b85-9ce4-fd129fe138e0",
+      "name": "Cmd Parse",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        1648,
+        592
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4d93a5d1-a32c-47cc-a3c6-74b91257ed56",
+              "name": "command",
+              "value": "={{ $json.output.command }}",
+              "type": "string"
+            },
+            {
+              "id": "f6da0a82-5850-41d2-be86-f8406c622c69",
+              "name": "arg1",
+              "value": "={{ $json.output.arg1 }}",
+              "type": "string"
+            },
+            {
+              "id": "2c46b611-7ed7-4d1c-a406-7e55832101ea",
+              "name": "chat_id",
+              "value": "={{ $('Set args').item.json.chat_id }}",
+              "type": "string"
+            },
+            {
+              "id": "338a3726-f58e-4a2b-81be-4a8ed8203efe",
+              "name": "user_id",
+              "value": "={{ $('Set args').item.json.user_id }}",
+              "type": "string"
+            },
+            {
+              "id": "67edd464-cb6a-46b1-ab45-ef80da23a705",
+              "name": "lang",
+              "value": "={{ $('Set args').item.json.lang }}",
+              "type": "string"
+            },
+            {
+              "id": "dcd57565-c08b-438d-a675-e52263ba2b76",
+              "name": "username",
+              "value": "={{ $('Set args').item.json.username }}",
+              "type": "string"
+            },
+            {
+              "id": "f03df867-7c46-4eb4-bac1-a9bde25fb174",
+              "name": "fullname",
+              "value": "={{ $('Set args').item.json.fullname }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2032,
+        832
+      ],
+      "id": "20f8862f-1a56-47e5-a5d7-31434e073e73",
+      "name": "Edit Fields"
+    }
+  ],
+  "connections": {
+    "Set args": {
+      "main": [
+        [
+          {
+            "node": "If command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Context": {
+      "main": [
+        [
+          {
+            "node": "NLP Command Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NLP Command Switch": {
+      "main": [
+        [
+          {
+            "node": "Execute Show",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute Book",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute List",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute Delete",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "NLP Execute Register",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute Delete All",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Call Help Command",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Call Start Command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NLP Execute Register": {
+      "main": [
+        []
+      ]
+    },
+    "Execute Show": {
+      "main": [
+        []
+      ]
+    },
+    "Execute Book": {
+      "main": [
+        []
+      ]
+    },
+    "Execute List": {
+      "main": [
+        []
+      ]
+    },
+    "Execute Delete": {
+      "main": [
+        []
+      ]
+    },
+    "Execute Delete All": {
+      "main": [
+        []
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Structured Output Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Send a chat action",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Set args",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If command": {
+      "main": [
+        [
+          {
+            "node": "Cmd Parse",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cmd Parse": {
+      "main": [
+        [
+          {
+            "node": "Merge Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Merge Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "versionId": "c7c989ae-f1d4-4b3d-ac2b-00705bf5a12d",
+  "activeVersionId": "c7c989ae-f1d4-4b3d-ac2b-00705bf5a12d",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-01-11T18:21:47.335Z",
+      "createdAt": "2026-01-11T18:21:47.335Z",
+      "role": "workflow:owner",
+      "workflowId": "QbD3Epml4ANF9vr0",
+      "projectId": "66rzfRQbAnEionlx"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-01-11T20:36:46.000Z",
+    "createdAt": "2026-01-11T20:33:30.593Z",
+    "versionId": "c7c989ae-f1d4-4b3d-ac2b-00705bf5a12d",
+    "workflowId": "QbD3Epml4ANF9vr0",
+    "nodes": [
+      {
+        "parameters": {
+          "model": "cnshenyang/qwen3-nothink:14b",
+          "options": {
+            "format": "json"
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmOllama",
+        "typeVersion": 1,
+        "position": [
+          1712,
+          1232
+        ],
+        "id": "8c1a80e5-56e4-4951-b69b-3b9826599a75",
+        "name": "Ollama Model1",
+        "credentials": {
+          "ollamaApi": {
+            "id": "OwoNqqKy33Tzlan7",
+            "name": "Ollama local"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "b7xXjE899CcIb9eo"
+          },
+          "workflowInputs": {
+            "value": {
+              "lang": "={{ $json.lang }}",
+              "chat_id": "={{ $json.chat_id }}",
+              "user_id": "={{ $json.user_id }}",
+              "fullname": "={{ $json.fullname }}",
+              "username": "={{ $json.username }}"
+            },
+            "schema": [
+              {
+                "id": "chat_id",
+                "type": "string",
+                "required": true,
+                "displayName": "chat_id"
+              },
+              {
+                "id": "user_id",
+                "type": "string",
+                "required": true,
+                "displayName": "user_id"
+              },
+              {
+                "id": "username",
+                "type": "string",
+                "required": true,
+                "displayName": "username"
+              },
+              {
+                "id": "fullname",
+                "type": "string",
+                "required": true,
+                "displayName": "fullname"
+              },
+              {
+                "id": "lang",
+                "type": "string",
+                "required": true,
+                "displayName": "lang"
+              }
+            ],
+            "mappingMode": "defineBelow",
+            "matchingColumns": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {
+            "waitForSubWorkflow": true
+          }
+        },
+        "id": "nlp-exec-deleteall",
+        "name": "Execute Delete All",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.3,
+        "position": [
+          3408,
+          864
+        ]
+      },
+      {
+        "parameters": {
+          "schemaType": "manual",
+          "inputSchema": "={\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"Command Processor\",\n  \"type\": \"object\",\n  \"required\": [\n    \"command\"\n  ],\n  \"properties\": {\n    \"command\": {\n      \"enum\": [\n        \"show\",\n        \"list\",\n        \"delete\",\n        \"deleteall\",\n        \"book\",\n        \"register\"\n      ]\n    }\n  },\n  \"allOf\": [\n    {\n      \"comment\": \"Case 1: 'book' requires an array of booking objects\",\n      \"if\": {\n        \"properties\": {\n          \"command\": {\n            \"const\": \"book\"\n          }\n        }\n      },\n      \"then\": {\n        \"properties\": {\n          \"arg1\": {\n            \"type\": \"array\",\n            \"items\": {\n              \"type\": \"object\",\n              \"properties\": {\n                \"court\": {\n                  \"type\": \"string\"\n                },\n                \"date\": {\n                  \"type\": \"string\",\n                  \"format\": \"date\"\n                },\n                \"time_start\": {\n                  \"type\": \"string\"\n                },\n                \"time_end\": {\n                  \"type\": \"string\"\n                },\n                \"players_num\": {\n                  \"type\": \"string\"\n                },\n                \"notes\": {\n                  \"type\": \"string\"\n                }\n              },\n              \"required\": [\n                \"court\",\n                \"date\",\n                \"time_start\",\n                \"time_end\"\n              ]\n            }\n          }\n        },\n        \"required\": [\n          \"arg1\"\n        ]\n      }\n    },\n    {\n      \"comment\": \"Case 2: 'show' or 'delete' require a string (date/ID)\",\n      \"if\": {\n        \"properties\": {\n          \"command\": {\n            \"enum\": [\n              \"show\",\n              \"delete\"\n            ]\n          }\n        }\n      },\n      \"then\": {\n        \"properties\": {\n          \"arg1\": {\n            \"type\": \"string\"\n          }\n        },\n        \"required\": [\n          \"arg1\"\n        ]\n      }\n    },\n    {\n      \"comment\": \"Case 3: 'list', 'deleteall', 'register' usually have no arg1\",\n      \"if\": {\n        \"properties\": {\n          \"command\": {\n            \"enum\": [\n              \"list\",\n              \"deleteall\",\n              \"register\"\n            ]\n          }\n        }\n      },\n      \"then\": {\n        \"not\": {\n          \"required\": [\n            \"arg1\"\n          ]\n        }\n      }\n    }\n  ]\n}",
+          "autoFix": true
+        },
+        "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+        "typeVersion": 1.3,
+        "position": [
+          1712,
+          1040
+        ],
+        "id": "fd11d4a8-90b2-4ce9-9451-29bc14ccf1a1",
+        "name": "Structured Output Parser"
+      },
+      {
+        "parameters": {
+          "model": "cnshenyang/qwen3-nothink:14b",
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+        "typeVersion": 1,
+        "position": [
+          1504,
+          1040
+        ],
+        "id": "14e5a540-a2b5-4ae1-a4e0-805e680f8632",
+        "name": "Ollama Chat Model",
+        "credentials": {
+          "ollamaApi": {
+            "id": "OwoNqqKy33Tzlan7",
+            "name": "Ollama local"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "value": "glm-4.5-air",
+            "mode": "list",
+            "cachedResultName": "glm-4.5-air"
+          },
+          "responsesApiEnabled": false,
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+        "typeVersion": 1.3,
+        "position": [
+          1616,
+          1040
+        ],
+        "id": "764d6a14-f52b-41e3-832d-0e22ae1b8595",
+        "name": "OpenAI Chat Model",
+        "credentials": {
+          "openAiApi": {
+            "id": "ciQFZjyEyaubkBmg",
+            "name": "z.ai"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "w8lC6D3QXh47u6w1",
+            "mode": "id"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "chat_id": "={{ $json.chat_id }}",
+              "user_id": "={{ $json.user_id }}",
+              "username": "={{ $json.username }}",
+              "fullname": "={{ $json.fullname }}",
+              "lang": "={{ $json.lang }}"
+            },
+            "schema": [
+              {
+                "id": "chat_id",
+                "displayName": "chat_id",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "id": "user_id",
+                "displayName": "user_id",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "id": "username",
+                "displayName": "username",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "id": "fullname",
+                "displayName": "fullname",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "id": "lang",
+                "displayName": "lang",
+                "required": true,
+                "type": "string"
+              }
+            ],
+            "matchingColumns": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {
+            "waitForSubWorkflow": true
+          }
+        },
+        "id": "nlp-exec-register",
+        "name": "NLP Execute Register",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.3,
+        "position": [
+          3248,
+          704
+        ]
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "dc0b16aa-f29a-474f-8285-51d18e336122",
+                "name": "chat_id",
+                "value": "={{ $json.chat_id }}",
+                "type": "string"
+              },
+              {
+                "id": "0e3401ee-0d12-423d-a865-83cf5c5e8b3a",
+                "name": "user_id",
+                "value": "={{ $json.user_id }}",
+                "type": "string"
+              },
+              {
+                "id": "2b1ac2e1-da8f-4546-a385-4dd86426e72b",
+                "name": "username",
+                "value": "={{ $json.username }}",
+                "type": "string"
+              },
+              {
+                "id": "f854f4d1-681e-4384-9a8b-77cb316ccdad",
+                "name": "fullname",
+                "value": "={{ $json.fullname }}",
+                "type": "string"
+              },
+              {
+                "id": "367396cb-c5ef-492b-b7f9-71627abefaac",
+                "name": "lang",
+                "value": "={{ $json.lang }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          1120,
+          608
+        ],
+        "id": "e9f32399-e18d-4ed6-babb-302ea9cd8186",
+        "name": "Set args"
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "cmd",
+                "name": "command",
+                "type": "string",
+                "value": "={{ $json.command }}"
+              },
+              {
+                "id": "arg",
+                "name": "arg1",
+                "type": "string",
+                "value": "={{ $json.arg1 }}"
+              },
+              {
+                "id": "cid",
+                "name": "chat_id",
+                "type": "string",
+                "value": "={{ $json.chat_id }}"
+              },
+              {
+                "id": "uid",
+                "name": "user_id",
+                "type": "string",
+                "value": "={{ $json.user_id }}"
+              },
+              {
+                "id": "uname",
+                "name": "username",
+                "type": "string",
+                "value": "={{ $json.username }}"
+              },
+              {
+                "id": "fname",
+                "name": "fullname",
+                "type": "string",
+                "value": "={{ $json.fullname }}"
+              },
+              {
+                "id": "lng",
+                "name": "lang",
+                "type": "string",
+                "value": "={{ $json.lang }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "merge-context-with-parsed",
+        "name": "Merge Context",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          2400,
+          592
+        ]
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "={{ $('Start').item.json.text }}",
+          "hasOutputParser": true,
+          "needsFallback": true,
+          "messages": {
+            "messageValues": [
+              {
+                "message": "=# TASK\nParse user message into this JSON format:\n{\"command\": \"<COMMAND>\", \"arg1\": \"<ARGUMENT>\" or [{\"prop1\":\"value1\"...}, ... {\"prop1\":\"value2\"}] }\nCommand is mandatory. Arguments \"arg1\" is optional.\nNO other fields allowed. NO arrays in root. JSON should be valid.\n\n---\n\n# CURRENT DATE\nToday: {{ $today.format('yyyy-MM-dd') }} ({{ $today.format('cccc') }})\nNow: {{ $now.format('yyyy-MM-dd HH:mm') }}\n\n---\n\n# COMMANDS REFERENCE\n\n## 1. show\nPurpose: Display court availability\nTrigger words: show, available, free, schedule, what's open, расписание, покажи, pokaż, wolne\narg1: Date string in YYYY-MM-DD format\n\nExamples:\n- \"show tomorrow\" → {\"command\": \"show\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n- \"what's available Saturday\" → {\"command\": \"show\", \"arg1\": \"2026-01-03\"}\n- \"Покажи расписание на субботу\" → {\"command\": \"show\", \"arg1\": \"2026-01-03\"}\n- \"pokaż wolne korty na jutro\" → {\"command\": \"show\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n\n## 2. list\nPurpose: Show user's reservations\nTrigger words: list, my reservations, my bookings, мои брони, moje rezerwacje. \nNo arguments.\n\nExamples:\n- \"list my bookings\" → {\"command\": \"list\"}\n- \"Покажи мои брони\" → {\"command\": \"list\"}\n- \"moje rezerwacje\" → {\"command\": \"list\"}\n\n## 3. delete\nPurpose: Cancel ONE reservation by ID\nTrigger words: delete, cancel, remove + ID (NOT \"all\")\narg1: Reservation ID string\n\nExamples:\n- \"cancel 6952ec02dda30\" → {\"command\": \"delete\", \"arg1\": \"6952ec02dda30\"}\n- \"delete booking abc123\" → {\"command\": \"delete\", \"arg1\": \"abc123\"}\n\n## 4. deleteall\nPurpose: Cancel ALL reservations\nTrigger words: delete all, cancel all, remove all, отмени все, usuń wszystko. \nNo arguments.\n\nExamples:\n- \"cancel all reservations\" → {\"command\": \"deleteall\"}\n- \"Отмени все мои брони\" → {\"command\": \"deleteall\"}\n- \"usuń wszystkie rezerwacje\" → {\"command\": \"deleteall\"}\n\n## 5. book\nPurpose: Make a court reservation\nTrigger words: book, reserve, забронируй, zarezerwuj.\nArgument:\narg1 - JSON array with booking details, each item has mandatory fields: \"court\", \"date\", \"time_start\", \"time_end\", \"players_num\", \"notes\".\n\nFormat: [{ \"court\": \"N\", \"date\": \"YYYY-MM-DD\", \"time_start\": \"HH:MM\", \"time_end\": \"HH:MM\", \"players_num\": \"4\", \"notes\": \"\" },\n...\n]\n\n\nExamples:\n- \"Book court 1 and 2 for tomorrow 16:00-17:00\" → `{\"command\": \"book\", \"arg1\": [{\"court\":\"1\", \"date\":\"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\", \"time_start\":\"16:00\", \"time_end\":\"17:00\", \"players_num\":\"4\", \"notes\":\"\"},{\"court\":\"2\", \"date\":\"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\", \"time_start\":\"16:00\", \"time_end\":\"17:00\", \"players_num\":\"4\", \"notes\":\"\"}]}`\n\n\n## 6. register\nPurpose: Save login credentials\nTrigger words: register, sign up, credentials\narg1: \"email password\" as single string\n\nExamples:\n- \"register user@mail.com pass123\" → {\"command\": \"register\", \"arg1\": \"user@mail.com pass123\"}\n\n---\n\n# DATE CONVERSION RULES\n\n| Input | Output |\n|-------|--------|\n| today | {{ $today.format('yyyy-MM-dd') }} |\n| tomorrow | {{ $today.plus({days: 1}).format('yyyy-MM-dd') }} |\n| day after tomorrow | {{ $today.plus({days: 2}).format('yyyy-MM-dd') }} |\n| Saturday | {{ $today.plus({week: 1}).beginningOf('week').plus({day: 5}).format('yyyy-MM-dd') }} (next Saturday) |\n| Sunday | {{ $today.plus({week: 1}).beginningOf('week').plus({day: 6}).format('yyyy-MM-dd') }} (next Sunday) |\n| 27.12  | {{ $today.format('yyyy') }}-12-27 |\n| 15.01.26 | 2026-01-15 |\n| 15 числа | {{ $today.format('yyyy') }}-{{ 15 > $today.format('dd')? $today.format('MM'): $today.plus({month: 1}).format('MM') }}-15 |\n\nRULE: Always use FUTURE dates. Never use dates in the past.\n\n---\n\n# WRONG vs CORRECT OUTPUT\n\n❌ WRONG (nested parameters):\n`{\"command\": \"show\", \"parameters\": {\"date\": \"2026-01-03\"}}`\n\n❌ WRONG (extra fields):\n`{\"command\": \"show\", \"arg1\": \"2026-01-03\", \"confidence\": 0.9, \"arg_json\": []}`\n\n✅ CORRECT:\n`{\"command\": \"list\"}`\n\n✅ CORRECT:\n`{\"command\": \"show\", \"arg1\": \"2026-01-03\"}`\n\n✅ CORRECT:\n`{\"command\": \"book\", \"arg1\": [{ \"court\": \"3\", \"date\": \"2026-01-10\", \"time_start\": \"15:00\", \"time_end\": \"17:00\", \"players_num\": \"4\", \"notes\": \"\" }]}`\n\n✅ CORRECT:\n`{\"command\": \"deleteall\"}`\n\n---\n\n# OUTPUT RULES\n1. Return ONLY valid JSON\n2. EXACTLY two fields: \"command\" and \"arg1\" or \"arg_json\"\n3. NO explanation, NO thinking, NO markdown\n4. arg1 is ALWAYS a string or a JSON array (if exists)"
+              }
+            ]
+          },
+          "batching": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.chainLlm",
+        "typeVersion": 1.8,
+        "position": [
+          1648,
+          832
+        ],
+        "id": "1a5277f2-62ea-4c18-a882-e431def2d443",
+        "name": "Basic LLM Chain"
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "wYEfXMLutTlrEgBq",
+            "mode": "id"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "arg1": "={{ $json.arg1 }}",
+              "chat_id": "={{ $json.chat_id }}",
+              "user_id": "={{ $json.user_id }}",
+              "username": "={{ $json.username }}",
+              "fullname": "={{ $json.fullname }}",
+              "lang": "={{ $json.lang }}"
+            },
+            "schema": [
+              {
+                "id": "arg1",
+                "displayName": "arg1",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "id": "chat_id",
+                "displayName": "chat_id",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "id": "user_id",
+                "displayName": "user_id",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "id": "username",
+                "displayName": "username",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "id": "fullname",
+                "displayName": "fullname",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "id": "lang",
+                "displayName": "lang",
+                "required": true,
+                "type": "string"
+              }
+            ],
+            "matchingColumns": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {
+            "waitForSubWorkflow": true
+          }
+        },
+        "id": "nlp-exec-delete",
+        "name": "Execute Delete",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.3,
+        "position": [
+          3008,
+          576
+        ]
+      },
+      {
+        "parameters": {
+          "rules": {
+            "values": [
+              {
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "show-cond",
+                      "leftValue": "={{ $json.command }}",
+                      "rightValue": "show",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      }
+                    }
+                  ]
+                },
+                "renameOutput": true,
+                "outputKey": "show"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "book-cond",
+                      "leftValue": "={{ $json.command }}",
+                      "rightValue": "book",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      }
+                    }
+                  ]
+                },
+                "renameOutput": true,
+                "outputKey": "book"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "list-cond",
+                      "leftValue": "={{ $json.command }}",
+                      "rightValue": "list",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      }
+                    }
+                  ]
+                },
+                "renameOutput": true,
+                "outputKey": "list"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "delete-cond",
+                      "leftValue": "={{ $json.command }}",
+                      "rightValue": "delete",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      }
+                    }
+                  ]
+                },
+                "renameOutput": true,
+                "outputKey": "delete"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "register-cond",
+                      "leftValue": "={{ $json.command }}",
+                      "rightValue": "register",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      }
+                    }
+                  ]
+                },
+                "renameOutput": true,
+                "outputKey": "register"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "deleteall-cond",
+                      "leftValue": "={{ $json.command }}",
+                      "rightValue": "deleteall",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      }
+                    }
+                  ]
+                },
+                "renameOutput": true,
+                "outputKey": "deleteall"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 2
+                  },
+                  "conditions": [
+                    {
+                      "id": "be0039d9-287b-4cc5-9562-28e220b9f9de",
+                      "leftValue": "={{ $json.command }}",
+                      "rightValue": "help",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals",
+                        "name": "filter.operator.equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                },
+                "renameOutput": true,
+                "outputKey": "help"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 2
+                  },
+                  "conditions": [
+                    {
+                      "id": "9269504a-9f4d-4fdb-8f45-094551edeb9c",
+                      "leftValue": "={{ $json.command }}",
+                      "rightValue": "start",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals",
+                        "name": "filter.operator.equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                },
+                "renameOutput": true,
+                "outputKey": "start"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "nlp-command-switch",
+        "name": "NLP Command Switch",
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3.2,
+        "position": [
+          2672,
+          496
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "sendChatAction",
+          "chatId": "={{ $json.chat_id }}"
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          1200,
+          384
+        ],
+        "id": "335f530d-a639-4a8e-83dd-d236f51249ca",
+        "name": "Send a chat action",
+        "webhookId": "ff016420-be64-4d5e-b454-2fc9453945c4",
+        "credentials": {
+          "telegramApi": {
+            "id": "pHQDqhsnrwimdaY2",
+            "name": "twoj_badminton_bot"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "51Y9SIV139LvX5jl",
+            "mode": "id"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "chat_id": "={{ $json.chat_id }}",
+              "user_id": "={{ $json.user_id }}",
+              "username": "={{ $json.username }}",
+              "fullname": "={{ $json.fullname }}",
+              "lang": "={{ $json.lang }}"
+            },
+            "schema": [
+              {
+                "id": "chat_id",
+                "displayName": "chat_id",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "id": "user_id",
+                "displayName": "user_id",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "id": "username",
+                "displayName": "username",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "id": "fullname",
+                "displayName": "fullname",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "id": "lang",
+                "displayName": "lang",
+                "required": true,
+                "type": "string"
+              }
+            ],
+            "matchingColumns": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {
+            "waitForSubWorkflow": false
+          }
+        },
+        "id": "nlp-exec-list",
+        "name": "Execute List",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.3,
+        "position": [
+          3232,
+          432
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "p5NpS5X1VLPdY3mX",
+            "mode": "id"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "arg1": "={{ $json.arg1 }}",
+              "chat_id": "={{ $json.chat_id }}",
+              "user_id": "={{ $json.user_id }}",
+              "username": "={{ $json.username }}",
+              "fullname": "={{ $json.fullname }}",
+              "lang": "={{ $json.lang }}"
+            },
+            "schema": [
+              {
+                "id": "arg1",
+                "displayName": "arg1",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "id": "chat_id",
+                "displayName": "chat_id",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "id": "user_id",
+                "displayName": "user_id",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "id": "username",
+                "displayName": "username",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "id": "fullname",
+                "displayName": "fullname",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "id": "lang",
+                "displayName": "lang",
+                "required": true,
+                "type": "string"
+              }
+            ],
+            "matchingColumns": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {
+            "waitForSubWorkflow": true
+          }
+        },
+        "id": "nlp-exec-book",
+        "name": "Execute Book",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.3,
+        "position": [
+          3376,
+          256
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "HFeE52YK9tAzKTpk",
+            "mode": "list",
+            "cachedResultUrl": "/workflow/HFeE52YK9tAzKTpk",
+            "cachedResultName": "Show Command"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "chat_id": "={{ $json.chat_id }}",
+              "arg1": "={{ $json.arg1 }}"
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "chat_id",
+                "displayName": "chat_id",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string"
+              },
+              {
+                "id": "arg1",
+                "displayName": "arg1",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string"
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {
+            "waitForSubWorkflow": false
+          }
+        },
+        "id": "nlp-exec-show",
+        "name": "Execute Show",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.3,
+        "position": [
+          3168,
+          144
+        ]
+      },
+      {
+        "parameters": {
+          "workflowInputs": {
+            "values": [
+              {
+                "name": "chat_id",
+                "type": "any"
+              },
+              {
+                "name": "user_id",
+                "type": "any"
+              },
+              {
+                "name": "username",
+                "type": "any"
+              },
+              {
+                "name": "fullname",
+                "type": "any"
+              },
+              {
+                "name": "lang",
+                "type": "any"
+              },
+              {
+                "name": "text",
+                "type": "any"
+              }
+            ]
+          }
+        },
+        "id": "cb088e16-c752-4c44-b17c-37a8576ca5a7",
+        "typeVersion": 1.1,
+        "name": "Start",
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "position": [
+          928,
+          608
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "ZLkal1BIG7llifwz",
+            "mode": "list"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "arg1": "={{ $json.arg1 }}",
+              "lang": "={{ $json.lang }}",
+              "chat_id_firstItem": "={{ $('Cmd Parse').first().json.chat_id }}"
+            },
+            "matchingColumns": [
+              "arg1",
+              "lang",
+              "chat_id_firstItem"
+            ],
+            "schema": [
+              {
+                "id": "arg1",
+                "displayName": "arg1",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "lang",
+                "displayName": "lang",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "chat_id_firstItem",
+                "displayName": "chat_id_firstItem",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "removed": false
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.2,
+        "position": [
+          3040,
+          880
+        ],
+        "name": "Call Help Command",
+        "id": "0c589faa-0104-4125-a9fc-6d26e80df0c3"
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "f87vmsseGzVtHF8j",
+            "mode": "list"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "lang_firstItem": "={{ $('Cmd Parse').first().json.lang }}",
+              "chat_id_firstItem": "={{ $('Cmd Parse').first().json.chat_id }}"
+            },
+            "matchingColumns": [
+              "lang_firstItem",
+              "chat_id_firstItem"
+            ],
+            "schema": [
+              {
+                "id": "lang_firstItem",
+                "displayName": "lang_firstItem",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "chat_id_firstItem",
+                "displayName": "chat_id_firstItem",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "removed": false
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.2,
+        "position": [
+          3120,
+          1088
+        ],
+        "name": "Call Start Command",
+        "id": "b4d550fd-b135-4049-962c-85166f686ab4"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "beed379a-0109-468d-accd-0c812afc851a",
+                "leftValue": "={{ $('Start').item.json.text }}",
+                "rightValue": "/",
+                "operator": {
+                  "type": "string",
+                  "operation": "startsWith"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          1344,
+          608
+        ],
+        "id": "c0677153-9ced-4bc7-93cf-481fad13394f",
+        "name": "If command"
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "ce8eebdd-c313-4444-a1bd-dcde56619a0d",
+                "name": "command",
+                "type": "string",
+                "value": "={{\n  $json.text\n    .toLowerCase()\n    .replace(/^\\//, '')\n    .split(/ (.+)/)[0]\n  || ''\n}}"
+              },
+              {
+                "id": "834f7369-52f1-4df3-bfcb-754be0bb11e0",
+                "name": "arg1",
+                "type": "string",
+                "value": "={{\n(() => {\n  const raw = $json.text\n    .toLowerCase()\n    .replace(/^\\//, '')\n    .split(/ (.+)/)[1] || '';\n  \n  if (!raw) return '';\n  \n  const input = raw.trim();\n  \n  // Already YYYY-MM-DD format\n  if (/^\\d{4}-\\d{2}-\\d{2}$/.test(input)) {\n    return input;\n  }\n  \n  // DD.MM.YYYY format (e.g., 19.12.2025)\n  const dotFull = input.match(/^(\\d{1,2})\\.(\\d{1,2})\\.(\\d{4})$/);\n  if (dotFull) {\n    const [, d, m, y] = dotFull;\n    return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;\n  }\n  \n  // DD.MM.YY format (e.g., 19.12.25)\n  const dotShort = input.match(/^(\\d{1,2})\\.(\\d{1,2})\\.(\\d{2})$/);\n  if (dotShort) {\n    const [, d, m, y] = dotShort;\n    const fullYear = parseInt(y) > 50 ? '19' + y : '20' + y;\n    return `${fullYear}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;\n  }\n  \n  // DD/MM/YYYY format\n  const slashFull = input.match(/^(\\d{1,2})\\/(\\d{1,2})\\/(\\d{4})$/);\n  if (slashFull) {\n    const [, d, m, y] = slashFull;\n    return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;\n  }\n  \n  // DD/MM/YY format\n  const slashShort = input.match(/^(\\d{1,2})\\/(\\d{1,2})\\/(\\d{2})$/);\n  if (slashShort) {\n    const [, d, m, y] = slashShort;\n    const fullYear = parseInt(y) > 50 ? '19' + y : '20' + y;\n    return `${fullYear}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;\n  }\n  \n  // Return as-is if no pattern matches\n  return input;\n})()\n}}"
+              }
+            ]
+          },
+          "includeOtherFields": true,
+          "include": "selected",
+          "includeFields": "chat_id,user_id,username,fullname,lang",
+          "options": {}
+        },
+        "id": "da92508e-a9c4-4b85-9ce4-fd129fe138e0",
+        "name": "Cmd Parse",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1648,
+          592
+        ],
+        "typeVersion": 3.4
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "4d93a5d1-a32c-47cc-a3c6-74b91257ed56",
+                "name": "command",
+                "value": "={{ $json.output.command }}",
+                "type": "string"
+              },
+              {
+                "id": "f6da0a82-5850-41d2-be86-f8406c622c69",
+                "name": "arg1",
+                "value": "={{ $json.output.arg1 }}",
+                "type": "string"
+              },
+              {
+                "id": "2c46b611-7ed7-4d1c-a406-7e55832101ea",
+                "name": "chat_id",
+                "value": "={{ $('Set args').item.json.chat_id }}",
+                "type": "string"
+              },
+              {
+                "id": "338a3726-f58e-4a2b-81be-4a8ed8203efe",
+                "name": "user_id",
+                "value": "={{ $('Set args').item.json.user_id }}",
+                "type": "string"
+              },
+              {
+                "id": "67edd464-cb6a-46b1-ab45-ef80da23a705",
+                "name": "lang",
+                "value": "={{ $('Set args').item.json.lang }}",
+                "type": "string"
+              },
+              {
+                "id": "dcd57565-c08b-438d-a675-e52263ba2b76",
+                "name": "username",
+                "value": "={{ $('Set args').item.json.username }}",
+                "type": "string"
+              },
+              {
+                "id": "f03df867-7c46-4eb4-bac1-a9bde25fb174",
+                "name": "fullname",
+                "value": "={{ $('Set args').item.json.fullname }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          2032,
+          832
+        ],
+        "id": "20f8862f-1a56-47e5-a5d7-31434e073e73",
+        "name": "Edit Fields"
+      }
+    ],
+    "connections": {
+      "Set args": {
+        "main": [
+          [
+            {
+              "node": "If command",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Merge Context": {
+        "main": [
+          [
+            {
+              "node": "NLP Command Switch",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "NLP Command Switch": {
+        "main": [
+          [
+            {
+              "node": "Execute Show",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Execute Book",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Execute List",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Execute Delete",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "NLP Execute Register",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Execute Delete All",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Call Help Command",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Call Start Command",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "NLP Execute Register": {
+        "main": [
+          []
+        ]
+      },
+      "Execute Show": {
+        "main": [
+          []
+        ]
+      },
+      "Execute Book": {
+        "main": [
+          []
+        ]
+      },
+      "Execute List": {
+        "main": [
+          []
+        ]
+      },
+      "Execute Delete": {
+        "main": [
+          []
+        ]
+      },
+      "Execute Delete All": {
+        "main": [
+          []
+        ]
+      },
+      "Basic LLM Chain": {
+        "main": [
+          [
+            {
+              "node": "Edit Fields",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Structured Output Parser": {
+        "ai_outputParser": [
+          [
+            {
+              "node": "Basic LLM Chain",
+              "type": "ai_outputParser",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Ollama Chat Model": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Basic LLM Chain",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Ollama Model1": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Structured Output Parser",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "OpenAI Chat Model": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Basic LLM Chain",
+              "type": "ai_languageModel",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "Start": {
+        "main": [
+          [
+            {
+              "node": "Send a chat action",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Set args",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "If command": {
+        "main": [
+          [
+            {
+              "node": "Cmd Parse",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Basic LLM Chain",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Cmd Parse": {
+        "main": [
+          [
+            {
+              "node": "Merge Context",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Edit Fields": {
+        "main": [
+          [
+            {
+              "node": "Merge Context",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Sergei Vedishchev",
+    "name": "Version c7c989ae",
+    "description": "",
+    "autosaved": false
+  },
+  "tags": []
+}
