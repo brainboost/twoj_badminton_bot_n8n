@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-05T15:11:28.066Z",
+  "updatedAt": "2026-01-26T21:49:35.700Z",
   "createdAt": "2025-12-22T13:22:52.158Z",
   "id": "p5NpS5X1VLPdY3mX",
   "name": "Book Command",
@@ -180,6 +180,12 @@
               "name": "bookings",
               "type": "array",
               "value": "={{ $('Parse Booking JSON').first().json.bookings }}"
+            },
+            {
+              "id": "236ebd44-e346-4192-b8cc-48b5b2ab64b7",
+              "name": "fullname",
+              "value": "={{ $('When Executed by Another Workflow').item.json.fullname }}",
+              "type": "string"
             }
           ]
         },
@@ -196,7 +202,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Prepare court_bookings array for bulk reservation API\nconst context = $('Set Booking Context').first().json;\nconst bookings = context.bookings;\nconst session_id = context.session_id;\n\n// Format bookings for put_bulk_reservation API\nconst court_bookings = bookings.map(booking => ({\n  court: String(booking.court),\n  date: booking.date,\n  time_start: booking.time_start,\n  time_end: booking.time_end\n}));\n\nreturn [{\n  json: {\n    session_id: session_id,\n    court_bookings: court_bookings,\n    original_bookings: bookings,\n    user_id: context.user_id,\n    username: context.username,\n    chat_id: context.chat_id,\n    lang: context.lang\n  }\n}];"
+        "jsCode": "// Prepare court_bookings array for bulk reservation API\nconst context = $('Set Booking Context').first().json;\nconst bookings = context.bookings;\nconst session_id = context.session_id;\n\n// Format bookings for put_bulk_reservation API\nconst court_bookings = bookings.map(booking => ({\n  court: String(booking.court),\n  date: booking.date,\n  time_start: booking.time_start,\n  time_end: booking.time_end\n}));\n\nreturn [{\n  json: {\n    session_id: session_id,\n    court_bookings: court_bookings,\n    original_bookings: bookings,\n    user_id: context.user_id,\n    username: context.username,\n    fullname: context.fullname,\n    chat_id: context.chat_id,\n    lang: context.lang\n  }\n}];"
       },
       "id": "prepare-bookings-loop",
       "name": "Prepare Bulk Bookings",
@@ -298,7 +304,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const bulkContext = $('Prepare Bulk Bookings').first().json;\nconst inserted = $('MCP Bulk Reservation').first().json.result.structuredContent;\nreturn [{\n  json: {\n    chat_id: bulkContext.chat_id,\n    lang: bulkContext.lang,\n    username: bulkContext.username,\n    bookings: bulkContext.original_bookings,\n    inserted: inserted,\n    success: true\n  }\n}];"
+        "jsCode": "const bulkContext = $('Prepare Bulk Bookings').first().json;\nconst inserted = $('MCP Bulk Reservation').first().json.result.structuredContent;\nreturn [{\n  json: {\n    chat_id: bulkContext.chat_id,\n    lang: bulkContext.lang,\n    username: bulkContext.username,\n    fullname: bulkContext.fullname,\n    bookings: bulkContext.original_bookings,\n    inserted: inserted,\n    success: true\n  }\n}];"
       },
       "id": "collect-success-results",
       "name": "Prepare Success Data",
@@ -354,7 +360,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const template = $input.first().json.text;\nconst context = $('Prepare Success Data').first().json;\nconst bookings = context.bookings;\nconst inserted = context.inserted.reservation.bookings;\nconst username = context.username;\n\nlet messages = [];\nfor (let i = 0; i < inserted.length; i++) {\n  const booking = inserted[i];\n// bookings.forEach( => {booking\n  let msg = template\n    .replace('{id}', booking.booking_id)\n    .replace('{date}', booking.date)\n    .replace('{time_start}', booking.time_start)\n    .replace('{time_end}', booking.time_end)\n    .replace('{court}', booking.court)\n    .replace('{players_num}', bookings[i].players_num)\n    .replace('{fullname}', username)\n    .replace('{notes}', bookings[i].notes || '-');\n  messages.push(\"✅ \" + msg);\n}\n\nreturn [{\n  json: {\n    chat_id: context.chat_id,\n    message: messages.join('\\n\\n---\\n\\n')\n  }\n}];"
+        "jsCode": "const template = $input.first().json.text;\nconst context = $('Prepare Success Data').first().json;\nconst bookings = context.bookings;\nconst inserted = context.inserted.reservation.bookings;\nconst username = context.username;\nconst fullname = context.fullname;\n\nlet messages = [];\nfor (let i = 0; i < inserted.length; i++) {\n  const booking = inserted[i];\n// bookings.forEach( => {booking\n  let msg = template\n    .replace('{id}', booking.booking_id)\n    .replace('{date}', booking.date)\n    .replace('{time_start}', booking.time_start)\n    .replace('{time_end}', booking.time_end)\n    .replace('{court}', booking.court)\n    .replace('{players_num}', bookings[i].players_num)\n    .replace('{fullname}', fullname)\n    .replace('{notes}', bookings[i].notes || '-');\n  messages.push(\"✅ \" + msg);\n}\n\nreturn [{\n  json: {\n    chat_id: context.chat_id,\n    message: messages.join('\\n\\n---\\n\\n')\n  }\n}];"
       },
       "id": "format-success-message",
       "name": "Format Success Message",
@@ -837,8 +843,8 @@
   "meta": {
     "templateCredsSetupCompleted": true
   },
-  "versionId": "4761660a-ab9f-4429-821a-70e44999969c",
-  "activeVersionId": "4761660a-ab9f-4429-821a-70e44999969c",
+  "versionId": "717dda27-8fad-4c8d-8fd6-4e5572a6e25e",
+  "activeVersionId": "717dda27-8fad-4c8d-8fd6-4e5572a6e25e",
   "triggerCount": 0,
   "shared": [
     {
@@ -850,9 +856,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2025-12-31T11:11:56.000Z",
-    "createdAt": "2025-12-31T11:11:41.465Z",
-    "versionId": "4761660a-ab9f-4429-821a-70e44999969c",
+    "updatedAt": "2026-01-26T21:49:39.000Z",
+    "createdAt": "2026-01-26T21:49:35.701Z",
+    "versionId": "717dda27-8fad-4c8d-8fd6-4e5572a6e25e",
     "workflowId": "p5NpS5X1VLPdY3mX",
     "nodes": [
       {
@@ -1029,6 +1035,12 @@
                 "name": "bookings",
                 "type": "array",
                 "value": "={{ $('Parse Booking JSON').first().json.bookings }}"
+              },
+              {
+                "id": "236ebd44-e346-4192-b8cc-48b5b2ab64b7",
+                "name": "fullname",
+                "value": "={{ $('When Executed by Another Workflow').item.json.fullname }}",
+                "type": "string"
               }
             ]
           },
@@ -1045,7 +1057,7 @@
       },
       {
         "parameters": {
-          "jsCode": "// Prepare court_bookings array for bulk reservation API\nconst context = $('Set Booking Context').first().json;\nconst bookings = context.bookings;\nconst session_id = context.session_id;\n\n// Format bookings for put_bulk_reservation API\nconst court_bookings = bookings.map(booking => ({\n  court: String(booking.court),\n  date: booking.date,\n  time_start: booking.time_start,\n  time_end: booking.time_end\n}));\n\nreturn [{\n  json: {\n    session_id: session_id,\n    court_bookings: court_bookings,\n    original_bookings: bookings,\n    user_id: context.user_id,\n    username: context.username,\n    chat_id: context.chat_id,\n    lang: context.lang\n  }\n}];"
+          "jsCode": "// Prepare court_bookings array for bulk reservation API\nconst context = $('Set Booking Context').first().json;\nconst bookings = context.bookings;\nconst session_id = context.session_id;\n\n// Format bookings for put_bulk_reservation API\nconst court_bookings = bookings.map(booking => ({\n  court: String(booking.court),\n  date: booking.date,\n  time_start: booking.time_start,\n  time_end: booking.time_end\n}));\n\nreturn [{\n  json: {\n    session_id: session_id,\n    court_bookings: court_bookings,\n    original_bookings: bookings,\n    user_id: context.user_id,\n    username: context.username,\n    fullname: context.fullname,\n    chat_id: context.chat_id,\n    lang: context.lang\n  }\n}];"
         },
         "id": "prepare-bookings-loop",
         "name": "Prepare Bulk Bookings",
@@ -1147,7 +1159,7 @@
       },
       {
         "parameters": {
-          "jsCode": "const bulkContext = $('Prepare Bulk Bookings').first().json;\nconst inserted = $('MCP Bulk Reservation').first().json.result.structuredContent;\nreturn [{\n  json: {\n    chat_id: bulkContext.chat_id,\n    lang: bulkContext.lang,\n    username: bulkContext.username,\n    bookings: bulkContext.original_bookings,\n    inserted: inserted,\n    success: true\n  }\n}];"
+          "jsCode": "const bulkContext = $('Prepare Bulk Bookings').first().json;\nconst inserted = $('MCP Bulk Reservation').first().json.result.structuredContent;\nreturn [{\n  json: {\n    chat_id: bulkContext.chat_id,\n    lang: bulkContext.lang,\n    username: bulkContext.username,\n    fullname: bulkContext.fullname,\n    bookings: bulkContext.original_bookings,\n    inserted: inserted,\n    success: true\n  }\n}];"
         },
         "id": "collect-success-results",
         "name": "Prepare Success Data",
@@ -1203,7 +1215,7 @@
       },
       {
         "parameters": {
-          "jsCode": "const template = $input.first().json.text;\nconst context = $('Prepare Success Data').first().json;\nconst bookings = context.bookings;\nconst inserted = context.inserted.reservation.bookings;\nconst username = context.username;\n\nlet messages = [];\nfor (let i = 0; i < inserted.length; i++) {\n  const booking = inserted[i];\n// bookings.forEach( => {booking\n  let msg = template\n    .replace('{id}', booking.booking_id)\n    .replace('{date}', booking.date)\n    .replace('{time_start}', booking.time_start)\n    .replace('{time_end}', booking.time_end)\n    .replace('{court}', booking.court)\n    .replace('{players_num}', bookings[i].players_num)\n    .replace('{fullname}', username)\n    .replace('{notes}', bookings[i].notes || '-');\n  messages.push(\"✅ \" + msg);\n}\n\nreturn [{\n  json: {\n    chat_id: context.chat_id,\n    message: messages.join('\\n\\n---\\n\\n')\n  }\n}];"
+          "jsCode": "const template = $input.first().json.text;\nconst context = $('Prepare Success Data').first().json;\nconst bookings = context.bookings;\nconst inserted = context.inserted.reservation.bookings;\nconst username = context.username;\nconst fullname = context.fullname;\n\nlet messages = [];\nfor (let i = 0; i < inserted.length; i++) {\n  const booking = inserted[i];\n// bookings.forEach( => {booking\n  let msg = template\n    .replace('{id}', booking.booking_id)\n    .replace('{date}', booking.date)\n    .replace('{time_start}', booking.time_start)\n    .replace('{time_end}', booking.time_end)\n    .replace('{court}', booking.court)\n    .replace('{players_num}', bookings[i].players_num)\n    .replace('{fullname}', fullname)\n    .replace('{notes}', bookings[i].notes || '-');\n  messages.push(\"✅ \" + msg);\n}\n\nreturn [{\n  json: {\n    chat_id: context.chat_id,\n    message: messages.join('\\n\\n---\\n\\n')\n  }\n}];"
         },
         "id": "format-success-message",
         "name": "Format Success Message",
@@ -1678,7 +1690,7 @@
       }
     },
     "authors": "Sergei Vedishchev",
-    "name": "Version 4761660a",
+    "name": "Version 717dda27",
     "description": "",
     "autosaved": false
   },
