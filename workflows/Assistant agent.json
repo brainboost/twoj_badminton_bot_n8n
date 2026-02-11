@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-12T13:38:36.314Z",
+  "updatedAt": "2026-01-26T13:33:53.619Z",
   "createdAt": "2025-10-14T10:11:33.990Z",
   "id": "uf7MYoeaspA2V85u",
   "name": "Assistant agent",
@@ -487,7 +487,8 @@
     {
       "parameters": {
         "sessionIdType": "customKey",
-        "sessionKey": "=492192664"
+        "sessionKey": "=492192664",
+        "contextWindowLength": 4
       },
       "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
       "typeVersion": 1.3,
@@ -502,8 +503,7 @@
           "id": "3SDluWLUa1vIU50a",
           "name": "Postgres account"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -1461,8 +1461,8 @@
     "templateId": "voice_assistant_agent_with_telegram",
     "templateCredsSetupCompleted": true
   },
-  "versionId": "41ad0b6d-5eb5-4629-95d6-fcd995bae1c2",
-  "activeVersionId": "0afa2696-0f26-4a45-aa4d-c3545fde8ccd",
+  "versionId": "f4f5fd0b-e432-4bfd-944c-2fb65dff4ee6",
+  "activeVersionId": "f4f5fd0b-e432-4bfd-944c-2fb65dff4ee6",
   "triggerCount": 1,
   "shared": [
     {
@@ -1474,9 +1474,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-01-11T20:43:22.000Z",
-    "createdAt": "2026-01-11T20:43:19.853Z",
-    "versionId": "0afa2696-0f26-4a45-aa4d-c3545fde8ccd",
+    "updatedAt": "2026-01-26T13:33:57.000Z",
+    "createdAt": "2026-01-26T13:33:53.620Z",
+    "versionId": "f4f5fd0b-e432-4bfd-944c-2fb65dff4ee6",
     "workflowId": "uf7MYoeaspA2V85u",
     "nodes": [
       {
@@ -1496,7 +1496,7 @@
         "typeVersion": 1.2,
         "position": [
           -1024,
-          -88
+          -96
         ],
         "webhookId": "55acc711-c248-4ac9-b6cd-e295c2d33f4b",
         "credentials": {
@@ -1516,7 +1516,7 @@
         "typeVersion": 1.2,
         "position": [
           -352,
-          276
+          288
         ],
         "id": "66219c83-6371-4cc6-ad43-57cee44f52da",
         "name": "Get a file",
@@ -1539,7 +1539,7 @@
         "typeVersion": 1.8,
         "position": [
           -128,
-          276
+          288
         ],
         "id": "6f314aef-7ff1-4211-8656-e2c1f8fea374",
         "name": "Transcribe audio",
@@ -1556,7 +1556,7 @@
         "typeVersion": 1,
         "position": [
           1600,
-          548
+          560
         ],
         "id": "3122d37e-a446-4f7c-aba0-76a6564b2ee9",
         "name": "Calculator"
@@ -1603,7 +1603,7 @@
         "typeVersion": 1,
         "position": [
           1728,
-          548
+          560
         ],
         "id": "913b9eb7-14e2-4b5a-9f5f-14d93aa0275b",
         "name": "Wikipedia"
@@ -1626,7 +1626,7 @@
         "typeVersion": 1.3,
         "position": [
           1856,
-          548
+          560
         ],
         "id": "924753ce-2c02-49e1-826b-fe741d84717e",
         "name": "Badminton knowledge base",
@@ -1674,7 +1674,7 @@
         "typeVersion": 3.4,
         "position": [
           320,
-          276
+          288
         ],
         "id": "925b1cdf-fbd8-4b01-bcd9-be4177be6c79",
         "name": "Edit Fields"
@@ -1805,7 +1805,7 @@
         "typeVersion": 3.4,
         "position": [
           -800,
-          104
+          112
         ],
         "id": "7f47e326-f0e4-4e03-b3c2-f42115b08cc7",
         "name": "Set fields"
@@ -1839,7 +1839,7 @@
         "typeVersion": 2.3,
         "position": [
           -576,
-          104
+          112
         ],
         "id": "ca86e140-67e6-4cd9-80b2-1efe1179158a",
         "name": "If"
@@ -1853,7 +1853,7 @@
         "typeVersion": 1.2,
         "position": [
           -800,
-          -136
+          -144
         ],
         "id": "44df1e02-a88d-49a9-bae2-a337b24cd045",
         "name": "Send a typing",
@@ -1897,7 +1897,7 @@
         "typeVersion": 1.2,
         "position": [
           96,
-          276
+          288
         ],
         "id": "a29216dc-52c9-46f1-b7b6-f764a9f1a6ed",
         "name": "Send a text message1",
@@ -1921,7 +1921,7 @@
         "typeVersion": 1,
         "position": [
           2144,
-          548
+          560
         ],
         "id": "82ae02fd-570d-4439-9502-ce3e415e7807",
         "name": "Search in Tavily",
@@ -1960,13 +1960,14 @@
       {
         "parameters": {
           "sessionIdType": "customKey",
-          "sessionKey": "=492192664"
+          "sessionKey": "=492192664",
+          "contextWindowLength": 4
         },
         "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
         "typeVersion": 1.3,
         "position": [
           1472,
-          548
+          560
         ],
         "id": "a74dfcb7-3e35-4397-b81e-c9572a4e223a",
         "name": "Postgres Chat Memory",
@@ -1975,8 +1976,7 @@
             "id": "3SDluWLUa1vIU50a",
             "name": "Postgres account"
           }
-        },
-        "disabled": true
+        }
       },
       {
         "parameters": {
@@ -2054,7 +2054,7 @@
         "typeVersion": 1,
         "position": [
           1344,
-          548
+          560
         ],
         "id": "9c07a09b-ca2a-4704-a865-f1266b40dd5d",
         "name": "Ollama Chat Model1",
@@ -2088,7 +2088,7 @@
         "typeVersion": 1.1,
         "position": [
           544,
-          228
+          240
         ],
         "id": "15736666-7dff-454d-aeef-a82675a5b553",
         "name": "Text Classifier"
@@ -2183,7 +2183,7 @@
         "type": "n8n-nodes-base.evaluation",
         "typeVersion": 4.8,
         "position": [
-          1736,
+          1744,
           -96
         ],
         "credentials": {
@@ -2278,7 +2278,7 @@
         "typeVersion": 4.7,
         "position": [
           -1024,
-          152
+          160
         ],
         "id": "711fa0ee-7a5f-484c-baa0-267758548e26",
         "name": "When fetching a dataset row",
@@ -2530,7 +2530,7 @@
             "convertFieldsToString": true
           },
           "options": {
-            "waitForSubWorkflow": false
+            "waitForSubWorkflow": true
           }
         },
         "type": "n8n-nodes-base.executeWorkflow",
@@ -2924,7 +2924,7 @@
       }
     },
     "authors": "Sergei Vedishchev",
-    "name": "Version 0afa2696",
+    "name": "Version f4f5fd0b",
     "description": "",
     "autosaved": false
   },
