@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-11T20:35:59.144Z",
+  "updatedAt": "2026-01-14T19:44:53.884Z",
   "createdAt": "2026-01-11T18:21:47.330Z",
   "id": "QbD3Epml4ANF9vr0",
   "name": "Command Parser",
@@ -96,7 +96,7 @@
     {
       "parameters": {
         "schemaType": "manual",
-        "inputSchema": "={\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"Command Processor\",\n  \"type\": \"object\",\n  \"required\": [\n    \"command\"\n  ],\n  \"properties\": {\n    \"command\": {\n      \"enum\": [\n        \"show\",\n        \"list\",\n        \"delete\",\n        \"deleteall\",\n        \"book\",\n        \"register\"\n      ]\n    }\n  },\n  \"allOf\": [\n    {\n      \"comment\": \"Case 1: 'book' requires an array of booking objects\",\n      \"if\": {\n        \"properties\": {\n          \"command\": {\n            \"const\": \"book\"\n          }\n        }\n      },\n      \"then\": {\n        \"properties\": {\n          \"arg1\": {\n            \"type\": \"array\",\n            \"items\": {\n              \"type\": \"object\",\n              \"properties\": {\n                \"court\": {\n                  \"type\": \"string\"\n                },\n                \"date\": {\n                  \"type\": \"string\",\n                  \"format\": \"date\"\n                },\n                \"time_start\": {\n                  \"type\": \"string\"\n                },\n                \"time_end\": {\n                  \"type\": \"string\"\n                },\n                \"players_num\": {\n                  \"type\": \"string\"\n                },\n                \"notes\": {\n                  \"type\": \"string\"\n                }\n              },\n              \"required\": [\n                \"court\",\n                \"date\",\n                \"time_start\",\n                \"time_end\"\n              ]\n            }\n          }\n        },\n        \"required\": [\n          \"arg1\"\n        ]\n      }\n    },\n    {\n      \"comment\": \"Case 2: 'show' or 'delete' require a string (date/ID)\",\n      \"if\": {\n        \"properties\": {\n          \"command\": {\n            \"enum\": [\n              \"show\",\n              \"delete\"\n            ]\n          }\n        }\n      },\n      \"then\": {\n        \"properties\": {\n          \"arg1\": {\n            \"type\": \"string\"\n          }\n        },\n        \"required\": [\n          \"arg1\"\n        ]\n      }\n    },\n    {\n      \"comment\": \"Case 3: 'list', 'deleteall', 'register' usually have no arg1\",\n      \"if\": {\n        \"properties\": {\n          \"command\": {\n            \"enum\": [\n              \"list\",\n              \"deleteall\",\n              \"register\"\n            ]\n          }\n        }\n      },\n      \"then\": {\n        \"not\": {\n          \"required\": [\n            \"arg1\"\n          ]\n        }\n      }\n    }\n  ]\n}",
+        "inputSchema": "={\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"Command Processor\",\n  \"type\": \"object\",\n  \"required\": [\n    \"command\"\n  ],\n  \"properties\": {\n    \"command\": {\n      \"enum\": [\n        \"show\",\n        \"list\",\n        \"delete\",\n        \"deleteall\",\n        \"book\",\n        \"register\",\n        \"play\",\n        \"noshow\",\n        \"help\",\n        \"start\"\n      ]\n    }\n  },\n  \"allOf\": [\n    {\n      \"comment\": \"Case 1: 'book' requires an array of booking objects\",\n      \"if\": {\n        \"properties\": {\n          \"command\": {\n            \"const\": \"book\"\n          }\n        }\n      },\n      \"then\": {\n        \"properties\": {\n          \"arg1\": {\n            \"type\": \"array\",\n            \"items\": {\n              \"type\": \"object\",\n              \"properties\": {\n                \"court\": {\n                  \"type\": \"string\"\n                },\n                \"date\": {\n                  \"type\": \"string\",\n                  \"format\": \"date\"\n                },\n                \"time_start\": {\n                  \"type\": \"string\"\n                },\n                \"time_end\": {\n                  \"type\": \"string\"\n                },\n                \"players_num\": {\n                  \"type\": \"string\"\n                },\n                \"notes\": {\n                  \"type\": \"string\"\n                }\n              },\n              \"required\": [\n                \"court\",\n                \"date\",\n                \"time_start\",\n                \"time_end\"\n              ]\n            }\n          }\n        },\n        \"required\": [\n          \"arg1\"\n        ]\n      }\n    },\n    {\n      \"comment\": \"Case 2: 'show', 'delete', 'play', 'noshow' require a string (date/ID)\",\n      \"if\": {\n        \"properties\": {\n          \"command\": {\n            \"enum\": [\n              \"show\",\n              \"delete\",\n              \"play\",\n              \"noshow\"\n            ]\n          }\n        }\n      },\n      \"then\": {\n        \"properties\": {\n          \"arg1\": {\n            \"type\": \"string\"\n          },\n          \"arg2\": {\n            \"type\": \"string\"\n          }\n        }\n      }\n    },\n    {\n      \"comment\": \"Case 3: 'list', 'deleteall', 'register', 'help', 'start' have no required args\",\n      \"if\": {\n        \"properties\": {\n          \"command\": {\n            \"enum\": [\n              \"list\",\n              \"deleteall\",\n              \"register\",\n              \"help\",\n              \"start\"\n            ]\n          }\n        }\n      },\n      \"then\": {\n        \"not\": {\n          \"required\": [\n            \"arg1\"\n          ]\n        }\n      }\n    }\n  ]\n}",
         "autoFix": true
       },
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
@@ -255,6 +255,9 @@
             }
           ]
         },
+        "includeOtherFields": true,
+        "include": "selected",
+        "includeFields": "text",
         "options": {}
       },
       "type": "n8n-nodes-base.set",
@@ -281,6 +284,12 @@
               "name": "arg1",
               "type": "string",
               "value": "={{ $json.arg1 }}"
+            },
+            {
+              "id": "arg2",
+              "name": "arg2",
+              "type": "string",
+              "value": "={{ $json.arg2 }}"
             },
             {
               "id": "cid",
@@ -334,7 +343,7 @@
         "messages": {
           "messageValues": [
             {
-              "message": "=# TASK\nParse user message into this JSON format:\n{\"command\": \"<COMMAND>\", \"arg1\": \"<ARGUMENT>\" or [{\"prop1\":\"value1\"...}, ... {\"prop1\":\"value2\"}] }\nCommand is mandatory. Arguments \"arg1\" is optional.\nNO other fields allowed. NO arrays in root. JSON should be valid.\n\n---\n\n# CURRENT DATE\nToday: {{ $today.format('yyyy-MM-dd') }} ({{ $today.format('cccc') }})\nNow: {{ $now.format('yyyy-MM-dd HH:mm') }}\n\n---\n\n# COMMANDS REFERENCE\n\n## 1. show\nPurpose: Display court availability\nTrigger words: show, available, free, schedule, what's open, расписание, покажи, pokaż, wolne\narg1: Date string in YYYY-MM-DD format\n\nExamples:\n- \"show tomorrow\" → {\"command\": \"show\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n- \"what's available Saturday\" → {\"command\": \"show\", \"arg1\": \"2026-01-03\"}\n- \"Покажи расписание на субботу\" → {\"command\": \"show\", \"arg1\": \"2026-01-03\"}\n- \"pokaż wolne korty na jutro\" → {\"command\": \"show\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n\n## 2. list\nPurpose: Show user's reservations\nTrigger words: list, my reservations, my bookings, мои брони, moje rezerwacje. \nNo arguments.\n\nExamples:\n- \"list my bookings\" → {\"command\": \"list\"}\n- \"Покажи мои брони\" → {\"command\": \"list\"}\n- \"moje rezerwacje\" → {\"command\": \"list\"}\n\n## 3. delete\nPurpose: Cancel ONE reservation by ID\nTrigger words: delete, cancel, remove + ID (NOT \"all\")\narg1: Reservation ID string\n\nExamples:\n- \"cancel 6952ec02dda30\" → {\"command\": \"delete\", \"arg1\": \"6952ec02dda30\"}\n- \"delete booking abc123\" → {\"command\": \"delete\", \"arg1\": \"abc123\"}\n\n## 4. deleteall\nPurpose: Cancel ALL reservations\nTrigger words: delete all, cancel all, remove all, отмени все, usuń wszystko. \nNo arguments.\n\nExamples:\n- \"cancel all reservations\" → {\"command\": \"deleteall\"}\n- \"Отмени все мои брони\" → {\"command\": \"deleteall\"}\n- \"usuń wszystkie rezerwacje\" → {\"command\": \"deleteall\"}\n\n## 5. book\nPurpose: Make a court reservation\nTrigger words: book, reserve, забронируй, zarezerwuj.\nArgument:\narg1 - JSON array with booking details, each item has mandatory fields: \"court\", \"date\", \"time_start\", \"time_end\", \"players_num\", \"notes\".\n\nFormat: [{ \"court\": \"N\", \"date\": \"YYYY-MM-DD\", \"time_start\": \"HH:MM\", \"time_end\": \"HH:MM\", \"players_num\": \"4\", \"notes\": \"\" },\n...\n]\n\n\nExamples:\n- \"Book court 1 and 2 for tomorrow 16:00-17:00\" → `{\"command\": \"book\", \"arg1\": [{\"court\":\"1\", \"date\":\"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\", \"time_start\":\"16:00\", \"time_end\":\"17:00\", \"players_num\":\"4\", \"notes\":\"\"},{\"court\":\"2\", \"date\":\"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\", \"time_start\":\"16:00\", \"time_end\":\"17:00\", \"players_num\":\"4\", \"notes\":\"\"}]}`\n\n\n## 6. register\nPurpose: Save login credentials\nTrigger words: register, sign up, credentials\narg1: \"email password\" as single string\n\nExamples:\n- \"register user@mail.com pass123\" → {\"command\": \"register\", \"arg1\": \"user@mail.com pass123\"}\n\n---\n\n# DATE CONVERSION RULES\n\n| Input | Output |\n|-------|--------|\n| today | {{ $today.format('yyyy-MM-dd') }} |\n| tomorrow | {{ $today.plus({days: 1}).format('yyyy-MM-dd') }} |\n| day after tomorrow | {{ $today.plus({days: 2}).format('yyyy-MM-dd') }} |\n| Saturday | {{ $today.plus({week: 1}).beginningOf('week').plus({day: 5}).format('yyyy-MM-dd') }} (next Saturday) |\n| Sunday | {{ $today.plus({week: 1}).beginningOf('week').plus({day: 6}).format('yyyy-MM-dd') }} (next Sunday) |\n| 27.12  | {{ $today.format('yyyy') }}-12-27 |\n| 15.01.26 | 2026-01-15 |\n| 15 числа | {{ $today.format('yyyy') }}-{{ 15 > $today.format('dd')? $today.format('MM'): $today.plus({month: 1}).format('MM') }}-15 |\n\nRULE: Always use FUTURE dates. Never use dates in the past.\n\n---\n\n# WRONG vs CORRECT OUTPUT\n\n❌ WRONG (nested parameters):\n`{\"command\": \"show\", \"parameters\": {\"date\": \"2026-01-03\"}}`\n\n❌ WRONG (extra fields):\n`{\"command\": \"show\", \"arg1\": \"2026-01-03\", \"confidence\": 0.9, \"arg_json\": []}`\n\n✅ CORRECT:\n`{\"command\": \"list\"}`\n\n✅ CORRECT:\n`{\"command\": \"show\", \"arg1\": \"2026-01-03\"}`\n\n✅ CORRECT:\n`{\"command\": \"book\", \"arg1\": [{ \"court\": \"3\", \"date\": \"2026-01-10\", \"time_start\": \"15:00\", \"time_end\": \"17:00\", \"players_num\": \"4\", \"notes\": \"\" }]}`\n\n✅ CORRECT:\n`{\"command\": \"deleteall\"}`\n\n---\n\n# OUTPUT RULES\n1. Return ONLY valid JSON\n2. EXACTLY two fields: \"command\" and \"arg1\" or \"arg_json\"\n3. NO explanation, NO thinking, NO markdown\n4. arg1 is ALWAYS a string or a JSON array (if exists)"
+              "message": "=# TASK\nParse user message into this JSON format:\n{\"command\": \"<COMMAND>\", \"arg1\": \"<ARGUMENT>\", \"arg2\": \"<ARGUMENT2>\"}\nCommand is mandatory. Arguments \"arg1\" and \"arg2\" are optional.\nNO other fields allowed. NO arrays in root (except for book command). JSON should be valid.\n\n---\n\n# CURRENT DATE\nToday: {{ $today.format('yyyy-MM-dd') }} ({{ $today.format('cccc') }})\nNow: {{ $now.format('yyyy-MM-dd HH:mm') }}\n\n---\n\n# COMMANDS REFERENCE\n\n## 1. show\nPurpose: Display court availability\nTrigger words: show, available, free, schedule, what's open, расписание, покажи, pokaż, wolne\narg1: Date string in YYYY-MM-DD format\n\nExamples:\n- \"show tomorrow\" → {\"command\": \"show\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n- \"what's available Saturday\" → {\"command\": \"show\", \"arg1\": \"2026-01-17\"}\n\n## 2. list\nPurpose: Show user's reservations\nTrigger words: list, my reservations, my bookings, мои брони, moje rezerwacje\nNo arguments.\n\nExamples:\n- \"list my bookings\" → {\"command\": \"list\"}\n- \"Покажи мои брони\" → {\"command\": \"list\"}\n\n## 3. delete\nPurpose: Cancel ONE reservation by ID\nTrigger words: delete, cancel, remove + ID (NOT \"all\")\narg1: Reservation ID string\n\nExamples:\n- \"cancel 6952ec02dda30\" → {\"command\": \"delete\", \"arg1\": \"6952ec02dda30\"}\n\n## 4. deleteall\nPurpose: Cancel ALL reservations\nTrigger words: delete all, cancel all, remove all, отмени все, usuń wszystko\nNo arguments.\n\nExamples:\n- \"cancel all reservations\" → {\"command\": \"deleteall\"}\n\n## 5. book\nPurpose: Make a court reservation\nTrigger words: book, reserve, забронируй, zarezerwuj\narg1: JSON array with booking details\n\nExamples:\n- \"Book court 1 for tomorrow 16:00-17:00\" → {\"command\": \"book\", \"arg1\": [{\"court\":\"1\", \"date\":\"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\", \"time_start\":\"16:00\", \"time_end\":\"17:00\", \"players_num\":\"4\", \"notes\":\"\"}]}\n\n## 6. register\nPurpose: Save login credentials\nTrigger words: register, sign up, credentials\narg1: \"email password\" as single string\n\nExamples:\n- \"register user@mail.com pass123\" → {\"command\": \"register\", \"arg1\": \"user@mail.com pass123\"}\n\n## 7. play\nPurpose: Register to play on a reserved court\nTrigger words: play, join, join game, register for game, записаться на игру, dołącz do gry, хочу играть, zagraj, поиграть\narg1: Optional - date in YYYY-MM-DD format\narg2: Optional - start time in HH:MM format\n\nExamples:\n- \"I want to play\" → {\"command\": \"play\"}\n- \"join tomorrow's game\" → {\"command\": \"play\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n- \"play 2026-01-17 19:00\" → {\"command\": \"play\", \"arg1\": \"2026-01-17\", \"arg2\": \"19:00\"}\n- \"хочу играть в субботу в 16:00\" → {\"command\": \"play\", \"arg1\": \"2026-01-18\", \"arg2\": \"16:00\"}\n- \"zapisz mnie na jutro na 18\" → {\"command\": \"play\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\", \"arg2\": \"18:00\"}\n- \"join the 7pm game on Friday\" → {\"command\": \"play\", \"arg1\": \"2026-01-17\", \"arg2\": \"19:00\"}\n- \"поиграем завтра?\" → {\"command\": \"play\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n\n## 8. noshow\nPurpose: Cancel registration for a session you previously signed up for\nTrigger words: noshow, unregister, cancel registration, can't make it, не могу прийти, rezygnuję, odpadam\narg1: Optional - date in YYYY-MM-DD format\narg2: Optional - start time in HH:MM format\n\nExamples:\n- \"I can't make it\" → {\"command\": \"noshow\"}\n- \"cancel my registration\" → {\"command\": \"noshow\"}\n- \"не могу прити завтра\" → {\"command\": \"noshow\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n- \"odpowiadam na jutro\" → {\"command\": \"noshow\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n- \"noshow 2026-01-17 19:00\" → {\"command\": \"noshow\", \"arg1\": \"2026-01-17\", \"arg2\": \"19:00\"}\n\n## 9. help\nPurpose: Show available commands\nTrigger words: help, pomoc, pomoc, помощь\nNo arguments.\n\n## 10. start\nPurpose: Start the bot / welcome message\nTrigger words: start, begin, начать, zacznij\nNo arguments.\n\n---\n\n# DATE CONVERSION RULES\n\n| Input | Output |\n|-------|--------|\n| today | {{ $today.format('yyyy-MM-dd') }} |\n| tomorrow | {{ $today.plus({days: 1}).format('yyyy-MM-dd') }} |\n| Saturday | next Saturday's date |\n| 27.12 | {{ $today.format('yyyy') }}-12-27 |\n\nRULE: Always use FUTURE dates.\n\n---\n\n# TIME CONVERSION RULES\n\n| Input | Output |\n|-------|--------|\n| 7pm | 19:00 |\n| 16:00 | 16:00 |\n| at 18 | 18:00 |\n| в 19 часов | 19:00 |\n| o 16 | 16:00 |\n\n---\n\n# OUTPUT RULES\n1. Return ONLY valid JSON\n2. Fields: \"command\" (required), \"arg1\" (optional), \"arg2\" (optional)\n3. NO explanation, NO thinking, NO markdown\n4. arg1 is a string or JSON array (for book), arg2 is always a string"
             }
           ]
         },
@@ -433,7 +442,6 @@
                   "caseSensitive": true,
                   "typeValidation": "strict"
                 },
-                "combinator": "and",
                 "conditions": [
                   {
                     "id": "show-cond",
@@ -444,7 +452,8 @@
                       "operation": "equals"
                     }
                   }
-                ]
+                ],
+                "combinator": "and"
               },
               "renameOutput": true,
               "outputKey": "show"
@@ -457,7 +466,6 @@
                   "caseSensitive": true,
                   "typeValidation": "strict"
                 },
-                "combinator": "and",
                 "conditions": [
                   {
                     "id": "book-cond",
@@ -468,7 +476,8 @@
                       "operation": "equals"
                     }
                   }
-                ]
+                ],
+                "combinator": "and"
               },
               "renameOutput": true,
               "outputKey": "book"
@@ -481,7 +490,6 @@
                   "caseSensitive": true,
                   "typeValidation": "strict"
                 },
-                "combinator": "and",
                 "conditions": [
                   {
                     "id": "list-cond",
@@ -492,7 +500,8 @@
                       "operation": "equals"
                     }
                   }
-                ]
+                ],
+                "combinator": "and"
               },
               "renameOutput": true,
               "outputKey": "list"
@@ -505,7 +514,6 @@
                   "caseSensitive": true,
                   "typeValidation": "strict"
                 },
-                "combinator": "and",
                 "conditions": [
                   {
                     "id": "delete-cond",
@@ -516,7 +524,8 @@
                       "operation": "equals"
                     }
                   }
-                ]
+                ],
+                "combinator": "and"
               },
               "renameOutput": true,
               "outputKey": "delete"
@@ -529,7 +538,6 @@
                   "caseSensitive": true,
                   "typeValidation": "strict"
                 },
-                "combinator": "and",
                 "conditions": [
                   {
                     "id": "register-cond",
@@ -540,7 +548,8 @@
                       "operation": "equals"
                     }
                   }
-                ]
+                ],
+                "combinator": "and"
               },
               "renameOutput": true,
               "outputKey": "register"
@@ -553,7 +562,6 @@
                   "caseSensitive": true,
                   "typeValidation": "strict"
                 },
-                "combinator": "and",
                 "conditions": [
                   {
                     "id": "deleteall-cond",
@@ -564,7 +572,8 @@
                       "operation": "equals"
                     }
                   }
-                ]
+                ],
+                "combinator": "and"
               },
               "renameOutput": true,
               "outputKey": "deleteall"
@@ -572,20 +581,19 @@
             {
               "conditions": {
                 "options": {
-                  "caseSensitive": true,
+                  "version": 2,
                   "leftValue": "",
-                  "typeValidation": "strict",
-                  "version": 2
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
                 },
                 "conditions": [
                   {
-                    "id": "be0039d9-287b-4cc5-9562-28e220b9f9de",
+                    "id": "help-cond",
                     "leftValue": "={{ $json.command }}",
                     "rightValue": "help",
                     "operator": {
                       "type": "string",
-                      "operation": "equals",
-                      "name": "filter.operator.equals"
+                      "operation": "equals"
                     }
                   }
                 ],
@@ -597,20 +605,19 @@
             {
               "conditions": {
                 "options": {
-                  "caseSensitive": true,
+                  "version": 2,
                   "leftValue": "",
-                  "typeValidation": "strict",
-                  "version": 2
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
                 },
                 "conditions": [
                   {
-                    "id": "9269504a-9f4d-4fdb-8f45-094551edeb9c",
+                    "id": "start-cond",
                     "leftValue": "={{ $json.command }}",
                     "rightValue": "start",
                     "operator": {
                       "type": "string",
-                      "operation": "equals",
-                      "name": "filter.operator.equals"
+                      "operation": "equals"
                     }
                   }
                 ],
@@ -618,6 +625,54 @@
               },
               "renameOutput": true,
               "outputKey": "start"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "play-cond",
+                    "leftValue": "={{ $json.command }}",
+                    "rightValue": "play",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "play"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "noshow-cond",
+                    "leftValue": "={{ $json.command }}",
+                    "rightValue": "noshow",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "noshow"
             }
           ]
         },
@@ -629,7 +684,7 @@
       "typeVersion": 3.2,
       "position": [
         2672,
-        496
+        464
       ]
     },
     {
@@ -938,8 +993,8 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.2,
       "position": [
-        3040,
-        880
+        3136,
+        896
       ],
       "name": "Call Help Command",
       "id": "0c589faa-0104-4125-a9fc-6d26e80df0c3"
@@ -989,8 +1044,8 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.2,
       "position": [
-        3120,
-        1088
+        3232,
+        1056
       ],
       "name": "Call Start Command",
       "id": "b4d550fd-b135-4049-962c-85166f686ab4"
@@ -999,15 +1054,15 @@
       "parameters": {
         "conditions": {
           "options": {
-            "caseSensitive": true,
+            "version": 3,
             "leftValue": "",
-            "typeValidation": "strict",
-            "version": 3
+            "caseSensitive": true,
+            "typeValidation": "strict"
           },
           "conditions": [
             {
               "id": "beed379a-0109-468d-accd-0c812afc851a",
-              "leftValue": "={{ $('Start').item.json.text }}",
+              "leftValue": "={{ $json.text }}",
               "rightValue": "/",
               "operator": {
                 "type": "string",
@@ -1036,13 +1091,19 @@
               "id": "ce8eebdd-c313-4444-a1bd-dcde56619a0d",
               "name": "command",
               "type": "string",
-              "value": "={{\n  $json.text\n    .toLowerCase()\n    .replace(/^\\//, '')\n    .split(/ (.+)/)[0]\n  || ''\n}}"
+              "value": "={{ $json.text.toLowerCase().replace(/^\\//, '').split(/ (.+)/)[0] || '' }}"
             },
             {
               "id": "834f7369-52f1-4df3-bfcb-754be0bb11e0",
               "name": "arg1",
               "type": "string",
-              "value": "={{\n(() => {\n  const raw = $json.text\n    .toLowerCase()\n    .replace(/^\\//, '')\n    .split(/ (.+)/)[1] || '';\n  \n  if (!raw) return '';\n  \n  const input = raw.trim();\n  \n  // Already YYYY-MM-DD format\n  if (/^\\d{4}-\\d{2}-\\d{2}$/.test(input)) {\n    return input;\n  }\n  \n  // DD.MM.YYYY format (e.g., 19.12.2025)\n  const dotFull = input.match(/^(\\d{1,2})\\.(\\d{1,2})\\.(\\d{4})$/);\n  if (dotFull) {\n    const [, d, m, y] = dotFull;\n    return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;\n  }\n  \n  // DD.MM.YY format (e.g., 19.12.25)\n  const dotShort = input.match(/^(\\d{1,2})\\.(\\d{1,2})\\.(\\d{2})$/);\n  if (dotShort) {\n    const [, d, m, y] = dotShort;\n    const fullYear = parseInt(y) > 50 ? '19' + y : '20' + y;\n    return `${fullYear}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;\n  }\n  \n  // DD/MM/YYYY format\n  const slashFull = input.match(/^(\\d{1,2})\\/(\\d{1,2})\\/(\\d{4})$/);\n  if (slashFull) {\n    const [, d, m, y] = slashFull;\n    return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;\n  }\n  \n  // DD/MM/YY format\n  const slashShort = input.match(/^(\\d{1,2})\\/(\\d{1,2})\\/(\\d{2})$/);\n  if (slashShort) {\n    const [, d, m, y] = slashShort;\n    const fullYear = parseInt(y) > 50 ? '19' + y : '20' + y;\n    return `${fullYear}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;\n  }\n  \n  // Return as-is if no pattern matches\n  return input;\n})()\n}}"
+              "value": "={{ (() => { const parts = $json.text.toLowerCase().replace(/^\\//, '').split(/\\s+/); return parts[1] || ''; })() }}"
+            },
+            {
+              "id": "arg2-new",
+              "name": "arg2",
+              "type": "string",
+              "value": "={{ (() => { const parts = $json.text.toLowerCase().replace(/^\\//, '').split(/\\s+/); return parts[2] || ''; })() }}"
             }
           ]
         },
@@ -1067,44 +1128,50 @@
             {
               "id": "4d93a5d1-a32c-47cc-a3c6-74b91257ed56",
               "name": "command",
-              "value": "={{ $json.output.command }}",
-              "type": "string"
+              "type": "string",
+              "value": "={{ $json.output.command }}"
             },
             {
               "id": "f6da0a82-5850-41d2-be86-f8406c622c69",
               "name": "arg1",
-              "value": "={{ $json.output.arg1 }}",
-              "type": "string"
+              "type": "string",
+              "value": "={{ $json.output.arg1 }}"
+            },
+            {
+              "id": "arg2-nlp",
+              "name": "arg2",
+              "type": "string",
+              "value": "={{ $json.output.arg2 }}"
             },
             {
               "id": "2c46b611-7ed7-4d1c-a406-7e55832101ea",
               "name": "chat_id",
-              "value": "={{ $('Set args').item.json.chat_id }}",
-              "type": "string"
+              "type": "string",
+              "value": "={{ $('Set args').item.json.chat_id }}"
             },
             {
               "id": "338a3726-f58e-4a2b-81be-4a8ed8203efe",
               "name": "user_id",
-              "value": "={{ $('Set args').item.json.user_id }}",
-              "type": "string"
+              "type": "string",
+              "value": "={{ $('Set args').item.json.user_id }}"
             },
             {
               "id": "67edd464-cb6a-46b1-ab45-ef80da23a705",
               "name": "lang",
-              "value": "={{ $('Set args').item.json.lang }}",
-              "type": "string"
+              "type": "string",
+              "value": "={{ $('Set args').item.json.lang }}"
             },
             {
               "id": "dcd57565-c08b-438d-a675-e52263ba2b76",
               "name": "username",
-              "value": "={{ $('Set args').item.json.username }}",
-              "type": "string"
+              "type": "string",
+              "value": "={{ $('Set args').item.json.username }}"
             },
             {
               "id": "f03df867-7c46-4eb4-bac1-a9bde25fb174",
               "name": "fullname",
-              "value": "={{ $('Set args').item.json.fullname }}",
-              "type": "string"
+              "type": "string",
+              "value": "={{ $('Set args').item.json.fullname }}"
             }
           ]
         },
@@ -1118,6 +1185,185 @@
       ],
       "id": "20f8862f-1a56-47e5-a5d7-31434e073e73",
       "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "CRCVg9hV0gdk0WNb"
+        },
+        "workflowInputs": {
+          "value": {
+            "arg1": "={{ $json.arg1 }}",
+            "arg2": "={{ $json.arg2 }}",
+            "lang": "={{ $json.lang }}",
+            "chat_id": "={{ $json.chat_id }}",
+            "user_id": "={{ $json.user_id }}",
+            "fullname": "={{ $json.fullname }}",
+            "username": "={{ $json.username }}"
+          },
+          "schema": [
+            {
+              "id": "arg1",
+              "type": "string",
+              "required": false,
+              "displayName": "arg1"
+            },
+            {
+              "id": "arg2",
+              "type": "string",
+              "required": false,
+              "displayName": "arg2"
+            },
+            {
+              "id": "chat_id",
+              "type": "string",
+              "required": true,
+              "displayName": "chat_id"
+            },
+            {
+              "id": "user_id",
+              "type": "string",
+              "required": true,
+              "displayName": "user_id"
+            },
+            {
+              "id": "username",
+              "type": "string",
+              "required": true,
+              "displayName": "username"
+            },
+            {
+              "id": "fullname",
+              "type": "string",
+              "required": true,
+              "displayName": "fullname"
+            },
+            {
+              "id": "lang",
+              "type": "string",
+              "required": true,
+              "displayName": "lang"
+            }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "exec-play",
+      "name": "Execute Play",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        3328,
+        1264
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "RURORDihq0oJJTKJ"
+        },
+        "workflowInputs": {
+          "value": {
+            "chat_id": "={{ $json.chat_id }}",
+            "user_id": "={{ $json.user_id }}",
+            "username": "={{ $json.username }}",
+            "fullname": "={{ $json.fullname }}",
+            "lang": "={{ $json.lang }}",
+            "arg1": "={{ $json.arg1 }}",
+            "arg2": "={{ $json.arg2 }}"
+          },
+          "schema": [
+            {
+              "id": "chat_id",
+              "type": "string",
+              "required": false,
+              "displayName": "chat_id",
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "user_id",
+              "type": "string",
+              "required": false,
+              "displayName": "user_id",
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "username",
+              "type": "string",
+              "required": false,
+              "displayName": "username",
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fullname",
+              "type": "string",
+              "required": false,
+              "displayName": "fullname",
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "lang",
+              "type": "string",
+              "required": false,
+              "displayName": "lang",
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "arg1",
+              "type": "string",
+              "required": false,
+              "displayName": "arg1",
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "arg2",
+              "type": "string",
+              "required": false,
+              "displayName": "arg2",
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "71e0882a-2ae9-4532-ab48-2418e847fab5",
+      "name": "Execute Noshow",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        3136,
+        1344
+      ]
     }
   ],
   "connections": {
@@ -1197,6 +1443,20 @@
         [
           {
             "node": "Call Start Command",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute Play",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute Noshow",
             "type": "main",
             "index": 0
           }
@@ -1347,12 +1607,13 @@
   },
   "settings": {
     "executionOrder": "v1",
-    "availableInMCP": false
+    "availableInMCP": false,
+    "callerPolicy": "workflowsFromSameOwner"
   },
   "staticData": null,
   "meta": null,
-  "versionId": "c7c989ae-f1d4-4b3d-ac2b-00705bf5a12d",
-  "activeVersionId": "c7c989ae-f1d4-4b3d-ac2b-00705bf5a12d",
+  "versionId": "66e10c60-f18e-4e00-9362-b377e35a231d",
+  "activeVersionId": "89d0bd76-62a4-448b-90ad-44a9265a516b",
   "triggerCount": 0,
   "shared": [
     {
@@ -1364,9 +1625,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-01-11T20:36:46.000Z",
-    "createdAt": "2026-01-11T20:33:30.593Z",
-    "versionId": "c7c989ae-f1d4-4b3d-ac2b-00705bf5a12d",
+    "updatedAt": "2026-01-14T19:40:15.822Z",
+    "createdAt": "2026-01-14T19:40:15.822Z",
+    "versionId": "89d0bd76-62a4-448b-90ad-44a9265a516b",
     "workflowId": "QbD3Epml4ANF9vr0",
     "nodes": [
       {
@@ -1459,7 +1720,7 @@
       {
         "parameters": {
           "schemaType": "manual",
-          "inputSchema": "={\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"Command Processor\",\n  \"type\": \"object\",\n  \"required\": [\n    \"command\"\n  ],\n  \"properties\": {\n    \"command\": {\n      \"enum\": [\n        \"show\",\n        \"list\",\n        \"delete\",\n        \"deleteall\",\n        \"book\",\n        \"register\"\n      ]\n    }\n  },\n  \"allOf\": [\n    {\n      \"comment\": \"Case 1: 'book' requires an array of booking objects\",\n      \"if\": {\n        \"properties\": {\n          \"command\": {\n            \"const\": \"book\"\n          }\n        }\n      },\n      \"then\": {\n        \"properties\": {\n          \"arg1\": {\n            \"type\": \"array\",\n            \"items\": {\n              \"type\": \"object\",\n              \"properties\": {\n                \"court\": {\n                  \"type\": \"string\"\n                },\n                \"date\": {\n                  \"type\": \"string\",\n                  \"format\": \"date\"\n                },\n                \"time_start\": {\n                  \"type\": \"string\"\n                },\n                \"time_end\": {\n                  \"type\": \"string\"\n                },\n                \"players_num\": {\n                  \"type\": \"string\"\n                },\n                \"notes\": {\n                  \"type\": \"string\"\n                }\n              },\n              \"required\": [\n                \"court\",\n                \"date\",\n                \"time_start\",\n                \"time_end\"\n              ]\n            }\n          }\n        },\n        \"required\": [\n          \"arg1\"\n        ]\n      }\n    },\n    {\n      \"comment\": \"Case 2: 'show' or 'delete' require a string (date/ID)\",\n      \"if\": {\n        \"properties\": {\n          \"command\": {\n            \"enum\": [\n              \"show\",\n              \"delete\"\n            ]\n          }\n        }\n      },\n      \"then\": {\n        \"properties\": {\n          \"arg1\": {\n            \"type\": \"string\"\n          }\n        },\n        \"required\": [\n          \"arg1\"\n        ]\n      }\n    },\n    {\n      \"comment\": \"Case 3: 'list', 'deleteall', 'register' usually have no arg1\",\n      \"if\": {\n        \"properties\": {\n          \"command\": {\n            \"enum\": [\n              \"list\",\n              \"deleteall\",\n              \"register\"\n            ]\n          }\n        }\n      },\n      \"then\": {\n        \"not\": {\n          \"required\": [\n            \"arg1\"\n          ]\n        }\n      }\n    }\n  ]\n}",
+          "inputSchema": "={\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"Command Processor\",\n  \"type\": \"object\",\n  \"required\": [\n    \"command\"\n  ],\n  \"properties\": {\n    \"command\": {\n      \"enum\": [\n        \"show\",\n        \"list\",\n        \"delete\",\n        \"deleteall\",\n        \"book\",\n        \"register\",\n        \"play\",\n        \"noshow\",\n        \"help\",\n        \"start\"\n      ]\n    }\n  },\n  \"allOf\": [\n    {\n      \"comment\": \"Case 1: 'book' requires an array of booking objects\",\n      \"if\": {\n        \"properties\": {\n          \"command\": {\n            \"const\": \"book\"\n          }\n        }\n      },\n      \"then\": {\n        \"properties\": {\n          \"arg1\": {\n            \"type\": \"array\",\n            \"items\": {\n              \"type\": \"object\",\n              \"properties\": {\n                \"court\": {\n                  \"type\": \"string\"\n                },\n                \"date\": {\n                  \"type\": \"string\",\n                  \"format\": \"date\"\n                },\n                \"time_start\": {\n                  \"type\": \"string\"\n                },\n                \"time_end\": {\n                  \"type\": \"string\"\n                },\n                \"players_num\": {\n                  \"type\": \"string\"\n                },\n                \"notes\": {\n                  \"type\": \"string\"\n                }\n              },\n              \"required\": [\n                \"court\",\n                \"date\",\n                \"time_start\",\n                \"time_end\"\n              ]\n            }\n          }\n        },\n        \"required\": [\n          \"arg1\"\n        ]\n      }\n    },\n    {\n      \"comment\": \"Case 2: 'show', 'delete', 'play', 'noshow' require a string (date/ID)\",\n      \"if\": {\n        \"properties\": {\n          \"command\": {\n            \"enum\": [\n              \"show\",\n              \"delete\",\n              \"play\",\n              \"noshow\"\n            ]\n          }\n        }\n      },\n      \"then\": {\n        \"properties\": {\n          \"arg1\": {\n            \"type\": \"string\"\n          },\n          \"arg2\": {\n            \"type\": \"string\"\n          }\n        }\n      }\n    },\n    {\n      \"comment\": \"Case 3: 'list', 'deleteall', 'register', 'help', 'start' have no required args\",\n      \"if\": {\n        \"properties\": {\n          \"command\": {\n            \"enum\": [\n              \"list\",\n              \"deleteall\",\n              \"register\",\n              \"help\",\n              \"start\"\n            ]\n          }\n        }\n      },\n      \"then\": {\n        \"not\": {\n          \"required\": [\n            \"arg1\"\n          ]\n        }\n      }\n    }\n  ]\n}",
           "autoFix": true
         },
         "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
@@ -1618,6 +1879,9 @@
               }
             ]
           },
+          "includeOtherFields": true,
+          "include": "selected",
+          "includeFields": "text",
           "options": {}
         },
         "type": "n8n-nodes-base.set",
@@ -1644,6 +1908,12 @@
                 "name": "arg1",
                 "type": "string",
                 "value": "={{ $json.arg1 }}"
+              },
+              {
+                "id": "arg2",
+                "name": "arg2",
+                "type": "string",
+                "value": "={{ $json.arg2 }}"
               },
               {
                 "id": "cid",
@@ -1697,11 +1967,10 @@
           "messages": {
             "messageValues": [
               {
-                "message": "=# TASK\nParse user message into this JSON format:\n{\"command\": \"<COMMAND>\", \"arg1\": \"<ARGUMENT>\" or [{\"prop1\":\"value1\"...}, ... {\"prop1\":\"value2\"}] }\nCommand is mandatory. Arguments \"arg1\" is optional.\nNO other fields allowed. NO arrays in root. JSON should be valid.\n\n---\n\n# CURRENT DATE\nToday: {{ $today.format('yyyy-MM-dd') }} ({{ $today.format('cccc') }})\nNow: {{ $now.format('yyyy-MM-dd HH:mm') }}\n\n---\n\n# COMMANDS REFERENCE\n\n## 1. show\nPurpose: Display court availability\nTrigger words: show, available, free, schedule, what's open, расписание, покажи, pokaż, wolne\narg1: Date string in YYYY-MM-DD format\n\nExamples:\n- \"show tomorrow\" → {\"command\": \"show\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n- \"what's available Saturday\" → {\"command\": \"show\", \"arg1\": \"2026-01-03\"}\n- \"Покажи расписание на субботу\" → {\"command\": \"show\", \"arg1\": \"2026-01-03\"}\n- \"pokaż wolne korty na jutro\" → {\"command\": \"show\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n\n## 2. list\nPurpose: Show user's reservations\nTrigger words: list, my reservations, my bookings, мои брони, moje rezerwacje. \nNo arguments.\n\nExamples:\n- \"list my bookings\" → {\"command\": \"list\"}\n- \"Покажи мои брони\" → {\"command\": \"list\"}\n- \"moje rezerwacje\" → {\"command\": \"list\"}\n\n## 3. delete\nPurpose: Cancel ONE reservation by ID\nTrigger words: delete, cancel, remove + ID (NOT \"all\")\narg1: Reservation ID string\n\nExamples:\n- \"cancel 6952ec02dda30\" → {\"command\": \"delete\", \"arg1\": \"6952ec02dda30\"}\n- \"delete booking abc123\" → {\"command\": \"delete\", \"arg1\": \"abc123\"}\n\n## 4. deleteall\nPurpose: Cancel ALL reservations\nTrigger words: delete all, cancel all, remove all, отмени все, usuń wszystko. \nNo arguments.\n\nExamples:\n- \"cancel all reservations\" → {\"command\": \"deleteall\"}\n- \"Отмени все мои брони\" → {\"command\": \"deleteall\"}\n- \"usuń wszystkie rezerwacje\" → {\"command\": \"deleteall\"}\n\n## 5. book\nPurpose: Make a court reservation\nTrigger words: book, reserve, забронируй, zarezerwuj.\nArgument:\narg1 - JSON array with booking details, each item has mandatory fields: \"court\", \"date\", \"time_start\", \"time_end\", \"players_num\", \"notes\".\n\nFormat: [{ \"court\": \"N\", \"date\": \"YYYY-MM-DD\", \"time_start\": \"HH:MM\", \"time_end\": \"HH:MM\", \"players_num\": \"4\", \"notes\": \"\" },\n...\n]\n\n\nExamples:\n- \"Book court 1 and 2 for tomorrow 16:00-17:00\" → `{\"command\": \"book\", \"arg1\": [{\"court\":\"1\", \"date\":\"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\", \"time_start\":\"16:00\", \"time_end\":\"17:00\", \"players_num\":\"4\", \"notes\":\"\"},{\"court\":\"2\", \"date\":\"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\", \"time_start\":\"16:00\", \"time_end\":\"17:00\", \"players_num\":\"4\", \"notes\":\"\"}]}`\n\n\n## 6. register\nPurpose: Save login credentials\nTrigger words: register, sign up, credentials\narg1: \"email password\" as single string\n\nExamples:\n- \"register user@mail.com pass123\" → {\"command\": \"register\", \"arg1\": \"user@mail.com pass123\"}\n\n---\n\n# DATE CONVERSION RULES\n\n| Input | Output |\n|-------|--------|\n| today | {{ $today.format('yyyy-MM-dd') }} |\n| tomorrow | {{ $today.plus({days: 1}).format('yyyy-MM-dd') }} |\n| day after tomorrow | {{ $today.plus({days: 2}).format('yyyy-MM-dd') }} |\n| Saturday | {{ $today.plus({week: 1}).beginningOf('week').plus({day: 5}).format('yyyy-MM-dd') }} (next Saturday) |\n| Sunday | {{ $today.plus({week: 1}).beginningOf('week').plus({day: 6}).format('yyyy-MM-dd') }} (next Sunday) |\n| 27.12  | {{ $today.format('yyyy') }}-12-27 |\n| 15.01.26 | 2026-01-15 |\n| 15 числа | {{ $today.format('yyyy') }}-{{ 15 > $today.format('dd')? $today.format('MM'): $today.plus({month: 1}).format('MM') }}-15 |\n\nRULE: Always use FUTURE dates. Never use dates in the past.\n\n---\n\n# WRONG vs CORRECT OUTPUT\n\n❌ WRONG (nested parameters):\n`{\"command\": \"show\", \"parameters\": {\"date\": \"2026-01-03\"}}`\n\n❌ WRONG (extra fields):\n`{\"command\": \"show\", \"arg1\": \"2026-01-03\", \"confidence\": 0.9, \"arg_json\": []}`\n\n✅ CORRECT:\n`{\"command\": \"list\"}`\n\n✅ CORRECT:\n`{\"command\": \"show\", \"arg1\": \"2026-01-03\"}`\n\n✅ CORRECT:\n`{\"command\": \"book\", \"arg1\": [{ \"court\": \"3\", \"date\": \"2026-01-10\", \"time_start\": \"15:00\", \"time_end\": \"17:00\", \"players_num\": \"4\", \"notes\": \"\" }]}`\n\n✅ CORRECT:\n`{\"command\": \"deleteall\"}`\n\n---\n\n# OUTPUT RULES\n1. Return ONLY valid JSON\n2. EXACTLY two fields: \"command\" and \"arg1\" or \"arg_json\"\n3. NO explanation, NO thinking, NO markdown\n4. arg1 is ALWAYS a string or a JSON array (if exists)"
+                "message": "=# TASK\nParse user message into this JSON format:\n{\"command\": \"<COMMAND>\", \"arg1\": \"<ARGUMENT>\", \"arg2\": \"<ARGUMENT2>\"}\nCommand is mandatory. Arguments \"arg1\" and \"arg2\" are optional.\nNO other fields allowed. NO arrays in root (except for book command). JSON should be valid.\n\n---\n\n# CURRENT DATE\nToday: {{ $today.format('yyyy-MM-dd') }} ({{ $today.format('cccc') }})\nNow: {{ $now.format('yyyy-MM-dd HH:mm') }}\n\n---\n\n# COMMANDS REFERENCE\n\n## 1. show\nPurpose: Display court availability\nTrigger words: show, available, free, schedule, what's open, расписание, покажи, pokaż, wolne\narg1: Date string in YYYY-MM-DD format\n\nExamples:\n- \"show tomorrow\" → {\"command\": \"show\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n- \"what's available Saturday\" → {\"command\": \"show\", \"arg1\": \"2026-01-17\"}\n\n## 2. list\nPurpose: Show user's reservations\nTrigger words: list, my reservations, my bookings, мои брони, moje rezerwacje\nNo arguments.\n\nExamples:\n- \"list my bookings\" → {\"command\": \"list\"}\n- \"Покажи мои брони\" → {\"command\": \"list\"}\n\n## 3. delete\nPurpose: Cancel ONE reservation by ID\nTrigger words: delete, cancel, remove + ID (NOT \"all\")\narg1: Reservation ID string\n\nExamples:\n- \"cancel 6952ec02dda30\" → {\"command\": \"delete\", \"arg1\": \"6952ec02dda30\"}\n\n## 4. deleteall\nPurpose: Cancel ALL reservations\nTrigger words: delete all, cancel all, remove all, отмени все, usuń wszystko\nNo arguments.\n\nExamples:\n- \"cancel all reservations\" → {\"command\": \"deleteall\"}\n\n## 5. book\nPurpose: Make a court reservation\nTrigger words: book, reserve, забронируй, zarezerwuj\narg1: JSON array with booking details\n\nExamples:\n- \"Book court 1 for tomorrow 16:00-17:00\" → {\"command\": \"book\", \"arg1\": [{\"court\":\"1\", \"date\":\"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\", \"time_start\":\"16:00\", \"time_end\":\"17:00\", \"players_num\":\"4\", \"notes\":\"\"}]}\n\n## 6. register\nPurpose: Save login credentials\nTrigger words: register, sign up, credentials\narg1: \"email password\" as single string\n\nExamples:\n- \"register user@mail.com pass123\" → {\"command\": \"register\", \"arg1\": \"user@mail.com pass123\"}\n\n## 7. play\nPurpose: Register to play on a reserved court\nTrigger words: play, join, join game, register for game, записаться на игру, dołącz do gry, хочу играть, zagraj, поиграть\narg1: Optional - date in YYYY-MM-DD format\narg2: Optional - start time in HH:MM format\n\nExamples:\n- \"I want to play\" → {\"command\": \"play\"}\n- \"join tomorrow's game\" → {\"command\": \"play\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n- \"play 2026-01-17 19:00\" → {\"command\": \"play\", \"arg1\": \"2026-01-17\", \"arg2\": \"19:00\"}\n- \"хочу играть в субботу в 16:00\" → {\"command\": \"play\", \"arg1\": \"2026-01-18\", \"arg2\": \"16:00\"}\n- \"zapisz mnie na jutro na 18\" → {\"command\": \"play\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\", \"arg2\": \"18:00\"}\n- \"join the 7pm game on Friday\" → {\"command\": \"play\", \"arg1\": \"2026-01-17\", \"arg2\": \"19:00\"}\n- \"поиграем завтра?\" → {\"command\": \"play\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n\n## 8. noshow\nPurpose: Cancel registration for a session you previously signed up for\nTrigger words: noshow, unregister, cancel registration, can't make it, не могу прийти, rezygnuję, odpadam\narg1: Optional - date in YYYY-MM-DD format\narg2: Optional - start time in HH:MM format\n\nExamples:\n- \"I can't make it\" → {\"command\": \"noshow\"}\n- \"cancel my registration\" → {\"command\": \"noshow\"}\n- \"не могу прити завтра\" → {\"command\": \"noshow\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n- \"odpowiadam na jutro\" → {\"command\": \"noshow\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n- \"noshow 2026-01-17 19:00\" → {\"command\": \"noshow\", \"arg1\": \"2026-01-17\", \"arg2\": \"19:00\"}\n\n## 9. help\nPurpose: Show available commands\nTrigger words: help, pomoc, pomoc, помощь\nNo arguments.\n\n## 10. start\nPurpose: Start the bot / welcome message\nTrigger words: start, begin, начать, zacznij\nNo arguments.\n\n---\n\n# DATE CONVERSION RULES\n\n| Input | Output |\n|-------|--------|\n| today | {{ $today.format('yyyy-MM-dd') }} |\n| tomorrow | {{ $today.plus({days: 1}).format('yyyy-MM-dd') }} |\n| Saturday | next Saturday's date |\n| 27.12 | {{ $today.format('yyyy') }}-12-27 |\n\nRULE: Always use FUTURE dates.\n\n---\n\n# TIME CONVERSION RULES\n\n| Input | Output |\n|-------|--------|\n| 7pm | 19:00 |\n| 16:00 | 16:00 |\n| at 18 | 18:00 |\n| в 19 часов | 19:00 |\n| o 16 | 16:00 |\n\n---\n\n# OUTPUT RULES\n1. Return ONLY valid JSON\n2. Fields: \"command\" (required), \"arg1\" (optional), \"arg2\" (optional)\n3. NO explanation, NO thinking, NO markdown\n4. arg1 is a string or JSON array (for book), arg2 is always a string"
               }
             ]
-          },
-          "batching": {}
+          }
         },
         "type": "@n8n/n8n-nodes-langchain.chainLlm",
         "typeVersion": 1.8,
@@ -1796,7 +2065,6 @@
                     "caseSensitive": true,
                     "typeValidation": "strict"
                   },
-                  "combinator": "and",
                   "conditions": [
                     {
                       "id": "show-cond",
@@ -1807,7 +2075,8 @@
                         "operation": "equals"
                       }
                     }
-                  ]
+                  ],
+                  "combinator": "and"
                 },
                 "renameOutput": true,
                 "outputKey": "show"
@@ -1820,7 +2089,6 @@
                     "caseSensitive": true,
                     "typeValidation": "strict"
                   },
-                  "combinator": "and",
                   "conditions": [
                     {
                       "id": "book-cond",
@@ -1831,7 +2099,8 @@
                         "operation": "equals"
                       }
                     }
-                  ]
+                  ],
+                  "combinator": "and"
                 },
                 "renameOutput": true,
                 "outputKey": "book"
@@ -1844,7 +2113,6 @@
                     "caseSensitive": true,
                     "typeValidation": "strict"
                   },
-                  "combinator": "and",
                   "conditions": [
                     {
                       "id": "list-cond",
@@ -1855,7 +2123,8 @@
                         "operation": "equals"
                       }
                     }
-                  ]
+                  ],
+                  "combinator": "and"
                 },
                 "renameOutput": true,
                 "outputKey": "list"
@@ -1868,7 +2137,6 @@
                     "caseSensitive": true,
                     "typeValidation": "strict"
                   },
-                  "combinator": "and",
                   "conditions": [
                     {
                       "id": "delete-cond",
@@ -1879,7 +2147,8 @@
                         "operation": "equals"
                       }
                     }
-                  ]
+                  ],
+                  "combinator": "and"
                 },
                 "renameOutput": true,
                 "outputKey": "delete"
@@ -1892,7 +2161,6 @@
                     "caseSensitive": true,
                     "typeValidation": "strict"
                   },
-                  "combinator": "and",
                   "conditions": [
                     {
                       "id": "register-cond",
@@ -1903,7 +2171,8 @@
                         "operation": "equals"
                       }
                     }
-                  ]
+                  ],
+                  "combinator": "and"
                 },
                 "renameOutput": true,
                 "outputKey": "register"
@@ -1916,7 +2185,6 @@
                     "caseSensitive": true,
                     "typeValidation": "strict"
                   },
-                  "combinator": "and",
                   "conditions": [
                     {
                       "id": "deleteall-cond",
@@ -1927,7 +2195,8 @@
                         "operation": "equals"
                       }
                     }
-                  ]
+                  ],
+                  "combinator": "and"
                 },
                 "renameOutput": true,
                 "outputKey": "deleteall"
@@ -1935,20 +2204,19 @@
               {
                 "conditions": {
                   "options": {
-                    "caseSensitive": true,
+                    "version": 2,
                     "leftValue": "",
-                    "typeValidation": "strict",
-                    "version": 2
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
                   },
                   "conditions": [
                     {
-                      "id": "be0039d9-287b-4cc5-9562-28e220b9f9de",
+                      "id": "help-cond",
                       "leftValue": "={{ $json.command }}",
                       "rightValue": "help",
                       "operator": {
                         "type": "string",
-                        "operation": "equals",
-                        "name": "filter.operator.equals"
+                        "operation": "equals"
                       }
                     }
                   ],
@@ -1960,20 +2228,19 @@
               {
                 "conditions": {
                   "options": {
-                    "caseSensitive": true,
+                    "version": 2,
                     "leftValue": "",
-                    "typeValidation": "strict",
-                    "version": 2
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
                   },
                   "conditions": [
                     {
-                      "id": "9269504a-9f4d-4fdb-8f45-094551edeb9c",
+                      "id": "start-cond",
                       "leftValue": "={{ $json.command }}",
                       "rightValue": "start",
                       "operator": {
                         "type": "string",
-                        "operation": "equals",
-                        "name": "filter.operator.equals"
+                        "operation": "equals"
                       }
                     }
                   ],
@@ -1981,6 +2248,54 @@
                 },
                 "renameOutput": true,
                 "outputKey": "start"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "conditions": [
+                    {
+                      "id": "play-cond",
+                      "leftValue": "={{ $json.command }}",
+                      "rightValue": "play",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                },
+                "renameOutput": true,
+                "outputKey": "play"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "leftValue": "",
+                    "caseSensitive": true,
+                    "typeValidation": "strict"
+                  },
+                  "conditions": [
+                    {
+                      "id": "noshow-cond",
+                      "leftValue": "={{ $json.command }}",
+                      "rightValue": "noshow",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                },
+                "renameOutput": true,
+                "outputKey": "noshow"
               }
             ]
           },
@@ -1992,7 +2307,7 @@
         "typeVersion": 3.2,
         "position": [
           2672,
-          496
+          480
         ]
       },
       {
@@ -2362,15 +2677,15 @@
         "parameters": {
           "conditions": {
             "options": {
-              "caseSensitive": true,
+              "version": 3,
               "leftValue": "",
-              "typeValidation": "strict",
-              "version": 3
+              "caseSensitive": true,
+              "typeValidation": "strict"
             },
             "conditions": [
               {
                 "id": "beed379a-0109-468d-accd-0c812afc851a",
-                "leftValue": "={{ $('Start').item.json.text }}",
+                "leftValue": "={{ $json.text }}",
                 "rightValue": "/",
                 "operator": {
                   "type": "string",
@@ -2399,13 +2714,19 @@
                 "id": "ce8eebdd-c313-4444-a1bd-dcde56619a0d",
                 "name": "command",
                 "type": "string",
-                "value": "={{\n  $json.text\n    .toLowerCase()\n    .replace(/^\\//, '')\n    .split(/ (.+)/)[0]\n  || ''\n}}"
+                "value": "={{ $json.text.toLowerCase().replace(/^\\//, '').split(/ (.+)/)[0] || '' }}"
               },
               {
                 "id": "834f7369-52f1-4df3-bfcb-754be0bb11e0",
                 "name": "arg1",
                 "type": "string",
-                "value": "={{\n(() => {\n  const raw = $json.text\n    .toLowerCase()\n    .replace(/^\\//, '')\n    .split(/ (.+)/)[1] || '';\n  \n  if (!raw) return '';\n  \n  const input = raw.trim();\n  \n  // Already YYYY-MM-DD format\n  if (/^\\d{4}-\\d{2}-\\d{2}$/.test(input)) {\n    return input;\n  }\n  \n  // DD.MM.YYYY format (e.g., 19.12.2025)\n  const dotFull = input.match(/^(\\d{1,2})\\.(\\d{1,2})\\.(\\d{4})$/);\n  if (dotFull) {\n    const [, d, m, y] = dotFull;\n    return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;\n  }\n  \n  // DD.MM.YY format (e.g., 19.12.25)\n  const dotShort = input.match(/^(\\d{1,2})\\.(\\d{1,2})\\.(\\d{2})$/);\n  if (dotShort) {\n    const [, d, m, y] = dotShort;\n    const fullYear = parseInt(y) > 50 ? '19' + y : '20' + y;\n    return `${fullYear}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;\n  }\n  \n  // DD/MM/YYYY format\n  const slashFull = input.match(/^(\\d{1,2})\\/(\\d{1,2})\\/(\\d{4})$/);\n  if (slashFull) {\n    const [, d, m, y] = slashFull;\n    return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;\n  }\n  \n  // DD/MM/YY format\n  const slashShort = input.match(/^(\\d{1,2})\\/(\\d{1,2})\\/(\\d{2})$/);\n  if (slashShort) {\n    const [, d, m, y] = slashShort;\n    const fullYear = parseInt(y) > 50 ? '19' + y : '20' + y;\n    return `${fullYear}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;\n  }\n  \n  // Return as-is if no pattern matches\n  return input;\n})()\n}}"
+                "value": "={{ (() => { const parts = $json.text.toLowerCase().replace(/^\\//, '').split(/\\s+/); return parts[1] || ''; })() }}"
+              },
+              {
+                "id": "arg2-new",
+                "name": "arg2",
+                "type": "string",
+                "value": "={{ (() => { const parts = $json.text.toLowerCase().replace(/^\\//, '').split(/\\s+/); return parts[2] || ''; })() }}"
               }
             ]
           },
@@ -2430,44 +2751,50 @@
               {
                 "id": "4d93a5d1-a32c-47cc-a3c6-74b91257ed56",
                 "name": "command",
-                "value": "={{ $json.output.command }}",
-                "type": "string"
+                "type": "string",
+                "value": "={{ $json.output.command }}"
               },
               {
                 "id": "f6da0a82-5850-41d2-be86-f8406c622c69",
                 "name": "arg1",
-                "value": "={{ $json.output.arg1 }}",
-                "type": "string"
+                "type": "string",
+                "value": "={{ $json.output.arg1 }}"
+              },
+              {
+                "id": "arg2-nlp",
+                "name": "arg2",
+                "type": "string",
+                "value": "={{ $json.output.arg2 }}"
               },
               {
                 "id": "2c46b611-7ed7-4d1c-a406-7e55832101ea",
                 "name": "chat_id",
-                "value": "={{ $('Set args').item.json.chat_id }}",
-                "type": "string"
+                "type": "string",
+                "value": "={{ $('Set args').item.json.chat_id }}"
               },
               {
                 "id": "338a3726-f58e-4a2b-81be-4a8ed8203efe",
                 "name": "user_id",
-                "value": "={{ $('Set args').item.json.user_id }}",
-                "type": "string"
+                "type": "string",
+                "value": "={{ $('Set args').item.json.user_id }}"
               },
               {
                 "id": "67edd464-cb6a-46b1-ab45-ef80da23a705",
                 "name": "lang",
-                "value": "={{ $('Set args').item.json.lang }}",
-                "type": "string"
+                "type": "string",
+                "value": "={{ $('Set args').item.json.lang }}"
               },
               {
                 "id": "dcd57565-c08b-438d-a675-e52263ba2b76",
                 "name": "username",
-                "value": "={{ $('Set args').item.json.username }}",
-                "type": "string"
+                "type": "string",
+                "value": "={{ $('Set args').item.json.username }}"
               },
               {
                 "id": "f03df867-7c46-4eb4-bac1-a9bde25fb174",
                 "name": "fullname",
-                "value": "={{ $('Set args').item.json.fullname }}",
-                "type": "string"
+                "type": "string",
+                "value": "={{ $('Set args').item.json.fullname }}"
               }
             ]
           },
@@ -2481,6 +2808,185 @@
         ],
         "id": "20f8862f-1a56-47e5-a5d7-31434e073e73",
         "name": "Edit Fields"
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "CRCVg9hV0gdk0WNb"
+          },
+          "workflowInputs": {
+            "value": {
+              "arg1": "={{ $json.arg1 }}",
+              "arg2": "={{ $json.arg2 }}",
+              "lang": "={{ $json.lang }}",
+              "chat_id": "={{ $json.chat_id }}",
+              "user_id": "={{ $json.user_id }}",
+              "fullname": "={{ $json.fullname }}",
+              "username": "={{ $json.username }}"
+            },
+            "schema": [
+              {
+                "id": "arg1",
+                "type": "string",
+                "required": false,
+                "displayName": "arg1"
+              },
+              {
+                "id": "arg2",
+                "type": "string",
+                "required": false,
+                "displayName": "arg2"
+              },
+              {
+                "id": "chat_id",
+                "type": "string",
+                "required": true,
+                "displayName": "chat_id"
+              },
+              {
+                "id": "user_id",
+                "type": "string",
+                "required": true,
+                "displayName": "user_id"
+              },
+              {
+                "id": "username",
+                "type": "string",
+                "required": true,
+                "displayName": "username"
+              },
+              {
+                "id": "fullname",
+                "type": "string",
+                "required": true,
+                "displayName": "fullname"
+              },
+              {
+                "id": "lang",
+                "type": "string",
+                "required": true,
+                "displayName": "lang"
+              }
+            ],
+            "mappingMode": "defineBelow",
+            "matchingColumns": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {
+            "waitForSubWorkflow": true
+          }
+        },
+        "id": "exec-play",
+        "name": "Execute Play",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.3,
+        "position": [
+          3088,
+          1296
+        ]
+      },
+      {
+        "id": "71e0882a-2ae9-4532-ab48-2418e847fab5",
+        "name": "Execute Noshow",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.3,
+        "position": [
+          3400,
+          1500
+        ],
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "RURORDihq0oJJTKJ"
+          },
+          "workflowInputs": {
+            "value": {
+              "chat_id": "={{ $json.chat_id }}",
+              "user_id": "={{ $json.user_id }}",
+              "username": "={{ $json.username }}",
+              "fullname": "={{ $json.fullname }}",
+              "lang": "={{ $json.lang }}",
+              "arg1": "={{ $json.arg1 }}",
+              "arg2": "={{ $json.arg2 }}"
+            },
+            "schema": [
+              {
+                "id": "chat_id",
+                "type": "string",
+                "required": false,
+                "displayName": "chat_id",
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "user_id",
+                "type": "string",
+                "required": false,
+                "displayName": "user_id",
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "username",
+                "type": "string",
+                "required": false,
+                "displayName": "username",
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "fullname",
+                "type": "string",
+                "required": false,
+                "displayName": "fullname",
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "lang",
+                "type": "string",
+                "required": false,
+                "displayName": "lang",
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "arg1",
+                "type": "string",
+                "required": false,
+                "displayName": "arg1",
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "arg2",
+                "type": "string",
+                "required": false,
+                "displayName": "arg2",
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true
+              }
+            ],
+            "mappingMode": "defineBelow",
+            "matchingColumns": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {
+            "waitForSubWorkflow": true
+          }
+        }
       }
     ],
     "connections": {
@@ -2560,6 +3066,20 @@
           [
             {
               "node": "Call Start Command",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Execute Play",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Execute Noshow",
               "type": "main",
               "index": 0
             }
@@ -2709,8 +3229,8 @@
       }
     },
     "authors": "Sergei Vedishchev",
-    "name": "Version c7c989ae",
-    "description": "",
+    "name": null,
+    "description": null,
     "autosaved": false
   },
   "tags": []
