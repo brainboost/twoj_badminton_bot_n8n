@@ -1,0 +1,1282 @@
+{
+  "updatedAt": "2026-01-14T19:57:04.173Z",
+  "createdAt": "2026-01-14T17:12:07.561Z",
+  "id": "CRCVg9hV0gdk0WNb",
+  "name": "Play Command",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "chat_id"
+            },
+            {
+              "name": "user_id"
+            },
+            {
+              "name": "username"
+            },
+            {
+              "name": "fullname"
+            },
+            {
+              "name": "lang"
+            },
+            {
+              "name": "arg1"
+            },
+            {
+              "name": "arg2"
+            }
+          ]
+        }
+      },
+      "id": "trigger-play",
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -880,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n    r.id,\n    r.date,\n    r.time_start,\n    r.time_end,\n    r.court,\n    r.user_id as organizer_id,\n    u.full_name as organizer_name,\n    u.user_name as organizer_username,\n    (SELECT COUNT(*) FROM match_registrations mr \n     WHERE mr.reservation_id = r.id AND mr.status = 'confirmed') as player_count\nFROM reservations r\nJOIN users u ON r.user_id = u.id\nWHERE r.date >= CURRENT_DATE\n  AND ('{{ $json.arg1 }}' = '' OR r.date = '{{ $json.arg1 }}'::date)\n  AND ('{{ $json.arg2 }}' = '' OR r.time_start = '{{ $json.arg2 }}')\nORDER BY r.date, r.time_start;",
+        "options": {}
+      },
+      "id": "get-matching-reservations",
+      "name": "Get Matching Reservations",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -656,
+        576
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "3SDluWLUa1vIU50a",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst trigger = $('When Executed by Another Workflow').first().json;\nconst count = items.length;\n\n// Determine which output based on count\nlet outputType = 'no_match';\nif (count === 1) {\n  outputType = 'exact_match';\n} else if (count > 1) {\n  outputType = 'multiple_match';\n}\n\nreturn [{\n  json: {\n    count: count,\n    output_type: outputType,\n    reservation: count === 1 ? items[0].json : null,\n    reservations: count > 1 ? items.map(i => i.json) : [],\n    chat_id: trigger.chat_id,\n    user_id: trigger.user_id,\n    lang: trigger.lang\n  }\n}];"
+      },
+      "id": "count-results",
+      "name": "Count Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -432,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=SELECT key, text FROM translations \nWHERE key IN ('play_no_match', 'play_multiple_match', 'play_already_registered') \nAND lang = '{{ $('Count Results').item.json.lang }}';",
+        "options": {}
+      },
+      "id": "get-translations",
+      "name": "Get Translations",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -208,
+        576
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "3SDluWLUa1vIU50a",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const countData = $('Count Results').item.json;\nconst translations = $input.all();\n\nconst translationMap = {};\ntranslations.forEach(t => {\n  translationMap[t.json.key] = t.json.text;\n});\n\nconst result = {\n  ...countData,\n  no_match_message: translationMap['play_no_match'] || 'No matching sessions found.',\n  multiple_match_message: translationMap['play_multiple_match'] || 'Multiple sessions found. Please be more specific.',\n  already_message: translationMap['play_already_registered'] || 'You are already registered for this session.'\n};\n\nreturn [{ json: result }];"
+      },
+      "id": "merge-translations",
+      "name": "Merge Translations",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        16,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "caseSensitive": true,
+                  "typeValidation": "strict",
+                  "leftValue": "",
+                  "leftType": "string"
+                },
+                "conditions": [
+                  {
+                    "id": "no-match",
+                    "leftValue": "={{ $json.output_type }}",
+                    "leftType": "string",
+                    "rightValue": "no_match",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "no_match"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "caseSensitive": true,
+                  "typeValidation": "strict",
+                  "leftValue": "",
+                  "leftType": "string"
+                },
+                "conditions": [
+                  {
+                    "id": "exact-match",
+                    "leftValue": "={{ $json.output_type }}",
+                    "leftType": "string",
+                    "rightValue": "exact_match",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "exact_match"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "caseSensitive": true,
+                  "typeValidation": "strict",
+                  "leftValue": "",
+                  "leftType": "string"
+                },
+                "conditions": [
+                  {
+                    "id": "multiple-match",
+                    "leftValue": "={{ $json.output_type }}",
+                    "leftType": "string",
+                    "rightValue": "multiple_match",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "multiple_match"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "switch-result",
+      "name": "Switch Result",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        240,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cid",
+              "name": "chat_id",
+              "type": "string",
+              "value": "={{ $json.chat_id }}"
+            },
+            {
+              "id": "msg",
+              "name": "message",
+              "type": "string",
+              "value": "={{ $json.no_match_message }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "format-no-match",
+      "name": "Format No Match",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        960,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cid",
+              "name": "chat_id",
+              "type": "string",
+              "value": "={{ $json.chat_id }}"
+            },
+            {
+              "id": "msg",
+              "name": "message",
+              "type": "string",
+              "value": "={{ $json.multiple_match_message }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "format-multiple",
+      "name": "Format Multiple Match",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        928,
+        1008
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=SELECT id, reservation_id FROM match_registrations \nWHERE reservation_id = {{ $json.reservation.id }}\nAND player_id = '{{ $json.user_id }}'\nAND status = 'confirmed';",
+        "options": {}
+      },
+      "id": "check-registered",
+      "name": "Check Already Registered",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        544,
+        576
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "3SDluWLUa1vIU50a",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "caseSensitive": true,
+            "typeValidation": "strict",
+            "leftValue": "",
+            "leftType": "string"
+          },
+          "conditions": [
+            {
+              "id": "has-registration",
+              "leftType": "string",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-registered",
+      "name": "If Already Registered?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        752,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cid",
+              "name": "chat_id",
+              "type": "string",
+              "value": "={{ $('Switch Result').item.json.chat_id }}"
+            },
+            {
+              "id": "msg",
+              "name": "message",
+              "type": "string",
+              "value": "={{ $('Switch Result').item.json.already_message }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "format-already",
+      "name": "Format Already Registered",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1072,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=INSERT INTO match_registrations (reservation_id, player_id, status)\nVALUES ({{ $('Switch Result').item.json.reservation.id }}, '{{ $('Switch Result').item.json.user_id }}', 'confirmed')\nON CONFLICT (reservation_id, player_id) \nDO UPDATE SET status = 'confirmed', registered_at = CURRENT_TIMESTAMP\nRETURNING id;",
+        "options": {}
+      },
+      "id": "insert-registration",
+      "name": "Insert Registration",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        976,
+        672
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "3SDluWLUa1vIU50a",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=SELECT \n    r.date,\n    r.time_start,\n    r.time_end,\n    r.court,\n    (SELECT COUNT(*) FROM match_registrations mr \n     WHERE mr.reservation_id = r.id AND mr.status = 'confirmed') as player_count,\n    t.text as template\nFROM reservations r\nCROSS JOIN translations t\nWHERE r.id = {{ $('Switch Result').item.json.reservation.id }}\nAND t.key = 'play_registered'\nAND t.lang = '{{ $('Switch Result').item.json.lang }}';",
+        "options": {}
+      },
+      "id": "get-success-details",
+      "name": "Get Success Details",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1152,
+        672
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "3SDluWLUa1vIU50a",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cid",
+              "name": "chat_id",
+              "type": "string",
+              "value": "={{ $('Switch Result').item.json.chat_id }}"
+            },
+            {
+              "id": "msg",
+              "name": "message",
+              "type": "string",
+              "value": "={{ $json.template.replace('{date}', $json.date).replace('{time_start}', $json.time_start).replace('{time_end}', $json.time_end).replace('{court}', $json.court).replace('{player_count}', $json.player_count) }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "format-success",
+      "name": "Format Success",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1312,
+        672
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": {
+          "__rl": true,
+          "mode": "expression",
+          "value": "={{ $json.chat_id }}"
+        },
+        "text": "={{ $json.message }}",
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "send-telegram",
+      "name": "Send Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1712,
+        672
+      ],
+      "webhookId": "cd242a22-6c67-4ab1-ba02-02a6608c930d",
+      "credentials": {
+        "telegramApi": {
+          "id": "pHQDqhsnrwimdaY2",
+          "name": "twoj_badminton_bot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Get Matching Reservations",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Get Matching Reservations": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Count Results",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Count Results": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Get Translations",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Get Translations": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Merge Translations",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Merge Translations": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Switch Result",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Switch Result": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Format No Match",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "node": "Check Already Registered",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Format Multiple Match",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format No Match": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Send Telegram",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Format Multiple Match": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Send Telegram",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Check Already Registered": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "If Already Registered?",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "If Already Registered?": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Format Already Registered",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "node": "Insert Registration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Already Registered": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Send Telegram",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Insert Registration": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Get Success Details",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Get Success Details": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Format Success",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Format Success": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Send Telegram",
+            "type": "main"
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "versionId": "3f45bfde-197a-4917-875a-5bc9c97eda08",
+  "activeVersionId": "9ded2a9a-46c4-45c4-891c-b0d8fbebb3e7",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-01-14T17:12:07.563Z",
+      "createdAt": "2026-01-14T17:12:07.563Z",
+      "role": "workflow:owner",
+      "workflowId": "CRCVg9hV0gdk0WNb",
+      "projectId": "66rzfRQbAnEionlx"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-01-14T19:36:08.897Z",
+    "createdAt": "2026-01-14T19:36:08.897Z",
+    "versionId": "9ded2a9a-46c4-45c4-891c-b0d8fbebb3e7",
+    "workflowId": "CRCVg9hV0gdk0WNb",
+    "nodes": [
+      {
+        "id": "trigger-play",
+        "name": "When Executed by Another Workflow",
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1.1,
+        "position": [
+          -880,
+          400
+        ],
+        "parameters": {
+          "workflowInputs": {
+            "values": [
+              {
+                "name": "chat_id"
+              },
+              {
+                "name": "user_id"
+              },
+              {
+                "name": "username"
+              },
+              {
+                "name": "fullname"
+              },
+              {
+                "name": "lang"
+              },
+              {
+                "name": "arg1"
+              },
+              {
+                "name": "arg2"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "get-matching-reservations",
+        "name": "Get Matching Reservations",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          -640,
+          400
+        ],
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "=SELECT \n    r.id,\n    r.date,\n    r.time_start,\n    r.time_end,\n    r.court,\n    r.user_id as organizer_id,\n    u.full_name as organizer_name,\n    u.user_name as organizer_username,\n    (SELECT COUNT(*) FROM match_registrations mr \n     WHERE mr.reservation_id = r.id AND mr.status = 'confirmed') as player_count\nFROM reservations r\nJOIN users u ON r.user_id = u.id\nWHERE r.date >= CURRENT_DATE\n  AND ('{{ $json.arg1 }}' = '' OR r.date = '{{ $json.arg1 }}'::date)\n  AND ('{{ $json.arg2 }}' = '' OR r.time_start = '{{ $json.arg2 }}')\nORDER BY r.date, r.time_start;"
+        },
+        "credentials": {
+          "postgres": {
+            "id": "3SDluWLUa1vIU50a",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "id": "count-results",
+        "name": "Count Results",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -400,
+          400
+        ],
+        "parameters": {
+          "jsCode": "const items = $input.all();\nconst trigger = $('When Executed by Another Workflow').first().json;\nconst count = items.length;\n\n// Determine which output based on count\nlet outputType = 'no_match';\nif (count === 1) {\n  outputType = 'exact_match';\n} else if (count > 1) {\n  outputType = 'multiple_match';\n}\n\nreturn [{\n  json: {\n    count: count,\n    output_type: outputType,\n    reservation: count === 1 ? items[0].json : null,\n    reservations: count > 1 ? items.map(i => i.json) : [],\n    chat_id: trigger.chat_id,\n    user_id: trigger.user_id,\n    lang: trigger.lang\n  }\n}];"
+        }
+      },
+      {
+        "id": "get-translations",
+        "name": "Get Translations",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          -160,
+          560
+        ],
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "=SELECT key, text FROM translations \nWHERE key IN ('play_no_match', 'play_multiple_match', 'play_already_registered') \nAND lang = '{{ $('Count Results').item.json.lang }}';"
+        },
+        "credentials": {
+          "postgres": {
+            "id": "3SDluWLUa1vIU50a",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "id": "merge-translations",
+        "name": "Merge Translations",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          80,
+          480
+        ],
+        "parameters": {
+          "jsCode": "const countData = $('Count Results').item.json;\nconst translations = $input.all();\n\nconst translationMap = {};\ntranslations.forEach(t => {\n  translationMap[t.json.key] = t.json.text;\n});\n\nconst result = {\n  ...countData,\n  no_match_message: translationMap['play_no_match'] || 'No matching sessions found.',\n  multiple_match_message: translationMap['play_multiple_match'] || 'Multiple sessions found. Please be more specific.',\n  already_message: translationMap['play_already_registered'] || 'You are already registered for this session.'\n};\n\nreturn [{ json: result }];"
+        }
+      },
+      {
+        "id": "switch-result",
+        "name": "Switch Result",
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3.2,
+        "position": [
+          320,
+          400
+        ],
+        "parameters": {
+          "rules": {
+            "values": [
+              {
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "caseSensitive": true,
+                    "typeValidation": "strict",
+                    "leftValue": "",
+                    "leftType": "string"
+                  },
+                  "conditions": [
+                    {
+                      "id": "no-match",
+                      "leftValue": "={{ $json.output_type }}",
+                      "leftType": "string",
+                      "rightValue": "no_match",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                },
+                "renameOutput": true,
+                "outputKey": "no_match"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "caseSensitive": true,
+                    "typeValidation": "strict",
+                    "leftValue": "",
+                    "leftType": "string"
+                  },
+                  "conditions": [
+                    {
+                      "id": "exact-match",
+                      "leftValue": "={{ $json.output_type }}",
+                      "leftType": "string",
+                      "rightValue": "exact_match",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                },
+                "renameOutput": true,
+                "outputKey": "exact_match"
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "version": 2,
+                    "caseSensitive": true,
+                    "typeValidation": "strict",
+                    "leftValue": "",
+                    "leftType": "string"
+                  },
+                  "conditions": [
+                    {
+                      "id": "multiple-match",
+                      "leftValue": "={{ $json.output_type }}",
+                      "leftType": "string",
+                      "rightValue": "multiple_match",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                },
+                "renameOutput": true,
+                "outputKey": "multiple_match"
+              }
+            ]
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "format-no-match",
+        "name": "Format No Match",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          560,
+          280
+        ],
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "cid",
+                "name": "chat_id",
+                "type": "string",
+                "value": "={{ $json.chat_id }}"
+              },
+              {
+                "id": "msg",
+                "name": "message",
+                "type": "string",
+                "value": "={{ $json.no_match_message }}"
+              }
+            ]
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "format-multiple",
+        "name": "Format Multiple Match",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          560,
+          540
+        ],
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "cid",
+                "name": "chat_id",
+                "type": "string",
+                "value": "={{ $json.chat_id }}"
+              },
+              {
+                "id": "msg",
+                "name": "message",
+                "type": "string",
+                "value": "={{ $json.multiple_match_message }}"
+              }
+            ]
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "check-registered",
+        "name": "Check Already Registered",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          560,
+          400
+        ],
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "=SELECT id, reservation_id FROM match_registrations \nWHERE reservation_id = {{ $json.reservation.id }}\nAND player_id = '{{ $json.user_id }}'\nAND status = 'confirmed';"
+        },
+        "credentials": {
+          "postgres": {
+            "id": "3SDluWLUa1vIU50a",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "id": "if-registered",
+        "name": "If Already Registered?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          800,
+          400
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "version": 2,
+              "caseSensitive": true,
+              "typeValidation": "strict",
+              "leftValue": "",
+              "leftType": "string"
+            },
+            "conditions": [
+              {
+                "id": "has-registration",
+                "leftType": "string",
+                "leftValue": "={{ $json.id }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "exists"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "format-already",
+        "name": "Format Already Registered",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          1040,
+          280
+        ],
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "cid",
+                "name": "chat_id",
+                "type": "string",
+                "value": "={{ $('Switch Result').item.json.chat_id }}"
+              },
+              {
+                "id": "msg",
+                "name": "message",
+                "type": "string",
+                "value": "={{ $('Switch Result').item.json.already_message }}"
+              }
+            ]
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "insert-registration",
+        "name": "Insert Registration",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          1040,
+          400
+        ],
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "=INSERT INTO match_registrations (reservation_id, player_id, status)\nVALUES ({{ $('Switch Result').item.json.reservation.id }}, '{{ $('Switch Result').item.json.user_id }}', 'confirmed')\nON CONFLICT (reservation_id, player_id) \nDO UPDATE SET status = 'confirmed', registered_at = CURRENT_TIMESTAMP\nRETURNING id;"
+        },
+        "credentials": {
+          "postgres": {
+            "id": "3SDluWLUa1vIU50a",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "id": "get-success-details",
+        "name": "Get Success Details",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          1280,
+          400
+        ],
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "=SELECT \n    r.date,\n    r.time_start,\n    r.time_end,\n    r.court,\n    (SELECT COUNT(*) FROM match_registrations mr \n     WHERE mr.reservation_id = r.id AND mr.status = 'confirmed') as player_count,\n    t.text as template\nFROM reservations r\nCROSS JOIN translations t\nWHERE r.id = {{ $('Switch Result').item.json.reservation.id }}\nAND t.key = 'play_registered'\nAND t.lang = '{{ $('Switch Result').item.json.lang }}';"
+        },
+        "credentials": {
+          "postgres": {
+            "id": "3SDluWLUa1vIU50a",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "id": "format-success",
+        "name": "Format Success",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          1520,
+          400
+        ],
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "cid",
+                "name": "chat_id",
+                "type": "string",
+                "value": "={{ $('Switch Result').item.json.chat_id }}"
+              },
+              {
+                "id": "msg",
+                "name": "message",
+                "type": "string",
+                "value": "={{ $json.template.replace('{date}', $json.date).replace('{time_start}', $json.time_start).replace('{time_end}', $json.time_end).replace('{court}', $json.court).replace('{player_count}', $json.player_count) }}"
+              }
+            ]
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "send-telegram",
+        "name": "Send Telegram",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          1760,
+          400
+        ],
+        "parameters": {
+          "operation": "sendMessage",
+          "chatId": {
+            "__rl": true,
+            "mode": "expression",
+            "value": "={{ $json.chat_id }}"
+          },
+          "text": "={{ $json.message }}",
+          "additionalFields": {
+            "parse_mode": "HTML"
+          }
+        },
+        "credentials": {
+          "telegramApi": {
+            "id": "pHQDqhsnrwimdaY2",
+            "name": "twoj_badminton_bot"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "When Executed by Another Workflow": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "Get Matching Reservations",
+              "type": "main"
+            }
+          ]
+        ]
+      },
+      "Get Matching Reservations": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "Count Results",
+              "type": "main"
+            }
+          ]
+        ]
+      },
+      "Count Results": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "Get Translations",
+              "type": "main"
+            }
+          ]
+        ]
+      },
+      "Get Translations": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "Merge Translations",
+              "type": "main"
+            }
+          ]
+        ]
+      },
+      "Merge Translations": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "Switch Result",
+              "type": "main"
+            }
+          ]
+        ]
+      },
+      "Switch Result": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "Format No Match",
+              "type": "main"
+            }
+          ],
+          [
+            {
+              "index": 1,
+              "node": "Check Already Registered",
+              "type": "main"
+            }
+          ],
+          [
+            {
+              "index": 2,
+              "node": "Format Multiple Match",
+              "type": "main"
+            }
+          ]
+        ]
+      },
+      "Format No Match": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "Send Telegram",
+              "type": "main"
+            }
+          ]
+        ]
+      },
+      "Format Multiple Match": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "Send Telegram",
+              "type": "main"
+            }
+          ]
+        ]
+      },
+      "Check Already Registered": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "If Already Registered?",
+              "type": "main"
+            }
+          ]
+        ]
+      },
+      "If Already Registered?": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "Format Already Registered",
+              "type": "main"
+            }
+          ],
+          [
+            {
+              "index": 1,
+              "node": "Insert Registration",
+              "type": "main"
+            }
+          ]
+        ]
+      },
+      "Format Already Registered": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "Send Telegram",
+              "type": "main"
+            }
+          ]
+        ]
+      },
+      "Insert Registration": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "Get Success Details",
+              "type": "main"
+            }
+          ]
+        ]
+      },
+      "Get Success Details": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "Format Success",
+              "type": "main"
+            }
+          ]
+        ]
+      },
+      "Format Success": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "Send Telegram",
+              "type": "main"
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Sergei Vedishchev",
+    "name": null,
+    "description": null,
+    "autosaved": false
+  },
+  "tags": [
+    {
+      "updatedAt": "2025-12-27T11:51:52.051Z",
+      "createdAt": "2025-12-27T11:51:52.051Z",
+      "id": "3W7RR758UwICVpEC",
+      "name": "bot_command"
+    }
+  ]
+}
