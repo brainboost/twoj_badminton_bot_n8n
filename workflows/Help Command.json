@@ -176,7 +176,7 @@
   "staticData": null,
   "meta": null,
   "versionId": "c461622e-9e02-4e47-806f-b653c12b8478",
-  "activeVersionId": "5190bd09-b107-4f48-a2a8-110ee37eb767",
+  "activeVersionId": "c461622e-9e02-4e47-806f-b653c12b8478",
   "triggerCount": 0,
   "shared": [
     {
@@ -188,14 +188,13 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-01-11T18:29:43.975Z",
-    "createdAt": "2026-01-11T18:29:43.975Z",
-    "versionId": "5190bd09-b107-4f48-a2a8-110ee37eb767",
+    "updatedAt": "2026-01-14T18:41:30.000Z",
+    "createdAt": "2026-01-11T18:30:13.120Z",
+    "versionId": "c461622e-9e02-4e47-806f-b653c12b8478",
     "workflowId": "ZLkal1BIG7llifwz",
     "nodes": [
       {
         "parameters": {
-          "resource": "database",
           "operation": "select",
           "schema": {
             "__rl": true,
@@ -209,24 +208,19 @@
             "mode": "list",
             "cachedResultName": "translations"
           },
-          "returnAll": false,
           "limit": 1,
           "where": {
             "values": [
               {
                 "column": "key",
-                "condition": "equal",
                 "value": "help"
               },
               {
                 "column": "lang",
-                "condition": "equal",
                 "value": "={{ $json.arg1 || $json.lang || 'en' }}"
               }
             ]
           },
-          "combineConditions": "AND",
-          "sort": {},
           "options": {}
         },
         "id": "get-help-translation",
@@ -234,7 +228,7 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          1632,
+          1648,
           -960
         ],
         "credentials": {
@@ -246,8 +240,6 @@
       },
       {
         "parameters": {
-          "mode": "manual",
-          "duplicateItem": false,
           "assignments": {
             "assignments": [
               {
@@ -264,7 +256,6 @@
               }
             ]
           },
-          "includeOtherFields": false,
           "options": {}
         },
         "id": "format-help-message",
@@ -272,18 +263,14 @@
         "type": "n8n-nodes-base.set",
         "typeVersion": 3.4,
         "position": [
-          2704,
+          1872,
           -960
         ]
       },
       {
         "parameters": {
-          "preBuiltAgentsCalloutTelegram": "",
-          "resource": "message",
-          "operation": "sendMessage",
           "chatId": "={{ $json.chat_id }}",
           "text": "={{ $json.message }}",
-          "replyMarkup": "none",
           "additionalFields": {
             "appendAttribution": false,
             "parse_mode": "HTML"
@@ -292,7 +279,7 @@
         "type": "n8n-nodes-base.telegram",
         "typeVersion": 1.2,
         "position": [
-          2928,
+          2096,
           -960
         ],
         "id": "1e07ce1e-c13a-487b-bc80-00bf7cfad219",
@@ -306,14 +293,6 @@
         }
       },
       {
-        "id": "7a67ec9f-21b2-495a-adbb-aae54667c05c",
-        "typeVersion": 1.1,
-        "name": "Start",
-        "type": "n8n-nodes-base.executeWorkflowTrigger",
-        "position": [
-          1424,
-          -960
-        ],
         "parameters": {
           "workflowInputs": {
             "values": [
@@ -331,7 +310,15 @@
               }
             ]
           }
-        }
+        },
+        "id": "7a67ec9f-21b2-495a-adbb-aae54667c05c",
+        "typeVersion": 1.1,
+        "name": "Start",
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "position": [
+          1424,
+          -960
+        ]
       }
     ],
     "connections": {
@@ -370,8 +357,8 @@
       }
     },
     "authors": "Sergei Vedishchev",
-    "name": null,
-    "description": null,
+    "name": "Version c461622e",
+    "description": "",
     "autosaved": false
   },
   "tags": [
