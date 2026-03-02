@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-26T21:49:35.700Z",
+  "updatedAt": "2026-03-02T09:06:39.492Z",
   "createdAt": "2025-12-22T13:22:52.158Z",
   "id": "p5NpS5X1VLPdY3mX",
   "name": "Book Command",
@@ -8,7 +8,28 @@
   "nodes": [
     {
       "parameters": {
-        "inputSource": "passthrough"
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "chat_id"
+            },
+            {
+              "name": "arg1"
+            },
+            {
+              "name": "lang"
+            },
+            {
+              "name": "user_id"
+            },
+            {
+              "name": "username"
+            },
+            {
+              "name": "fullname"
+            }
+          ]
+        }
       },
       "id": "trigger-book",
       "name": "When Executed by Another Workflow",
@@ -129,8 +150,7 @@
               "rightValue": "",
               "operator": {
                 "type": "string",
-                "operation": "notEmpty",
-                "singleValue": true
+                "operation": "notEmpty"
               }
             }
           ],
@@ -238,10 +258,10 @@
       "parameters": {
         "conditions": {
           "options": {
-            "caseSensitive": true,
+            "version": 3,
             "leftValue": "",
-            "typeValidation": "strict",
-            "version": 3
+            "caseSensitive": true,
+            "typeValidation": "strict"
           },
           "conditions": [
             {
@@ -270,7 +290,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const original_args = $('When Executed by Another Workflow').first().json.arg1;\nconst bookings = JSON.parse(original_args);\nconst user_id = $('When Executed by Another Workflow').first().json.user_id;\nlet queries = [];\nconst inserted = $input.first().json.result.structuredContent.reservation.bookings;\nfor (let i = 0; i < inserted.length; i++) {\n  const b = bookings[i];\n  const reservation_id = inserted[i].booking_id;\n  if (b.notes){\n    b.notes = b.notes.replace(\"'\", \"''\");\n  }\n  const query = \"INSERT INTO reservations (date, time_start, time_end, court, players_num, user_id, notes, reservation_id) VALUES('\" + b.date + \"','\" + b.time_start + \"','\" + b.time_end + \"','\" + b.court + \"',\" + b.players_num + \",'\" + user_id + \"','\" + b.notes + \"','\" + reservation_id + \"');\";\n  queries.push(query);\n}\n\nreturn [{ json: { queries: queries } }];"
+        "jsCode": "const original_args = $('When Executed by Another Workflow').first().json.arg1;\nconst bookings = JSON.parse(original_args);\nconst user_id = $('When Executed by Another Workflow').first().json.user_id;\nconst fullname = $('When Executed by Another Workflow').first().json.fullname;\nlet queries = [];\nconst inserted = $input.first().json.result.structuredContent.reservation.bookings;\n\nfor (let i = 0; i < inserted.length; i++) {\n  const b = bookings[i];\n  const reservation_id = inserted[i].booking_id;\n\n  // Convert date from DD.MM.YYYY to YYYY-MM-DD for PostgreSQL DATE column\n  let dbDate = b.date;\n  const dateMatch = b.date.match(/^(\\d{1,2})\\.(\\d{1,2})\\.(\\d{4})$/);\n  if (dateMatch) {\n    const day = dateMatch[1].padStart(2, '0');\n    const month = dateMatch[2].padStart(2, '0');\n    const year = dateMatch[3];\n    dbDate = `${year}-${month}-${day}`;\n  }\n\n  // Safe notes: handle null/undefined and escape ALL apostrophes\n  const safeNotes = (b.notes || fullname || '').replace(/'/g, \"''\");\n\n  const query = \"INSERT INTO reservations \" +\n    \"(date, time_start, time_end, court, players_num, user_id, notes, reservation_id) \" +\n    \"VALUES(\" +\n    \"'\" + dbDate + \"',\" +\n    \"'\" + b.time_start + \"',\" +\n    \"'\" + b.time_end + \"',\" +\n    \"'\" + b.court + \"',\" +\n    b.players_num + \",\" +\n    \"'\" + user_id + \"',\" +\n    \"'\" + safeNotes + \"',\" +\n    \"'\" + reservation_id + \"'\" +\n    \");\";\n  queries.push(query);\n}\n\nreturn [{ json: { queries: queries } }];"
       },
       "id": "build-insert-query",
       "name": "Build Insert Query",
@@ -284,7 +304,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "{{ $json.queries.join('\\n') }}",
+        "query": "{{ $json.queries[0] }}",
         "options": {}
       },
       "id": "save-reservation-db",
@@ -843,8 +863,8 @@
   "meta": {
     "templateCredsSetupCompleted": true
   },
-  "versionId": "717dda27-8fad-4c8d-8fd6-4e5572a6e25e",
-  "activeVersionId": "717dda27-8fad-4c8d-8fd6-4e5572a6e25e",
+  "versionId": "72c7abb9-f0c4-46e0-a45b-dda9b8052d45",
+  "activeVersionId": "72c7abb9-f0c4-46e0-a45b-dda9b8052d45",
   "triggerCount": 0,
   "shared": [
     {
@@ -856,14 +876,35 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-01-26T21:49:39.000Z",
-    "createdAt": "2026-01-26T21:49:35.701Z",
-    "versionId": "717dda27-8fad-4c8d-8fd6-4e5572a6e25e",
+    "updatedAt": "2026-03-02T09:06:51.000Z",
+    "createdAt": "2026-03-02T09:06:39.493Z",
+    "versionId": "72c7abb9-f0c4-46e0-a45b-dda9b8052d45",
     "workflowId": "p5NpS5X1VLPdY3mX",
     "nodes": [
       {
         "parameters": {
-          "inputSource": "passthrough"
+          "workflowInputs": {
+            "values": [
+              {
+                "name": "chat_id"
+              },
+              {
+                "name": "arg1"
+              },
+              {
+                "name": "lang"
+              },
+              {
+                "name": "user_id"
+              },
+              {
+                "name": "username"
+              },
+              {
+                "name": "fullname"
+              }
+            ]
+          }
         },
         "id": "trigger-book",
         "name": "When Executed by Another Workflow",
@@ -984,8 +1025,7 @@
                 "rightValue": "",
                 "operator": {
                   "type": "string",
-                  "operation": "notEmpty",
-                  "singleValue": true
+                  "operation": "notEmpty"
                 }
               }
             ],
@@ -1093,10 +1133,10 @@
         "parameters": {
           "conditions": {
             "options": {
-              "caseSensitive": true,
+              "version": 3,
               "leftValue": "",
-              "typeValidation": "strict",
-              "version": 3
+              "caseSensitive": true,
+              "typeValidation": "strict"
             },
             "conditions": [
               {
@@ -1125,7 +1165,7 @@
       },
       {
         "parameters": {
-          "jsCode": "const original_args = $('When Executed by Another Workflow').first().json.arg1;\nconst bookings = JSON.parse(original_args);\nconst user_id = $('When Executed by Another Workflow').first().json.user_id;\nlet queries = [];\nconst inserted = $input.first().json.result.structuredContent.reservation.bookings;\nfor (let i = 0; i < inserted.length; i++) {\n  const b = bookings[i];\n  const reservation_id = inserted[i].booking_id;\n  if (b.notes){\n    b.notes = b.notes.replace(\"'\", \"''\");\n  }\n  const query = \"INSERT INTO reservations (date, time_start, time_end, court, players_num, user_id, notes, reservation_id) VALUES('\" + b.date + \"','\" + b.time_start + \"','\" + b.time_end + \"','\" + b.court + \"',\" + b.players_num + \",'\" + user_id + \"','\" + b.notes + \"','\" + reservation_id + \"');\";\n  queries.push(query);\n}\n\nreturn [{ json: { queries: queries } }];"
+          "jsCode": "const original_args = $('When Executed by Another Workflow').first().json.arg1;\nconst bookings = JSON.parse(original_args);\nconst user_id = $('When Executed by Another Workflow').first().json.user_id;\nconst fullname = $('When Executed by Another Workflow').first().json.fullname;\nlet queries = [];\nconst inserted = $input.first().json.result.structuredContent.reservation.bookings;\n\nfor (let i = 0; i < inserted.length; i++) {\n  const b = bookings[i];\n  const reservation_id = inserted[i].booking_id;\n\n  // Convert date from DD.MM.YYYY to YYYY-MM-DD for PostgreSQL DATE column\n  let dbDate = b.date;\n  const dateMatch = b.date.match(/^(\\d{1,2})\\.(\\d{1,2})\\.(\\d{4})$/);\n  if (dateMatch) {\n    const day = dateMatch[1].padStart(2, '0');\n    const month = dateMatch[2].padStart(2, '0');\n    const year = dateMatch[3];\n    dbDate = `${year}-${month}-${day}`;\n  }\n\n  // Safe notes: handle null/undefined and escape ALL apostrophes\n  const safeNotes = (b.notes || fullname || '').replace(/'/g, \"''\");\n\n  const query = \"INSERT INTO reservations \" +\n    \"(date, time_start, time_end, court, players_num, user_id, notes, reservation_id) \" +\n    \"VALUES(\" +\n    \"'\" + dbDate + \"',\" +\n    \"'\" + b.time_start + \"',\" +\n    \"'\" + b.time_end + \"',\" +\n    \"'\" + b.court + \"',\" +\n    b.players_num + \",\" +\n    \"'\" + user_id + \"',\" +\n    \"'\" + safeNotes + \"',\" +\n    \"'\" + reservation_id + \"'\" +\n    \");\";\n  queries.push(query);\n}\n\nreturn [{ json: { queries: queries } }];"
         },
         "id": "build-insert-query",
         "name": "Build Insert Query",
@@ -1139,7 +1179,7 @@
       {
         "parameters": {
           "operation": "executeQuery",
-          "query": "{{ $json.queries.join('\\n') }}",
+          "query": "{{ $json.queries[0] }}",
           "options": {}
         },
         "id": "save-reservation-db",
@@ -1690,7 +1730,7 @@
       }
     },
     "authors": "Sergei Vedishchev",
-    "name": "Version 717dda27",
+    "name": "Version 72c7abb9",
     "description": "",
     "autosaved": false
   },
