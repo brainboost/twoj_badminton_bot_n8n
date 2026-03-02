@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-02T13:45:46.826Z",
+  "updatedAt": "2026-03-02T10:47:38.222Z",
   "createdAt": "2025-12-27T11:51:58.987Z",
   "id": "HFeE52YK9tAzKTpk",
   "name": "Show Command",
@@ -15,6 +15,18 @@
             },
             {
               "name": "arg1"
+            },
+            {
+              "name": "lang"
+            },
+            {
+              "name": "user_id"
+            },
+            {
+              "name": "username"
+            },
+            {
+              "name": "fullname"
             }
           ]
         }
@@ -30,39 +42,11 @@
     },
     {
       "parameters": {
-        "operation": "select",
-        "schema": {
-          "__rl": true,
-          "value": "public",
-          "mode": "list",
-          "cachedResultName": "public"
-        },
-        "table": {
-          "__rl": true,
-          "value": "club_schedules",
-          "mode": "list",
-          "cachedResultName": "club_schedules"
-        },
-        "returnAll": true,
-        "where": {
-          "values": [
-            {
-              "column": "date",
-              "value": "={{ $json.arg1 || $today }}"
-            }
-          ]
-        },
-        "sort": {
-          "values": [
-            {
-              "column": "time_slot"
-            },
-            {
-              "column": "court_number"
-            }
-          ]
-        },
-        "options": {}
+        "operation": "executeQuery",
+        "query": "SELECT  cs.club_id,  cs.sport_id,  cs.date,  cs.court_number,  cs.time_slot,  cs.is_available,  cs.updated_at,  r.user_id   AS bot_user_id, u.full_name AS bot_user_name,  u.user_name AS bot_username \nFROM club_schedules cs\nLEFT JOIN reservations r  ON  cs.date = r.date  AND cs.time_slot::time = r.time_start::time  AND cs.court_number = 'Badminton ' || r.court\nLEFT JOIN users u  ON r.user_id = u.id WHERE cs.date = $1::date  AND cs.sport_id = 84\nORDER BY cs.time_slot, cs.court_number",
+        "options": {
+          "queryReplacement": "={{ $json.arg1 || $today }}"
+        }
       },
       "id": "5d9763e6-3b39-402e-b0c2-165225b1371d",
       "name": "Select Schedules",
@@ -82,7 +66,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const chatId = $('When Executed by Another Workflow').first().json.chat_id;\nconst items = $input.all().map(item => item.json);\nif (!items || items.length === 0 || Object.keys(items[0]).length === 0) {\n  return [{ json: { message: '📭 No schedule data available.', chat_id: chatId } }];\n}\n\n// Extract unique time slots and courts\nconst timeslots = [...new Set(items.map(x => x.time_slot))].sort();\nconst courts = [...new Set(items.map(x => x.court_number))].sort();\n\n// Get the date from first item - fix UTC timezone shift\nlet scheduleDate = 'Unknown date';\nif (items[0]?.date) {\n  const d = new Date(items[0].date);\n  scheduleDate = d.toLocaleDateString('sv-SE', { timeZone: 'Europe/Warsaw' });\n}\n\n// Build header\nlet message = `<b>🏸 Court Schedule</b>\\n`;\nmessage += `<b>📅 ${scheduleDate}</b>\\n\\n`;\n\n// Build monospace table header\nmessage += '<pre>';\nmessage += '🕓     ';\ncourts.forEach(court => {\n  const courtNum = court.replace('Badminton ', '#');\n  message += `${courtNum} `;\n});\nmessage += '\\n';\nmessage += '───────' + '────'.repeat(courts.length) + '\\n';\n\nconst available_times = Object.entries(\n  $input.all().map(i => i.json)\n    .filter(slot => slot.is_available) // ← Filter first\n    .reduce((acc, slot) => {\n      const time = slot.time_slot.slice(0, 5);\n      const court = slot.court_number.replace('Badminton ', '');\n      acc[time] = acc[time] || [];\n      acc[time].push(court);\n      return acc;\n    }, {})\n).map(([time_slot, courts]) => ({ time_slot, courts }));\n\n// Build table rows\ntimeslots.forEach(ts => {\n  let timeDisplay = ts;\n  if (ts.includes('T')) {\n    timeDisplay = ts.substring(11, 16);\n  } else if (ts.length > 5) {\n    timeDisplay = ts.substring(0, 5);\n  }\n  message += timeDisplay + '  ';\n  \n  courts.forEach(court => {\n    const slot = items.find(item => \n      item.time_slot === ts && item.court_number === court\n    );\n    \n    if (slot) {\n        message += slot.is_available ? '✅ ' : '❌ ';\n    } else {\n      message += '⬜ ';\n    }\n  });\n  message += '\\n';\n});\n\nmessage += '</pre>';\nmessage += '\\n✅ Available  ❌ Booked';\n\nreturn [{ json: { message: message, chat_id: chatId, available_times: available_times } }];"
+        "jsCode": "const chatId = $('When Executed by Another Workflow').first().json.chat_id;\nconst items = $input.all().map(item => item.json);\nif (!items || items.length === 0 || Object.keys(items[0]).length === 0) {\n  return [{ json: { message: '📭 No schedule data available.', chat_id: chatId } }];\n}\n\n// Extract unique time slots and courts\nconst timeslots = [...new Set(items.map(x => x.time_slot))].sort();\nconst courts = [...new Set(items.map(x => x.court_number))].sort();\n\n// Get the date from first item - fix UTC timezone shift\nlet scheduleDate = 'Unknown date';\nif (items[0]?.date) {\n  const d = new Date(items[0].date);\n  scheduleDate = d.toLocaleDateString('sv-SE', { timeZone: 'Europe/Warsaw' });\n}\n\n// Build header\nlet message = `<b>🏸 Court Schedule</b>\\n`;\nmessage += `<b>📅 ${scheduleDate}</b>\\n\\n`;\n\n// Build monospace table header\nmessage += '<pre>';\nmessage += '🕓     ';\ncourts.forEach(court => {\n  const courtNum = court.replace('Badminton ', '#');\n  message += `${courtNum} `;\n});\nmessage += '\\n';\nmessage += '───────' + '────'.repeat(courts.length) + '\\n';\n\nconst available_times = Object.entries(\n  $input.all().map(i => i.json)\n    .filter(slot => slot.is_available) // ← Filter first\n    .reduce((acc, slot) => {\n      const time = slot.time_slot.slice(0, 5);\n      const court = slot.court_number.replace('Badminton ', '');\n      acc[time] = acc[time] || [];\n      acc[time].push(court);\n      return acc;\n    }, {})\n).map(([time_slot, courts]) => ({ time_slot, courts }));\n\n// Build table rows\ntimeslots.forEach(ts => {\n  let timeDisplay = ts;\n  if (ts.includes('T')) {\n    timeDisplay = ts.substring(11, 16);\n  } else if (ts.length > 5) {\n    timeDisplay = ts.substring(0, 5);\n  }\n  message += timeDisplay + '  ';\n  \n  courts.forEach(court => {\n    const slot = items.find(item => \n      item.time_slot === ts && item.court_number === court\n    );\n    \n    if (!slot) {\n      message += '⬜ ';\n    } else if (slot.bot_user_id) {\n      message += '🏸 ';  // booked by a bot user (takes priority — handles pre-sync window)\n    } else if (slot.is_available) {\n      message += '✅ ';\n    } else {\n      message += '❌ ';  // booked externally\n    }\n  });\n  message += '\\n';\n});\n\nmessage += '</pre>';\nmessage += '\\n✅ Available  🏸 Bot booking  ❌ External';\n\nreturn [{ json: { message: message, chat_id: chatId, available_times: available_times } }];"
       },
       "id": "23333bcf-24de-43e8-8c16-0ac274362f52",
       "name": "Format Schedule",
@@ -169,8 +153,8 @@
   "meta": {
     "templateCredsSetupCompleted": true
   },
-  "versionId": "9d5f58da-6b9c-4273-ad5e-e1e96e587dc7",
-  "activeVersionId": "9d5f58da-6b9c-4273-ad5e-e1e96e587dc7",
+  "versionId": "640813b3-1007-4f8c-87fe-9f6e9af95b83",
+  "activeVersionId": "640813b3-1007-4f8c-87fe-9f6e9af95b83",
   "triggerCount": 0,
   "shared": [
     {
@@ -182,9 +166,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2025-12-27T13:34:46.000Z",
-    "createdAt": "2025-12-27T13:34:13.898Z",
-    "versionId": "9d5f58da-6b9c-4273-ad5e-e1e96e587dc7",
+    "updatedAt": "2026-03-02T10:47:40.000Z",
+    "createdAt": "2026-03-02T10:47:38.223Z",
+    "versionId": "640813b3-1007-4f8c-87fe-9f6e9af95b83",
     "workflowId": "HFeE52YK9tAzKTpk",
     "nodes": [
       {
@@ -196,6 +180,18 @@
               },
               {
                 "name": "arg1"
+              },
+              {
+                "name": "lang"
+              },
+              {
+                "name": "user_id"
+              },
+              {
+                "name": "username"
+              },
+              {
+                "name": "fullname"
               }
             ]
           }
@@ -211,39 +207,11 @@
       },
       {
         "parameters": {
-          "operation": "select",
-          "schema": {
-            "__rl": true,
-            "value": "public",
-            "mode": "list",
-            "cachedResultName": "public"
-          },
-          "table": {
-            "__rl": true,
-            "value": "club_schedules",
-            "mode": "list",
-            "cachedResultName": "club_schedules"
-          },
-          "returnAll": true,
-          "where": {
-            "values": [
-              {
-                "column": "date",
-                "value": "={{ $json.arg1 || $today }}"
-              }
-            ]
-          },
-          "sort": {
-            "values": [
-              {
-                "column": "time_slot"
-              },
-              {
-                "column": "court_number"
-              }
-            ]
-          },
-          "options": {}
+          "operation": "executeQuery",
+          "query": "SELECT  cs.club_id,  cs.sport_id,  cs.date,  cs.court_number,  cs.time_slot,  cs.is_available,  cs.updated_at,  r.user_id   AS bot_user_id, u.full_name AS bot_user_name,  u.user_name AS bot_username \nFROM club_schedules cs\nLEFT JOIN reservations r  ON  cs.date = r.date  AND cs.time_slot::time = r.time_start::time  AND cs.court_number = 'Badminton ' || r.court\nLEFT JOIN users u  ON r.user_id = u.id WHERE cs.date = $1::date  AND cs.sport_id = 84\nORDER BY cs.time_slot, cs.court_number",
+          "options": {
+            "queryReplacement": "={{ $json.arg1 || $today }}"
+          }
         },
         "id": "5d9763e6-3b39-402e-b0c2-165225b1371d",
         "name": "Select Schedules",
@@ -263,7 +231,7 @@
       },
       {
         "parameters": {
-          "jsCode": "const chatId = $('When Executed by Another Workflow').first().json.chat_id;\nconst items = $input.all().map(item => item.json);\nif (!items || items.length === 0 || Object.keys(items[0]).length === 0) {\n  return [{ json: { message: '📭 No schedule data available.', chat_id: chatId } }];\n}\n\n// Extract unique time slots and courts\nconst timeslots = [...new Set(items.map(x => x.time_slot))].sort();\nconst courts = [...new Set(items.map(x => x.court_number))].sort();\n\n// Get the date from first item - fix UTC timezone shift\nlet scheduleDate = 'Unknown date';\nif (items[0]?.date) {\n  const d = new Date(items[0].date);\n  scheduleDate = d.toLocaleDateString('sv-SE', { timeZone: 'Europe/Warsaw' });\n}\n\n// Build header\nlet message = `<b>🏸 Court Schedule</b>\\n`;\nmessage += `<b>📅 ${scheduleDate}</b>\\n\\n`;\n\n// Build monospace table header\nmessage += '<pre>';\nmessage += '🕓     ';\ncourts.forEach(court => {\n  const courtNum = court.replace('Badminton ', '#');\n  message += `${courtNum} `;\n});\nmessage += '\\n';\nmessage += '───────' + '────'.repeat(courts.length) + '\\n';\n\nconst available_times = Object.entries(\n  $input.all().map(i => i.json)\n    .filter(slot => slot.is_available) // ← Filter first\n    .reduce((acc, slot) => {\n      const time = slot.time_slot.slice(0, 5);\n      const court = slot.court_number.replace('Badminton ', '');\n      acc[time] = acc[time] || [];\n      acc[time].push(court);\n      return acc;\n    }, {})\n).map(([time_slot, courts]) => ({ time_slot, courts }));\n\n// Build table rows\ntimeslots.forEach(ts => {\n  let timeDisplay = ts;\n  if (ts.includes('T')) {\n    timeDisplay = ts.substring(11, 16);\n  } else if (ts.length > 5) {\n    timeDisplay = ts.substring(0, 5);\n  }\n  message += timeDisplay + '  ';\n  \n  courts.forEach(court => {\n    const slot = items.find(item => \n      item.time_slot === ts && item.court_number === court\n    );\n    \n    if (slot) {\n        message += slot.is_available ? '✅ ' : '❌ ';\n    } else {\n      message += '⬜ ';\n    }\n  });\n  message += '\\n';\n});\n\nmessage += '</pre>';\nmessage += '\\n✅ Available  ❌ Booked';\n\nreturn [{ json: { message: message, chat_id: chatId, available_times: available_times } }];"
+          "jsCode": "const chatId = $('When Executed by Another Workflow').first().json.chat_id;\nconst items = $input.all().map(item => item.json);\nif (!items || items.length === 0 || Object.keys(items[0]).length === 0) {\n  return [{ json: { message: '📭 No schedule data available.', chat_id: chatId } }];\n}\n\n// Extract unique time slots and courts\nconst timeslots = [...new Set(items.map(x => x.time_slot))].sort();\nconst courts = [...new Set(items.map(x => x.court_number))].sort();\n\n// Get the date from first item - fix UTC timezone shift\nlet scheduleDate = 'Unknown date';\nif (items[0]?.date) {\n  const d = new Date(items[0].date);\n  scheduleDate = d.toLocaleDateString('sv-SE', { timeZone: 'Europe/Warsaw' });\n}\n\n// Build header\nlet message = `<b>🏸 Court Schedule</b>\\n`;\nmessage += `<b>📅 ${scheduleDate}</b>\\n\\n`;\n\n// Build monospace table header\nmessage += '<pre>';\nmessage += '🕓     ';\ncourts.forEach(court => {\n  const courtNum = court.replace('Badminton ', '#');\n  message += `${courtNum} `;\n});\nmessage += '\\n';\nmessage += '───────' + '────'.repeat(courts.length) + '\\n';\n\nconst available_times = Object.entries(\n  $input.all().map(i => i.json)\n    .filter(slot => slot.is_available) // ← Filter first\n    .reduce((acc, slot) => {\n      const time = slot.time_slot.slice(0, 5);\n      const court = slot.court_number.replace('Badminton ', '');\n      acc[time] = acc[time] || [];\n      acc[time].push(court);\n      return acc;\n    }, {})\n).map(([time_slot, courts]) => ({ time_slot, courts }));\n\n// Build table rows\ntimeslots.forEach(ts => {\n  let timeDisplay = ts;\n  if (ts.includes('T')) {\n    timeDisplay = ts.substring(11, 16);\n  } else if (ts.length > 5) {\n    timeDisplay = ts.substring(0, 5);\n  }\n  message += timeDisplay + '  ';\n  \n  courts.forEach(court => {\n    const slot = items.find(item => \n      item.time_slot === ts && item.court_number === court\n    );\n    \n    if (!slot) {\n      message += '⬜ ';\n    } else if (slot.bot_user_id) {\n      message += '🏸 ';  // booked by a bot user (takes priority — handles pre-sync window)\n    } else if (slot.is_available) {\n      message += '✅ ';\n    } else {\n      message += '❌ ';  // booked externally\n    }\n  });\n  message += '\\n';\n});\n\nmessage += '</pre>';\nmessage += '\\n✅ Available  🏸 Bot booking  ❌ External';\n\nreturn [{ json: { message: message, chat_id: chatId, available_times: available_times } }];"
         },
         "id": "23333bcf-24de-43e8-8c16-0ac274362f52",
         "name": "Format Schedule",
@@ -341,7 +309,7 @@
       }
     },
     "authors": "Sergei Vedishchev",
-    "name": "Version 9d5f58da",
+    "name": "Version 640813b3",
     "description": "",
     "autosaved": false
   },
