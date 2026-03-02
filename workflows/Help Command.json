@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-11T18:41:52.008Z",
+  "updatedAt": "2026-03-01T21:22:01.278Z",
   "createdAt": "2026-01-11T18:29:43.968Z",
   "id": "ZLkal1BIG7llifwz",
   "name": "Help Command",
@@ -110,16 +110,13 @@
         "workflowInputs": {
           "values": [
             {
-              "name": "arg1",
-              "type": "any"
+              "name": "arg1"
             },
             {
-              "name": "lang",
-              "type": "any"
+              "name": "lang"
             },
             {
-              "name": "chat_id_firstItem",
-              "type": "any"
+              "name": "chat_id"
             }
           ]
         }
@@ -175,8 +172,8 @@
   },
   "staticData": null,
   "meta": null,
-  "versionId": "c461622e-9e02-4e47-806f-b653c12b8478",
-  "activeVersionId": "c461622e-9e02-4e47-806f-b653c12b8478",
+  "versionId": "c46427b9-52ae-47cd-9c66-45172c41b61f",
+  "activeVersionId": "c46427b9-52ae-47cd-9c66-45172c41b61f",
   "triggerCount": 0,
   "shared": [
     {
@@ -188,9 +185,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-01-14T18:41:30.000Z",
-    "createdAt": "2026-01-11T18:30:13.120Z",
-    "versionId": "c461622e-9e02-4e47-806f-b653c12b8478",
+    "updatedAt": "2026-03-01T21:22:05.000Z",
+    "createdAt": "2026-03-01T21:22:01.279Z",
+    "versionId": "c46427b9-52ae-47cd-9c66-45172c41b61f",
     "workflowId": "ZLkal1BIG7llifwz",
     "nodes": [
       {
@@ -297,16 +294,13 @@
           "workflowInputs": {
             "values": [
               {
-                "name": "arg1",
-                "type": "any"
+                "name": "arg1"
               },
               {
-                "name": "lang",
-                "type": "any"
+                "name": "lang"
               },
               {
-                "name": "chat_id_firstItem",
-                "type": "any"
+                "name": "chat_id"
               }
             ]
           }
@@ -357,7 +351,7 @@
       }
     },
     "authors": "Sergei Vedishchev",
-    "name": "Version c461622e",
+    "name": "Version c46427b9",
     "description": "",
     "autosaved": false
   },
