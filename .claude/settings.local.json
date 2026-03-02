@@ -5,7 +5,13 @@
       "mcp__n8n-mcp__n8n_get_workflow",
       "mcp__n8n-mcp__n8n_update_partial_workflow",
       "mcp__n8n-mcp__get_node",
-      "mcp__n8n-mcp__n8n_validate_workflow"
+      "mcp__n8n-mcp__n8n_validate_workflow",
+      "Bash(git commit:*)",
+      "Bash(gh repo create:*)",
+      "Bash(dir:*)",
+      "mcp__n8n-mcp__tools_documentation",
+      "mcp__plugin_context7_context7__resolve-library-id",
+      "mcp__postgres__execute_sql"
     ]
   }
 }

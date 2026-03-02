@@ -304,7 +304,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "{{ $json.queries[0] }}",
+        "query": "{{ $json.queries.join('\\n') }}",
         "options": {}
       },
       "id": "save-reservation-db",

@@ -777,6 +777,78 @@
       "parameters": {
         "workflowId": {
           "__rl": true,
+          "value": "p5NpS5X1VLPdY3mX",
+          "mode": "id"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "arg1": "={{ $json.arg1 }}",
+            "chat_id": "={{ $json.chat_id }}",
+            "user_id": "={{ $json.user_id }}",
+            "username": "={{ $json.username }}",
+            "fullname": "={{ $json.fullname }}",
+            "lang": "={{ $json.lang }}"
+          },
+          "schema": [
+            {
+              "id": "arg1",
+              "displayName": "arg1",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "id": "user_id",
+              "displayName": "user_id",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "id": "username",
+              "displayName": "username",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "id": "fullname",
+              "displayName": "fullname",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "id": "lang",
+              "displayName": "lang",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "nlp-exec-book",
+      "name": "Execute Book",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        3376,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
           "value": "HFeE52YK9tAzKTpk",
           "mode": "list",
           "cachedResultUrl": "/workflow/HFeE52YK9tAzKTpk",
@@ -1499,6 +1571,11 @@
       ]
     },
     "Execute Show": {
+      "main": [
+        []
+      ]
+    },
+    "Execute Book": {
       "main": [
         []
       ]
@@ -2420,6 +2497,78 @@
         "position": [
           3232,
           432
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "p5NpS5X1VLPdY3mX",
+            "mode": "id"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "arg1": "={{ $json.arg1 }}",
+              "chat_id": "={{ $json.chat_id }}",
+              "user_id": "={{ $json.user_id }}",
+              "username": "={{ $json.username }}",
+              "fullname": "={{ $json.fullname }}",
+              "lang": "={{ $json.lang }}"
+            },
+            "schema": [
+              {
+                "id": "arg1",
+                "displayName": "arg1",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "id": "chat_id",
+                "displayName": "chat_id",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "id": "user_id",
+                "displayName": "user_id",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "id": "username",
+                "displayName": "username",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "id": "fullname",
+                "displayName": "fullname",
+                "required": true,
+                "type": "string"
+              },
+              {
+                "id": "lang",
+                "displayName": "lang",
+                "required": true,
+                "type": "string"
+              }
+            ],
+            "matchingColumns": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {
+            "waitForSubWorkflow": true
+          }
+        },
+        "id": "nlp-exec-book",
+        "name": "Execute Book",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.3,
+        "position": [
+          3376,
+          256
         ]
       },
       {
