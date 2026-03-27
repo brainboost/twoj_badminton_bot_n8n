@@ -11,7 +11,10 @@
       "Bash(dir:*)",
       "mcp__n8n-mcp__tools_documentation",
       "mcp__plugin_context7_context7__resolve-library-id",
-      "mcp__postgres__execute_sql"
+      "mcp__postgres__execute_sql",
+      "Bash(node:*)",
+      "mcp__n8n-mcp__n8n_executions",
+      "Bash(python3:*)"
     ]
   }
 }
