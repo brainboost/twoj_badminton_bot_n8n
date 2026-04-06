@@ -9,9 +9,8 @@ body:
   - type: markdown
     attributes:
       value: |
-        ## Thanks for suggesting a feature!
+        ### Thanks for suggesting a feature!
         
-        Please help us understand your use case by filling out the sections below.
         Before submitting, please check if this feature has already been requested.
         
   - type: checkboxes
