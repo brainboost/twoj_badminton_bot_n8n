@@ -1,42 +1,22 @@
 {
-  "updatedAt": "2026-03-02T09:06:39.492Z",
+  "updatedAt": "2026-04-14T10:35:22.679Z",
   "createdAt": "2025-12-22T13:22:52.158Z",
   "id": "p5NpS5X1VLPdY3mX",
   "name": "Book Command",
+  "description": null,
   "active": true,
   "isArchived": false,
   "nodes": [
     {
       "parameters": {
-        "workflowInputs": {
-          "values": [
-            {
-              "name": "chat_id"
-            },
-            {
-              "name": "arg1"
-            },
-            {
-              "name": "lang"
-            },
-            {
-              "name": "user_id"
-            },
-            {
-              "name": "username"
-            },
-            {
-              "name": "fullname"
-            }
-          ]
-        }
+        "inputSource": "passthrough"
       },
       "id": "trigger-book",
       "name": "When Executed by Another Workflow",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "position": [
         -528,
-        256
+        384
       ],
       "typeVersion": 1.1
     },
@@ -48,8 +28,8 @@
       "name": "Parse Booking JSON",
       "type": "n8n-nodes-base.code",
       "position": [
-        -304,
-        256
+        -80,
+        288
       ],
       "typeVersion": 2
     },
@@ -81,8 +61,8 @@
       "name": "Check Booking Parse",
       "type": "n8n-nodes-base.if",
       "position": [
-        -112,
-        256
+        144,
+        288
       ],
       "typeVersion": 2.2
     },
@@ -114,8 +94,8 @@
       "name": "Get User Credentials",
       "type": "n8n-nodes-base.postgres",
       "position": [
-        128,
-        240
+        368,
+        192
       ],
       "typeVersion": 2.6,
       "credentials": {
@@ -162,8 +142,8 @@
       "name": "Check User Credentials",
       "type": "n8n-nodes-base.if",
       "position": [
-        608,
-        240
+        816,
+        192
       ],
       "typeVersion": 2.2
     },
@@ -215,8 +195,8 @@
       "name": "Set Booking Context",
       "type": "n8n-nodes-base.set",
       "position": [
-        896,
-        80
+        1040,
+        96
       ],
       "typeVersion": 3.4
     },
@@ -228,8 +208,8 @@
       "name": "Prepare Bulk Bookings",
       "type": "n8n-nodes-base.code",
       "position": [
-        1136,
-        80
+        1264,
+        96
       ],
       "typeVersion": 2
     },
@@ -244,8 +224,8 @@
       "type": "n8n-nodes-mcp.mcpClient",
       "typeVersion": 1,
       "position": [
-        1376,
-        80
+        1488,
+        96
       ],
       "credentials": {
         "mcpClientApi": {
@@ -282,36 +262,36 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        1616,
-        80
+        1712,
+        96
       ],
       "id": "b675edb4-9347-4d44-bba9-fa3d6e7d38ad",
       "name": "Check Bulk Result"
     },
     {
       "parameters": {
-        "jsCode": "const original_args = $('When Executed by Another Workflow').first().json.arg1;\nconst bookings = JSON.parse(original_args);\nconst user_id = $('When Executed by Another Workflow').first().json.user_id;\nconst fullname = $('When Executed by Another Workflow').first().json.fullname;\nlet queries = [];\nconst inserted = $input.first().json.result.structuredContent.reservation.bookings;\n\nfor (let i = 0; i < inserted.length; i++) {\n  const b = bookings[i];\n  const reservation_id = inserted[i].booking_id;\n\n  // Convert date from DD.MM.YYYY to YYYY-MM-DD for PostgreSQL DATE column\n  let dbDate = b.date;\n  const dateMatch = b.date.match(/^(\\d{1,2})\\.(\\d{1,2})\\.(\\d{4})$/);\n  if (dateMatch) {\n    const day = dateMatch[1].padStart(2, '0');\n    const month = dateMatch[2].padStart(2, '0');\n    const year = dateMatch[3];\n    dbDate = `${year}-${month}-${day}`;\n  }\n\n  // Safe notes: handle null/undefined and escape ALL apostrophes\n  const safeNotes = (b.notes || fullname || '').replace(/'/g, \"''\");\n\n  const query = \"INSERT INTO reservations \" +\n    \"(date, time_start, time_end, court, players_num, user_id, notes, reservation_id) \" +\n    \"VALUES(\" +\n    \"'\" + dbDate + \"',\" +\n    \"'\" + b.time_start + \"',\" +\n    \"'\" + b.time_end + \"',\" +\n    \"'\" + b.court + \"',\" +\n    b.players_num + \",\" +\n    \"'\" + user_id + \"',\" +\n    \"'\" + safeNotes + \"',\" +\n    \"'\" + reservation_id + \"'\" +\n    \");\";\n  queries.push(query);\n}\n\nreturn [{ json: { queries: queries } }];"
+        "jsCode": "const original_args = $('When Executed by Another Workflow').first().json.arg1;\nconst bookings = JSON.parse(original_args);\nconst user_id = $('When Executed by Another Workflow').first().json.user_id;\nlet queries = [];\nconst inserted = $input.first().json.result.structuredContent.reservation.bookings;\n\nfor (let i = 0; i < inserted.length; i++) {\n  const b = bookings[i];\n  const reservation_id = inserted[i].booking_id;\n\n  // Convert date from DD.MM.YYYY to YYYY-MM-DD for PostgreSQL DATE column\n  let dbDate = b.date;\n  const dateMatch = b.date.match(/^(\\d{1,2})\\.(\\d{1,2})\\.(\\d{4})$/);\n  if (dateMatch) {\n    const day = dateMatch[1].padStart(2, '0');\n    const month = dateMatch[2].padStart(2, '0');\n    const year = dateMatch[3];\n    dbDate = `${year}-${month}-${day}`;\n  }\n\n  // Safe notes: handle null/undefined and escape ALL apostrophes\n  const safeNotes = (b.notes || '').replace(/'/g, \"''\");\n\n  const query = \"INSERT INTO reservations \" +\n    \"(date, time_start, time_end, court, players_num, user_id, notes, reservation_id) \" +\n    \"VALUES(\" +\n    \"'\" + dbDate + \"',\" +\n    \"'\" + b.time_start + \"',\" +\n    \"'\" + b.time_end + \"',\" +\n    \"'\" + b.court + \"',\" +\n    b.players_num + \",\" +\n    \"'\" + user_id + \"',\" +\n    \"'\" + safeNotes + \"',\" +\n    \"'\" + reservation_id + \"'\" +\n    \");\";\n  queries.push(query);\n}\n\nreturn [{ json: { queries: queries } }];"
       },
       "id": "build-insert-query",
       "name": "Build Insert Query",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1872,
+        1936,
         0
       ]
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "{{ $json.queries.join('\\n') }}",
+        "query": "{{ $json.queries.join('\\\\n') }}",
         "options": {}
       },
       "id": "save-reservation-db",
       "name": "Save All Reservations",
       "type": "n8n-nodes-base.postgres",
       "position": [
-        2096,
+        2160,
         0
       ],
       "typeVersion": 2.6,
@@ -330,7 +310,7 @@
       "name": "Prepare Success Data",
       "type": "n8n-nodes-base.code",
       "position": [
-        2336,
+        2384,
         0
       ],
       "typeVersion": 2
@@ -367,7 +347,7 @@
       "name": "Get Book Success Translation",
       "type": "n8n-nodes-base.postgres",
       "position": [
-        2576,
+        2608,
         0
       ],
       "typeVersion": 2.6,
@@ -386,7 +366,7 @@
       "name": "Format Success Message",
       "type": "n8n-nodes-base.code",
       "position": [
-        2816,
+        2832,
         0
       ],
       "typeVersion": 2
@@ -414,7 +394,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1872,
+        2832,
         192
       ],
       "id": "c2b57987-7a40-4e5a-9b05-019e44e0fab8",
@@ -452,8 +432,8 @@
       "name": "Get Error Translation",
       "type": "n8n-nodes-base.postgres",
       "position": [
-        352,
-        672
+        2608,
+        576
       ],
       "typeVersion": 2.6,
       "credentials": {
@@ -487,8 +467,8 @@
       "name": "Format Error Message",
       "type": "n8n-nodes-base.set",
       "position": [
-        640,
-        672
+        2832,
+        576
       ],
       "typeVersion": 3.4
     },
@@ -524,8 +504,8 @@
       "name": "Get No Credentials Translation",
       "type": "n8n-nodes-base.postgres",
       "position": [
-        880,
-        448
+        2608,
+        384
       ],
       "typeVersion": 2.6,
       "credentials": {
@@ -559,8 +539,8 @@
       "name": "Format No Credentials Message",
       "type": "n8n-nodes-base.set",
       "position": [
-        1104,
-        448
+        2832,
+        384
       ],
       "typeVersion": 3.4
     },
@@ -576,8 +556,8 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        3024,
-        192
+        3056,
+        288
       ],
       "id": "f1fed62a-bc39-4a06-84d6-2633f7ae8852",
       "name": "Send a text message",
@@ -600,8 +580,8 @@
       "type": "n8n-nodes-mcp.mcpClient",
       "typeVersion": 1,
       "position": [
-        384,
-        240
+        592,
+        192
       ],
       "credentials": {
         "mcpClientApi": {
@@ -609,20 +589,148 @@
           "name": "Twojtenis MCP Client (STDIO)"
         }
       }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "confirmed-condition",
+              "leftValue": "={{ $json.confirmed }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "hitl-check-confirmed",
+      "name": "Check Confirmed",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -304,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const crypto = require('crypto');\nconst input = $input.first().json;\nconst confirmation_id = crypto.randomBytes(8).toString('hex');\n\n// Parse booking slots from arg1 to build confirmation message details\nlet details = '';\ntry {\n  const slots = JSON.parse(input.arg1);\n  if (Array.isArray(slots) && slots.length > 0) {\n    details = slots.map(function(s) {\n      const courtLabel = s.court ? 'Court ' + s.court : '';\n      const dateLabel = s.date || '';\n      const timeLabel = (s.time_start && s.time_end) ? s.time_start + '\\u2013' + s.time_end : '';\n      const playersLabel = s.players_num ? '\\ud83d\\udc65 ' + s.players_num : '';\n      return ('\\ud83c\\udff8 ' + courtLabel + '  \\ud83d\\udcc5 ' + dateLabel + '  \\u23f0 ' + timeLabel + '  ' + playersLabel).trim();\n    }).join('\\n');\n  }\n} catch(e) {\n  details = input.arg1 || '';\n}\n\nconst result = {\n  json: {\n    chat_id: input.chat_id,\n    user_id: input.user_id,\n    username: input.username,\n    fullname: input.fullname,\n    lang: input.lang,\n    command: input.command,\n    arg1: input.arg1,\n    confirmed: input.confirmed,\n    confirmation_id: confirmation_id,\n    details_text: details\n  }\n};\n\nreturn [result];\n"
+      },
+      "id": "hitl-gen-confirmation-id",
+      "name": "Generate Confirmation ID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -80,
+        744
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO pending_confirmations (confirmation_id, chat_id, user_id, lang, command, payload) VALUES ($1, $2, $3, $4, 'book', $5::jsonb)",
+        "options": {
+          "queryReplacement": "={{ $json.confirmation_id }},{{ String($json.chat_id) }},{{ String($json.user_id) }},{{ $json.lang }},{{ $json }}"
+        }
+      },
+      "id": "hitl-store-pending",
+      "name": "Store Pending Confirmation",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        144,
+        744
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "3SDluWLUa1vIU50a",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT text FROM translations WHERE key = 'confirm_book' AND lang = $1 UNION ALL SELECT text FROM translations WHERE key = 'confirm_book' AND lang = 'en' LIMIT 1",
+        "options": {
+          "queryReplacement": "={{ $('Check Confirmed').first().json.lang }}"
+        }
+      },
+      "id": "hitl-get-confirm-translation",
+      "name": "Get Book Confirm Translation",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        368,
+        744
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "3SDluWLUa1vIU50a",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ String($('Generate Confirmation ID').first().json.chat_id) }}",
+        "text": "={{ $json.text.replace('{details}', $('Generate Confirmation ID').first().json.details_text) }}",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "✅ Confirm",
+                    "additionalFields": {
+                      "callback_data": "={{ 'confirm:' + $('Generate Confirmation ID').first().json.confirmation_id }}"
+                    }
+                  },
+                  {
+                    "text": "❌ Cancel",
+                    "additionalFields": {
+                      "callback_data": "={{ 'cancel:' + $('Generate Confirmation ID').first().json.confirmation_id }}"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "hitl-send-confirm-keyboard",
+      "name": "Send Book Confirm Keyboard",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        592,
+        744
+      ],
+      "webhookId": "b9ba5bf4-ff84-4e10-a8f9-6c6958a9be17",
+      "credentials": {
+        "telegramApi": {
+          "id": "pHQDqhsnrwimdaY2",
+          "name": "twoj_badminton_bot"
+        }
+      }
     }
   ],
   "connections": {
-    "When Executed by Another Workflow": {
-      "main": [
-        [
-          {
-            "node": "Parse Booking JSON",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Parse Booking JSON": {
       "main": [
         [
@@ -852,19 +960,83 @@
           }
         ]
       ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Check Confirmed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Confirmed": {
+      "main": [
+        [
+          {
+            "node": "Parse Booking JSON",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Generate Confirmation ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Confirmation ID": {
+      "main": [
+        [
+          {
+            "node": "Store Pending Confirmation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store Pending Confirmation": {
+      "main": [
+        [
+          {
+            "node": "Get Book Confirm Translation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Book Confirm Translation": {
+      "main": [
+        [
+          {
+            "node": "Send Book Confirm Keyboard",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
     "executionOrder": "v1",
     "callerPolicy": "workflowsFromSameOwner",
-    "availableInMCP": false
+    "availableInMCP": false,
+    "binaryMode": "separate"
   },
   "staticData": null,
   "meta": {
     "templateCredsSetupCompleted": true
   },
-  "versionId": "72c7abb9-f0c4-46e0-a45b-dda9b8052d45",
-  "activeVersionId": "72c7abb9-f0c4-46e0-a45b-dda9b8052d45",
+  "versionId": "bd9b6a0a-897f-44d2-abbf-5e158aeeda74",
+  "activeVersionId": "bd9b6a0a-897f-44d2-abbf-5e158aeeda74",
+  "versionCounter": 160,
   "triggerCount": 0,
   "shared": [
     {
@@ -872,46 +1044,43 @@
       "createdAt": "2025-12-22T13:22:52.160Z",
       "role": "workflow:owner",
       "workflowId": "p5NpS5X1VLPdY3mX",
-      "projectId": "66rzfRQbAnEionlx"
+      "projectId": "66rzfRQbAnEionlx",
+      "project": {
+        "updatedAt": "2025-09-19T18:39:13.257Z",
+        "createdAt": "2025-09-18T20:36:06.558Z",
+        "id": "66rzfRQbAnEionlx",
+        "name": "Sergei Vedishchev <brainboost@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "53af7452-7a67-4d31-8a0d-967083ebc818"
+      }
+    }
+  ],
+  "tags": [
+    {
+      "updatedAt": "2025-12-27T11:51:52.051Z",
+      "createdAt": "2025-12-27T11:51:52.051Z",
+      "id": "3W7RR758UwICVpEC",
+      "name": "bot_command"
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-03-02T09:06:51.000Z",
-    "createdAt": "2026-03-02T09:06:39.493Z",
-    "versionId": "72c7abb9-f0c4-46e0-a45b-dda9b8052d45",
+    "updatedAt": "2026-04-14T10:35:40.000Z",
+    "createdAt": "2026-04-14T10:35:22.680Z",
+    "versionId": "bd9b6a0a-897f-44d2-abbf-5e158aeeda74",
     "workflowId": "p5NpS5X1VLPdY3mX",
     "nodes": [
       {
         "parameters": {
-          "workflowInputs": {
-            "values": [
-              {
-                "name": "chat_id"
-              },
-              {
-                "name": "arg1"
-              },
-              {
-                "name": "lang"
-              },
-              {
-                "name": "user_id"
-              },
-              {
-                "name": "username"
-              },
-              {
-                "name": "fullname"
-              }
-            ]
-          }
+          "inputSource": "passthrough"
         },
         "id": "trigger-book",
         "name": "When Executed by Another Workflow",
         "type": "n8n-nodes-base.executeWorkflowTrigger",
         "position": [
           -528,
-          256
+          384
         ],
         "typeVersion": 1.1
       },
@@ -923,8 +1092,8 @@
         "name": "Parse Booking JSON",
         "type": "n8n-nodes-base.code",
         "position": [
-          -304,
-          256
+          -80,
+          288
         ],
         "typeVersion": 2
       },
@@ -956,8 +1125,8 @@
         "name": "Check Booking Parse",
         "type": "n8n-nodes-base.if",
         "position": [
-          -112,
-          256
+          144,
+          288
         ],
         "typeVersion": 2.2
       },
@@ -989,8 +1158,8 @@
         "name": "Get User Credentials",
         "type": "n8n-nodes-base.postgres",
         "position": [
-          128,
-          240
+          368,
+          192
         ],
         "typeVersion": 2.6,
         "credentials": {
@@ -1037,8 +1206,8 @@
         "name": "Check User Credentials",
         "type": "n8n-nodes-base.if",
         "position": [
-          608,
-          240
+          816,
+          192
         ],
         "typeVersion": 2.2
       },
@@ -1090,8 +1259,8 @@
         "name": "Set Booking Context",
         "type": "n8n-nodes-base.set",
         "position": [
-          896,
-          80
+          1040,
+          96
         ],
         "typeVersion": 3.4
       },
@@ -1103,8 +1272,8 @@
         "name": "Prepare Bulk Bookings",
         "type": "n8n-nodes-base.code",
         "position": [
-          1136,
-          80
+          1264,
+          96
         ],
         "typeVersion": 2
       },
@@ -1119,8 +1288,8 @@
         "type": "n8n-nodes-mcp.mcpClient",
         "typeVersion": 1,
         "position": [
-          1376,
-          80
+          1488,
+          96
         ],
         "credentials": {
           "mcpClientApi": {
@@ -1157,36 +1326,36 @@
         "type": "n8n-nodes-base.if",
         "typeVersion": 2.3,
         "position": [
-          1616,
-          80
+          1712,
+          96
         ],
         "id": "b675edb4-9347-4d44-bba9-fa3d6e7d38ad",
         "name": "Check Bulk Result"
       },
       {
         "parameters": {
-          "jsCode": "const original_args = $('When Executed by Another Workflow').first().json.arg1;\nconst bookings = JSON.parse(original_args);\nconst user_id = $('When Executed by Another Workflow').first().json.user_id;\nconst fullname = $('When Executed by Another Workflow').first().json.fullname;\nlet queries = [];\nconst inserted = $input.first().json.result.structuredContent.reservation.bookings;\n\nfor (let i = 0; i < inserted.length; i++) {\n  const b = bookings[i];\n  const reservation_id = inserted[i].booking_id;\n\n  // Convert date from DD.MM.YYYY to YYYY-MM-DD for PostgreSQL DATE column\n  let dbDate = b.date;\n  const dateMatch = b.date.match(/^(\\d{1,2})\\.(\\d{1,2})\\.(\\d{4})$/);\n  if (dateMatch) {\n    const day = dateMatch[1].padStart(2, '0');\n    const month = dateMatch[2].padStart(2, '0');\n    const year = dateMatch[3];\n    dbDate = `${year}-${month}-${day}`;\n  }\n\n  // Safe notes: handle null/undefined and escape ALL apostrophes\n  const safeNotes = (b.notes || fullname || '').replace(/'/g, \"''\");\n\n  const query = \"INSERT INTO reservations \" +\n    \"(date, time_start, time_end, court, players_num, user_id, notes, reservation_id) \" +\n    \"VALUES(\" +\n    \"'\" + dbDate + \"',\" +\n    \"'\" + b.time_start + \"',\" +\n    \"'\" + b.time_end + \"',\" +\n    \"'\" + b.court + \"',\" +\n    b.players_num + \",\" +\n    \"'\" + user_id + \"',\" +\n    \"'\" + safeNotes + \"',\" +\n    \"'\" + reservation_id + \"'\" +\n    \");\";\n  queries.push(query);\n}\n\nreturn [{ json: { queries: queries } }];"
+          "jsCode": "const original_args = $('When Executed by Another Workflow').first().json.arg1;\nconst bookings = JSON.parse(original_args);\nconst user_id = $('When Executed by Another Workflow').first().json.user_id;\nlet queries = [];\nconst inserted = $input.first().json.result.structuredContent.reservation.bookings;\n\nfor (let i = 0; i < inserted.length; i++) {\n  const b = bookings[i];\n  const reservation_id = inserted[i].booking_id;\n\n  // Convert date from DD.MM.YYYY to YYYY-MM-DD for PostgreSQL DATE column\n  let dbDate = b.date;\n  const dateMatch = b.date.match(/^(\\d{1,2})\\.(\\d{1,2})\\.(\\d{4})$/);\n  if (dateMatch) {\n    const day = dateMatch[1].padStart(2, '0');\n    const month = dateMatch[2].padStart(2, '0');\n    const year = dateMatch[3];\n    dbDate = `${year}-${month}-${day}`;\n  }\n\n  // Safe notes: handle null/undefined and escape ALL apostrophes\n  const safeNotes = (b.notes || '').replace(/'/g, \"''\");\n\n  const query = \"INSERT INTO reservations \" +\n    \"(date, time_start, time_end, court, players_num, user_id, notes, reservation_id) \" +\n    \"VALUES(\" +\n    \"'\" + dbDate + \"',\" +\n    \"'\" + b.time_start + \"',\" +\n    \"'\" + b.time_end + \"',\" +\n    \"'\" + b.court + \"',\" +\n    b.players_num + \",\" +\n    \"'\" + user_id + \"',\" +\n    \"'\" + safeNotes + \"',\" +\n    \"'\" + reservation_id + \"'\" +\n    \");\";\n  queries.push(query);\n}\n\nreturn [{ json: { queries: queries } }];"
         },
         "id": "build-insert-query",
         "name": "Build Insert Query",
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          1872,
+          1936,
           0
         ]
       },
       {
         "parameters": {
           "operation": "executeQuery",
-          "query": "{{ $json.queries[0] }}",
+          "query": "{{ $json.queries.join('\\\\n') }}",
           "options": {}
         },
         "id": "save-reservation-db",
         "name": "Save All Reservations",
         "type": "n8n-nodes-base.postgres",
         "position": [
-          2096,
+          2160,
           0
         ],
         "typeVersion": 2.6,
@@ -1205,7 +1374,7 @@
         "name": "Prepare Success Data",
         "type": "n8n-nodes-base.code",
         "position": [
-          2336,
+          2384,
           0
         ],
         "typeVersion": 2
@@ -1242,7 +1411,7 @@
         "name": "Get Book Success Translation",
         "type": "n8n-nodes-base.postgres",
         "position": [
-          2576,
+          2608,
           0
         ],
         "typeVersion": 2.6,
@@ -1261,7 +1430,7 @@
         "name": "Format Success Message",
         "type": "n8n-nodes-base.code",
         "position": [
-          2816,
+          2832,
           0
         ],
         "typeVersion": 2
@@ -1289,7 +1458,7 @@
         "type": "n8n-nodes-base.set",
         "typeVersion": 3.4,
         "position": [
-          1872,
+          2832,
           192
         ],
         "id": "c2b57987-7a40-4e5a-9b05-019e44e0fab8",
@@ -1327,8 +1496,8 @@
         "name": "Get Error Translation",
         "type": "n8n-nodes-base.postgres",
         "position": [
-          352,
-          672
+          2608,
+          576
         ],
         "typeVersion": 2.6,
         "credentials": {
@@ -1362,8 +1531,8 @@
         "name": "Format Error Message",
         "type": "n8n-nodes-base.set",
         "position": [
-          640,
-          672
+          2832,
+          576
         ],
         "typeVersion": 3.4
       },
@@ -1399,8 +1568,8 @@
         "name": "Get No Credentials Translation",
         "type": "n8n-nodes-base.postgres",
         "position": [
-          880,
-          448
+          2608,
+          384
         ],
         "typeVersion": 2.6,
         "credentials": {
@@ -1434,8 +1603,8 @@
         "name": "Format No Credentials Message",
         "type": "n8n-nodes-base.set",
         "position": [
-          1104,
-          448
+          2832,
+          384
         ],
         "typeVersion": 3.4
       },
@@ -1451,8 +1620,8 @@
         "type": "n8n-nodes-base.telegram",
         "typeVersion": 1.2,
         "position": [
-          3024,
-          192
+          3056,
+          288
         ],
         "id": "f1fed62a-bc39-4a06-84d6-2633f7ae8852",
         "name": "Send a text message",
@@ -1475,8 +1644,8 @@
         "type": "n8n-nodes-mcp.mcpClient",
         "typeVersion": 1,
         "position": [
-          384,
-          240
+          592,
+          192
         ],
         "credentials": {
           "mcpClientApi": {
@@ -1484,20 +1653,148 @@
             "name": "Twojtenis MCP Client (STDIO)"
           }
         }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            },
+            "conditions": [
+              {
+                "id": "confirmed-condition",
+                "leftValue": "={{ $json.confirmed }}",
+                "rightValue": true,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "hitl-check-confirmed",
+        "name": "Check Confirmed",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          -304,
+          384
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const crypto = require('crypto');\nconst input = $input.first().json;\nconst confirmation_id = crypto.randomBytes(8).toString('hex');\n\n// Parse booking slots from arg1 to build confirmation message details\nlet details = '';\ntry {\n  const slots = JSON.parse(input.arg1);\n  if (Array.isArray(slots) && slots.length > 0) {\n    details = slots.map(function(s) {\n      const courtLabel = s.court ? 'Court ' + s.court : '';\n      const dateLabel = s.date || '';\n      const timeLabel = (s.time_start && s.time_end) ? s.time_start + '\\u2013' + s.time_end : '';\n      const playersLabel = s.players_num ? '\\ud83d\\udc65 ' + s.players_num : '';\n      return ('\\ud83c\\udff8 ' + courtLabel + '  \\ud83d\\udcc5 ' + dateLabel + '  \\u23f0 ' + timeLabel + '  ' + playersLabel).trim();\n    }).join('\\n');\n  }\n} catch(e) {\n  details = input.arg1 || '';\n}\n\nconst result = {\n  json: {\n    chat_id: input.chat_id,\n    user_id: input.user_id,\n    username: input.username,\n    fullname: input.fullname,\n    lang: input.lang,\n    command: input.command,\n    arg1: input.arg1,\n    confirmed: input.confirmed,\n    confirmation_id: confirmation_id,\n    details_text: details\n  }\n};\n\nreturn [result];\n"
+        },
+        "id": "hitl-gen-confirmation-id",
+        "name": "Generate Confirmation ID",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -80,
+          744
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "INSERT INTO pending_confirmations (confirmation_id, chat_id, user_id, lang, command, payload) VALUES ($1, $2, $3, $4, 'book', $5::jsonb)",
+          "options": {
+            "queryReplacement": "={{ $json.confirmation_id }},{{ String($json.chat_id) }},{{ String($json.user_id) }},{{ $json.lang }},{{ $json }}"
+          }
+        },
+        "id": "hitl-store-pending",
+        "name": "Store Pending Confirmation",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          144,
+          744
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "3SDluWLUa1vIU50a",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT text FROM translations WHERE key = 'confirm_book' AND lang = $1 UNION ALL SELECT text FROM translations WHERE key = 'confirm_book' AND lang = 'en' LIMIT 1",
+          "options": {
+            "queryReplacement": "={{ $('Check Confirmed').first().json.lang }}"
+          }
+        },
+        "id": "hitl-get-confirm-translation",
+        "name": "Get Book Confirm Translation",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          368,
+          744
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "3SDluWLUa1vIU50a",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "chatId": "={{ String($('Generate Confirmation ID').first().json.chat_id) }}",
+          "text": "={{ $json.text.replace('{details}', $('Generate Confirmation ID').first().json.details_text) }}",
+          "replyMarkup": "inlineKeyboard",
+          "inlineKeyboard": {
+            "rows": [
+              {
+                "row": {
+                  "buttons": [
+                    {
+                      "text": "✅ Confirm",
+                      "additionalFields": {
+                        "callback_data": "={{ 'confirm:' + $('Generate Confirmation ID').first().json.confirmation_id }}"
+                      }
+                    },
+                    {
+                      "text": "❌ Cancel",
+                      "additionalFields": {
+                        "callback_data": "={{ 'cancel:' + $('Generate Confirmation ID').first().json.confirmation_id }}"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "additionalFields": {
+            "appendAttribution": false,
+            "parse_mode": "HTML"
+          }
+        },
+        "id": "hitl-send-confirm-keyboard",
+        "name": "Send Book Confirm Keyboard",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          592,
+          744
+        ],
+        "webhookId": "b9ba5bf4-ff84-4e10-a8f9-6c6958a9be17",
+        "credentials": {
+          "telegramApi": {
+            "id": "pHQDqhsnrwimdaY2",
+            "name": "twoj_badminton_bot"
+          }
+        }
       }
     ],
     "connections": {
-      "When Executed by Another Workflow": {
-        "main": [
-          [
-            {
-              "node": "Parse Booking JSON",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
       "Parse Booking JSON": {
         "main": [
           [
@@ -1727,19 +2024,83 @@
             }
           ]
         ]
+      },
+      "When Executed by Another Workflow": {
+        "main": [
+          [
+            {
+              "node": "Check Confirmed",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check Confirmed": {
+        "main": [
+          [
+            {
+              "node": "Parse Booking JSON",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Generate Confirmation ID",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Generate Confirmation ID": {
+        "main": [
+          [
+            {
+              "node": "Store Pending Confirmation",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Store Pending Confirmation": {
+        "main": [
+          [
+            {
+              "node": "Get Book Confirm Translation",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Book Confirm Translation": {
+        "main": [
+          [
+            {
+              "node": "Send Book Confirm Keyboard",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "authors": "Sergei Vedishchev",
-    "name": "Version 72c7abb9",
+    "name": "Version bd9b6a0a",
     "description": "",
-    "autosaved": false
-  },
-  "tags": [
-    {
-      "updatedAt": "2025-12-27T11:51:52.051Z",
-      "createdAt": "2025-12-27T11:51:52.051Z",
-      "id": "3W7RR758UwICVpEC",
-      "name": "bot_command"
-    }
-  ]
+    "autosaved": true,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-04-14T10:35:40.400Z",
+        "id": 301,
+        "workflowId": "p5NpS5X1VLPdY3mX",
+        "versionId": "bd9b6a0a-897f-44d2-abbf-5e158aeeda74",
+        "event": "activated",
+        "userId": "53af7452-7a67-4d31-8a0d-967083ebc818"
+      }
+    ]
+  }
 }

@@ -1,8 +1,9 @@
 {
-  "updatedAt": "2026-03-01T21:46:31.778Z",
+  "updatedAt": "2026-03-26T21:35:57.084Z",
   "createdAt": "2026-01-11T18:21:47.330Z",
   "id": "QbD3Epml4ANF9vr0",
   "name": "Command Parser",
+  "description": null,
   "active": true,
   "isArchived": false,
   "nodes": [
@@ -343,7 +344,7 @@
         "messages": {
           "messageValues": [
             {
-              "message": "=# TASK\nParse user message into this JSON format:\n{\"command\": \"<COMMAND>\", \"arg1\": \"<ARGUMENT>\", \"arg2\": \"<ARGUMENT2>\"}\nCommand is mandatory. Arguments \"arg1\" and \"arg2\" are optional.\nNO other fields allowed. NO arrays in root (except for book command). JSON should be valid.\n\n---\n\n# CURRENT DATE\nToday: {{ $today.format('yyyy-MM-dd') }} ({{ $today.format('cccc') }})\nNow: {{ $now.format('yyyy-MM-dd HH:mm') }}\n\n---\n\n# COMMANDS REFERENCE\n\n## 1. show\nPurpose: Display court availability\nTrigger words: show, available, free, schedule, what's open, расписание, покажи, pokaż, wolne\narg1: Date string in YYYY-MM-DD format\n\nExamples:\n- \"show tomorrow\" → {\"command\": \"show\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n- \"what's available Saturday\" → {\"command\": \"show\", \"arg1\": \"2026-01-17\"}\n\n## 2. list\nPurpose: Show user's reservations\nTrigger words: list, my reservations, my bookings, мои брони, moje rezerwacje\nNo arguments.\n\nExamples:\n- \"list my bookings\" → {\"command\": \"list\"}\n- \"Покажи мои брони\" → {\"command\": \"list\"}\n\n## 3. delete\nPurpose: Cancel ONE reservation by ID\nTrigger words: delete, cancel, remove + ID (NOT \"all\")\narg1: Reservation ID string\n\nExamples:\n- \"cancel 6952ec02dda30\" → {\"command\": \"delete\", \"arg1\": \"6952ec02dda30\"}\n\n## 4. deleteall\nPurpose: Cancel ALL reservations\nTrigger words: delete all, cancel all, remove all, отмени все, usuń wszystko\nNo arguments.\n\nExamples:\n- \"cancel all reservations\" → {\"command\": \"deleteall\"}\n\n## 5. book\nPurpose: Make a court reservation\nTrigger words: book, reserve, забронируй, zarezerwuj\narg1: JSON array with booking details\n\nExamples:\n- \"Book court 1 for tomorrow 16:00-17:00\" → {\"command\": \"book\", \"arg1\": [{\"court\":\"1\", \"date\":\"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\", \"time_start\":\"16:00\", \"time_end\":\"17:00\", \"players_num\":\"4\", \"notes\":\"\"}]}\n\n## 6. register\nPurpose: Save login credentials\nTrigger words: register, sign up, credentials\narg1: \"email password\" as single string\n\nExamples:\n- \"register user@mail.com pass123\" → {\"command\": \"register\", \"arg1\": \"user@mail.com pass123\"}\n\n## 7. play\nPurpose: Register to play on a reserved court\nTrigger words: play, join, join game, register for game, записаться на игру, dołącz do gry, хочу играть, zagraj, поиграть\narg1: Optional - date in YYYY-MM-DD format\narg2: Optional - start time in HH:MM format\n\nExamples:\n- \"I want to play\" → {\"command\": \"play\"}\n- \"join tomorrow's game\" → {\"command\": \"play\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n- \"play 2026-01-17 19:00\" → {\"command\": \"play\", \"arg1\": \"2026-01-17\", \"arg2\": \"19:00\"}\n- \"хочу играть в субботу в 16:00\" → {\"command\": \"play\", \"arg1\": \"2026-01-18\", \"arg2\": \"16:00\"}\n- \"zapisz mnie na jutro na 18\" → {\"command\": \"play\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\", \"arg2\": \"18:00\"}\n- \"join the 7pm game on Friday\" → {\"command\": \"play\", \"arg1\": \"2026-01-17\", \"arg2\": \"19:00\"}\n- \"поиграем завтра?\" → {\"command\": \"play\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n\n## 8. noshow\nPurpose: Cancel registration for a session you previously signed up for\nTrigger words: noshow, unregister, cancel registration, can't make it, не могу прийти, rezygnuję, odpadam\narg1: Optional - date in YYYY-MM-DD format\narg2: Optional - start time in HH:MM format\n\nExamples:\n- \"I can't make it\" → {\"command\": \"noshow\"}\n- \"cancel my registration\" → {\"command\": \"noshow\"}\n- \"не могу прити завтра\" → {\"command\": \"noshow\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n- \"odpowiadam na jutro\" → {\"command\": \"noshow\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n- \"noshow 2026-01-17 19:00\" → {\"command\": \"noshow\", \"arg1\": \"2026-01-17\", \"arg2\": \"19:00\"}\n\n## 9. help\nPurpose: Show available commands\nTrigger words: help, pomoc, pomoc, помощь\nNo arguments.\n\n## 10. start\nPurpose: Start the bot / welcome message\nTrigger words: start, begin, начать, zacznij\nNo arguments.\n\n---\n\n# DATE CONVERSION RULES\n\n| Input | Output |\n|-------|--------|\n| today | {{ $today.format('yyyy-MM-dd') }} |\n| tomorrow | {{ $today.plus({days: 1}).format('yyyy-MM-dd') }} |\n| Saturday | next Saturday's date |\n| 27.12 | {{ $today.format('yyyy') }}-12-27 |\n\nRULE: Always use FUTURE dates.\n\n---\n\n# TIME CONVERSION RULES\n\n| Input | Output |\n|-------|--------|\n| 7pm | 19:00 |\n| 16:00 | 16:00 |\n| at 18 | 18:00 |\n| в 19 часов | 19:00 |\n| o 16 | 16:00 |\n\n---\n\n# OUTPUT RULES\n1. Return ONLY valid JSON\n2. Fields: \"command\" (required), \"arg1\" (optional), \"arg2\" (optional)\n3. NO explanation, NO thinking, NO markdown\n4. arg1 is a string or JSON array (for book), arg2 is always a string"
+              "message": "=# TASK\nParse user message into this JSON format:\n{\"command\": \"<COMMAND>\", \"arg1\": \"<ARGUMENT>\", \"arg2\": \"<ARGUMENT2>\"}\nCommand is mandatory. Arguments \"arg1\" and \"arg2\" are optional.\nNO other fields allowed. NO arrays in root (except for book command). JSON should be valid.\n\n---\n\n# CURRENT DATE\nToday: {{ $today.format('yyyy-MM-dd') }} ({{ $today.format('cccc') }})\nNow: {{ $now.format('yyyy-MM-dd HH:mm') }}\n\n---\n\n# COMMANDS REFERENCE\n\n## 1. show\nPurpose: Display court availability\nTrigger words: show, available, free, schedule, what's open, расписание, покажи, pokaż, wolne\narg1: Date string in YYYY-MM-DD format\n\nExamples:\n- \"show tomorrow\" → {\"command\": \"show\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n- \"what's available Saturday\" → {\"command\": \"show\", \"arg1\": \"2026-01-17\"}\n\n## 2. list\nPurpose: Show user's reservations\nTrigger words: list, my reservations, my bookings, мои брони, moje rezerwacje\nNo arguments.\n\nExamples:\n- \"list my bookings\" → {\"command\": \"list\"}\n- \"Покажи мои брони\" → {\"command\": \"list\"}\n\n## 3. delete\nPurpose: Cancel ONE reservation by ID\nTrigger words: delete, cancel, remove + ID (NOT \"all\")\narg1: Reservation ID string\n\nExamples:\n- \"cancel 6952ec02dda30\" → {\"command\": \"delete\", \"arg1\": \"6952ec02dda30\"}\n\n## 4. deleteall\nPurpose: Cancel ALL reservations\nTrigger words: delete all, cancel all, remove all, отмени все, usuń wszystko\nNo arguments.\n\nExamples:\n- \"cancel all reservations\" → {\"command\": \"deleteall\"}\n\n## 5. book\nPurpose: Make a court reservation\nTrigger words: book, reserve, забронируй, zarezerwuj\narg1: JSON array with booking details\n\nExamples:\n- \"Book court 1 for tomorrow 16:00-17:00\" → {\"command\": \"book\", \"arg1\": [{\"court\":\"1\", \"date\":\"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\", \"time_start\":\"16:00\", \"time_end\":\"17:00\", \"players_num\":\"4\", \"notes\":\"\"}]}\n\n## 6. register\nPurpose: Save login credentials\nTrigger words: register, sign up, credentials\narg1: \"email password\" as single string\n\nExamples:\n- \"register user@mail.com pass123\" → {\"command\": \"register\", \"arg1\": \"user@mail.com pass123\"}\n\n## 7. play\nPurpose: Register to play on a reserved court\nTrigger words: play, join, join game, register for game, записаться на игру, dołącz do gry, хочу играть, zagraj, поиграть\narg1: Optional - date in YYYY-MM-DD format\narg2: Optional - start time in HH:MM format\n\nExamples:\n- \"I want to play\" → {\"command\": \"play\"}\n- \"join tomorrow's game\" → {\"command\": \"play\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n- \"play 2026-01-17 19:00\" → {\"command\": \"play\", \"arg1\": \"2026-01-17\", \"arg2\": \"19:00\"}\n- \"хочу играть в субботу в 16:00\" → {\"command\": \"play\", \"arg1\": \"2026-01-18\", \"arg2\": \"16:00\"}\n- \"zapisz mnie na jutro na 18\" → {\"command\": \"play\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\", \"arg2\": \"18:00\"}\n- \"join the 7pm game on Friday\" → {\"command\": \"play\", \"arg1\": \"2026-01-17\", \"arg2\": \"19:00\"}\n- \"поиграем завтра?\" → {\"command\": \"play\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n\n## 8. noshow\nPurpose: Cancel registration for a session you previously signed up for\nTrigger words: noshow, unregister, cancel registration, can't make it, не могу прийти, rezygnuję, odpadam\narg1: Optional - date in YYYY-MM-DD format\narg2: Optional - start time in HH:MM format\n\nExamples:\n- \"I can't make it\" → {\"command\": \"noshow\"}\n- \"cancel my registration\" → {\"command\": \"noshow\"}\n- \"не могу прити завтра\" → {\"command\": \"noshow\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n- \"odpowiadam na jutro\" → {\"command\": \"noshow\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n- \"noshow 2026-01-17 19:00\" → {\"command\": \"noshow\", \"arg1\": \"2026-01-17\", \"arg2\": \"19:00\"}\n\n## 9. help\nPurpose: Show available commands\nTrigger words: help, pomoc, pomoc, помощь\nNo arguments.\n\n## 10. start\nPurpose: Start the bot / welcome message\nTrigger words: start, begin, начать, zacznij\nNo arguments.\n\n---\n\n# DATE CONVERSION RULES\n\n| Input | Output |\n|-------|--------|\n| today | {{ $today.format('yyyy-MM-dd') }} |\n| tomorrow | {{ $today.plus({days: 1}).format('yyyy-MM-dd') }} |\n| Saturday | this week Saturday's date OR next week Saturday's date, if today is Saturday or Sunday |\n| 27.12 | {{ $today.format('yyyy') }}-12-27 |\n\nRULE: Always use FUTURE dates.\n\n---\n\n# TIME CONVERSION RULES\n\n| Input | Output |\n|-------|--------|\n| 7pm | 19:00 |\n| 16:00 | 16:00 |\n| at 18 | 18:00 |\n| в 19 часов | 19:00 |\n| o 16 | 16:00 |\n\n---\n\n# OUTPUT RULES\n1. Return ONLY valid JSON\n2. Fields: \"command\" (required), \"arg1\" (optional), \"arg2\" (optional)\n3. NO explanation, NO thinking, NO markdown\n4. arg1 is a string or JSON array (for book), arg2 is always a string"
             }
           ]
         },
@@ -771,78 +772,6 @@
       "position": [
         3232,
         432
-      ]
-    },
-    {
-      "parameters": {
-        "workflowId": {
-          "__rl": true,
-          "value": "p5NpS5X1VLPdY3mX",
-          "mode": "id"
-        },
-        "workflowInputs": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "arg1": "={{ $json.arg1 }}",
-            "chat_id": "={{ $json.chat_id }}",
-            "user_id": "={{ $json.user_id }}",
-            "username": "={{ $json.username }}",
-            "fullname": "={{ $json.fullname }}",
-            "lang": "={{ $json.lang }}"
-          },
-          "schema": [
-            {
-              "id": "arg1",
-              "displayName": "arg1",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "id": "chat_id",
-              "displayName": "chat_id",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "id": "user_id",
-              "displayName": "user_id",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "id": "username",
-              "displayName": "username",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "id": "fullname",
-              "displayName": "fullname",
-              "required": true,
-              "type": "string"
-            },
-            {
-              "id": "lang",
-              "displayName": "lang",
-              "required": true,
-              "type": "string"
-            }
-          ],
-          "matchingColumns": [],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": true
-        },
-        "options": {
-          "waitForSubWorkflow": true
-        }
-      },
-      "id": "nlp-exec-book",
-      "name": "Execute Book",
-      "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.3,
-      "position": [
-        3376,
-        256
       ]
     },
     {
@@ -1575,11 +1504,6 @@
         []
       ]
     },
-    "Execute Book": {
-      "main": [
-        []
-      ]
-    },
     "Execute List": {
       "main": [
         []
@@ -1710,12 +1634,14 @@
   "settings": {
     "executionOrder": "v1",
     "availableInMCP": false,
-    "callerPolicy": "workflowsFromSameOwner"
+    "callerPolicy": "workflowsFromSameOwner",
+    "binaryMode": "separate"
   },
   "staticData": null,
   "meta": null,
-  "versionId": "1e625f5c-1bf3-49ca-8dfc-92aa6b4bc2bb",
-  "activeVersionId": "1e625f5c-1bf3-49ca-8dfc-92aa6b4bc2bb",
+  "versionId": "82228d08-da58-4ee8-87dd-9540ddf919a2",
+  "activeVersionId": "82228d08-da58-4ee8-87dd-9540ddf919a2",
+  "versionCounter": 110,
   "triggerCount": 0,
   "shared": [
     {
@@ -1723,13 +1649,24 @@
       "createdAt": "2026-01-11T18:21:47.335Z",
       "role": "workflow:owner",
       "workflowId": "QbD3Epml4ANF9vr0",
-      "projectId": "66rzfRQbAnEionlx"
+      "projectId": "66rzfRQbAnEionlx",
+      "project": {
+        "updatedAt": "2025-09-19T18:39:13.257Z",
+        "createdAt": "2025-09-18T20:36:06.558Z",
+        "id": "66rzfRQbAnEionlx",
+        "name": "Sergei Vedishchev <brainboost@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "53af7452-7a67-4d31-8a0d-967083ebc818"
+      }
     }
   ],
+  "tags": [],
   "activeVersion": {
-    "updatedAt": "2026-03-01T21:46:34.000Z",
-    "createdAt": "2026-03-01T21:46:31.779Z",
-    "versionId": "1e625f5c-1bf3-49ca-8dfc-92aa6b4bc2bb",
+    "updatedAt": "2026-03-26T21:33:31.000Z",
+    "createdAt": "2026-03-26T21:33:13.500Z",
+    "versionId": "82228d08-da58-4ee8-87dd-9540ddf919a2",
     "workflowId": "QbD3Epml4ANF9vr0",
     "nodes": [
       {
@@ -2069,7 +2006,7 @@
           "messages": {
             "messageValues": [
               {
-                "message": "=# TASK\nParse user message into this JSON format:\n{\"command\": \"<COMMAND>\", \"arg1\": \"<ARGUMENT>\", \"arg2\": \"<ARGUMENT2>\"}\nCommand is mandatory. Arguments \"arg1\" and \"arg2\" are optional.\nNO other fields allowed. NO arrays in root (except for book command). JSON should be valid.\n\n---\n\n# CURRENT DATE\nToday: {{ $today.format('yyyy-MM-dd') }} ({{ $today.format('cccc') }})\nNow: {{ $now.format('yyyy-MM-dd HH:mm') }}\n\n---\n\n# COMMANDS REFERENCE\n\n## 1. show\nPurpose: Display court availability\nTrigger words: show, available, free, schedule, what's open, расписание, покажи, pokaż, wolne\narg1: Date string in YYYY-MM-DD format\n\nExamples:\n- \"show tomorrow\" → {\"command\": \"show\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n- \"what's available Saturday\" → {\"command\": \"show\", \"arg1\": \"2026-01-17\"}\n\n## 2. list\nPurpose: Show user's reservations\nTrigger words: list, my reservations, my bookings, мои брони, moje rezerwacje\nNo arguments.\n\nExamples:\n- \"list my bookings\" → {\"command\": \"list\"}\n- \"Покажи мои брони\" → {\"command\": \"list\"}\n\n## 3. delete\nPurpose: Cancel ONE reservation by ID\nTrigger words: delete, cancel, remove + ID (NOT \"all\")\narg1: Reservation ID string\n\nExamples:\n- \"cancel 6952ec02dda30\" → {\"command\": \"delete\", \"arg1\": \"6952ec02dda30\"}\n\n## 4. deleteall\nPurpose: Cancel ALL reservations\nTrigger words: delete all, cancel all, remove all, отмени все, usuń wszystko\nNo arguments.\n\nExamples:\n- \"cancel all reservations\" → {\"command\": \"deleteall\"}\n\n## 5. book\nPurpose: Make a court reservation\nTrigger words: book, reserve, забронируй, zarezerwuj\narg1: JSON array with booking details\n\nExamples:\n- \"Book court 1 for tomorrow 16:00-17:00\" → {\"command\": \"book\", \"arg1\": [{\"court\":\"1\", \"date\":\"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\", \"time_start\":\"16:00\", \"time_end\":\"17:00\", \"players_num\":\"4\", \"notes\":\"\"}]}\n\n## 6. register\nPurpose: Save login credentials\nTrigger words: register, sign up, credentials\narg1: \"email password\" as single string\n\nExamples:\n- \"register user@mail.com pass123\" → {\"command\": \"register\", \"arg1\": \"user@mail.com pass123\"}\n\n## 7. play\nPurpose: Register to play on a reserved court\nTrigger words: play, join, join game, register for game, записаться на игру, dołącz do gry, хочу играть, zagraj, поиграть\narg1: Optional - date in YYYY-MM-DD format\narg2: Optional - start time in HH:MM format\n\nExamples:\n- \"I want to play\" → {\"command\": \"play\"}\n- \"join tomorrow's game\" → {\"command\": \"play\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n- \"play 2026-01-17 19:00\" → {\"command\": \"play\", \"arg1\": \"2026-01-17\", \"arg2\": \"19:00\"}\n- \"хочу играть в субботу в 16:00\" → {\"command\": \"play\", \"arg1\": \"2026-01-18\", \"arg2\": \"16:00\"}\n- \"zapisz mnie na jutro na 18\" → {\"command\": \"play\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\", \"arg2\": \"18:00\"}\n- \"join the 7pm game on Friday\" → {\"command\": \"play\", \"arg1\": \"2026-01-17\", \"arg2\": \"19:00\"}\n- \"поиграем завтра?\" → {\"command\": \"play\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n\n## 8. noshow\nPurpose: Cancel registration for a session you previously signed up for\nTrigger words: noshow, unregister, cancel registration, can't make it, не могу прийти, rezygnuję, odpadam\narg1: Optional - date in YYYY-MM-DD format\narg2: Optional - start time in HH:MM format\n\nExamples:\n- \"I can't make it\" → {\"command\": \"noshow\"}\n- \"cancel my registration\" → {\"command\": \"noshow\"}\n- \"не могу прити завтра\" → {\"command\": \"noshow\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n- \"odpowiadam na jutro\" → {\"command\": \"noshow\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n- \"noshow 2026-01-17 19:00\" → {\"command\": \"noshow\", \"arg1\": \"2026-01-17\", \"arg2\": \"19:00\"}\n\n## 9. help\nPurpose: Show available commands\nTrigger words: help, pomoc, pomoc, помощь\nNo arguments.\n\n## 10. start\nPurpose: Start the bot / welcome message\nTrigger words: start, begin, начать, zacznij\nNo arguments.\n\n---\n\n# DATE CONVERSION RULES\n\n| Input | Output |\n|-------|--------|\n| today | {{ $today.format('yyyy-MM-dd') }} |\n| tomorrow | {{ $today.plus({days: 1}).format('yyyy-MM-dd') }} |\n| Saturday | next Saturday's date |\n| 27.12 | {{ $today.format('yyyy') }}-12-27 |\n\nRULE: Always use FUTURE dates.\n\n---\n\n# TIME CONVERSION RULES\n\n| Input | Output |\n|-------|--------|\n| 7pm | 19:00 |\n| 16:00 | 16:00 |\n| at 18 | 18:00 |\n| в 19 часов | 19:00 |\n| o 16 | 16:00 |\n\n---\n\n# OUTPUT RULES\n1. Return ONLY valid JSON\n2. Fields: \"command\" (required), \"arg1\" (optional), \"arg2\" (optional)\n3. NO explanation, NO thinking, NO markdown\n4. arg1 is a string or JSON array (for book), arg2 is always a string"
+                "message": "=# TASK\nParse user message into this JSON format:\n{\"command\": \"<COMMAND>\", \"arg1\": \"<ARGUMENT>\", \"arg2\": \"<ARGUMENT2>\"}\nCommand is mandatory. Arguments \"arg1\" and \"arg2\" are optional.\nNO other fields allowed. NO arrays in root (except for book command). JSON should be valid.\n\n---\n\n# CURRENT DATE\nToday: {{ $today.format('yyyy-MM-dd') }} ({{ $today.format('cccc') }})\nNow: {{ $now.format('yyyy-MM-dd HH:mm') }}\n\n---\n\n# COMMANDS REFERENCE\n\n## 1. show\nPurpose: Display court availability\nTrigger words: show, available, free, schedule, what's open, расписание, покажи, pokaż, wolne\narg1: Date string in YYYY-MM-DD format\n\nExamples:\n- \"show tomorrow\" → {\"command\": \"show\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n- \"what's available Saturday\" → {\"command\": \"show\", \"arg1\": \"2026-01-17\"}\n\n## 2. list\nPurpose: Show user's reservations\nTrigger words: list, my reservations, my bookings, мои брони, moje rezerwacje\nNo arguments.\n\nExamples:\n- \"list my bookings\" → {\"command\": \"list\"}\n- \"Покажи мои брони\" → {\"command\": \"list\"}\n\n## 3. delete\nPurpose: Cancel ONE reservation by ID\nTrigger words: delete, cancel, remove + ID (NOT \"all\")\narg1: Reservation ID string\n\nExamples:\n- \"cancel 6952ec02dda30\" → {\"command\": \"delete\", \"arg1\": \"6952ec02dda30\"}\n\n## 4. deleteall\nPurpose: Cancel ALL reservations\nTrigger words: delete all, cancel all, remove all, отмени все, usuń wszystko\nNo arguments.\n\nExamples:\n- \"cancel all reservations\" → {\"command\": \"deleteall\"}\n\n## 5. book\nPurpose: Make a court reservation\nTrigger words: book, reserve, забронируй, zarezerwuj\narg1: JSON array with booking details\n\nExamples:\n- \"Book court 1 for tomorrow 16:00-17:00\" → {\"command\": \"book\", \"arg1\": [{\"court\":\"1\", \"date\":\"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\", \"time_start\":\"16:00\", \"time_end\":\"17:00\", \"players_num\":\"4\", \"notes\":\"\"}]}\n\n## 6. register\nPurpose: Save login credentials\nTrigger words: register, sign up, credentials\narg1: \"email password\" as single string\n\nExamples:\n- \"register user@mail.com pass123\" → {\"command\": \"register\", \"arg1\": \"user@mail.com pass123\"}\n\n## 7. play\nPurpose: Register to play on a reserved court\nTrigger words: play, join, join game, register for game, записаться на игру, dołącz do gry, хочу играть, zagraj, поиграть\narg1: Optional - date in YYYY-MM-DD format\narg2: Optional - start time in HH:MM format\n\nExamples:\n- \"I want to play\" → {\"command\": \"play\"}\n- \"join tomorrow's game\" → {\"command\": \"play\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n- \"play 2026-01-17 19:00\" → {\"command\": \"play\", \"arg1\": \"2026-01-17\", \"arg2\": \"19:00\"}\n- \"хочу играть в субботу в 16:00\" → {\"command\": \"play\", \"arg1\": \"2026-01-18\", \"arg2\": \"16:00\"}\n- \"zapisz mnie na jutro na 18\" → {\"command\": \"play\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\", \"arg2\": \"18:00\"}\n- \"join the 7pm game on Friday\" → {\"command\": \"play\", \"arg1\": \"2026-01-17\", \"arg2\": \"19:00\"}\n- \"поиграем завтра?\" → {\"command\": \"play\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n\n## 8. noshow\nPurpose: Cancel registration for a session you previously signed up for\nTrigger words: noshow, unregister, cancel registration, can't make it, не могу прийти, rezygnuję, odpadam\narg1: Optional - date in YYYY-MM-DD format\narg2: Optional - start time in HH:MM format\n\nExamples:\n- \"I can't make it\" → {\"command\": \"noshow\"}\n- \"cancel my registration\" → {\"command\": \"noshow\"}\n- \"не могу прити завтра\" → {\"command\": \"noshow\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n- \"odpowiadam na jutro\" → {\"command\": \"noshow\", \"arg1\": \"{{ $now.plus({days: 1}).format('yyyy-MM-dd') }}\"}\n- \"noshow 2026-01-17 19:00\" → {\"command\": \"noshow\", \"arg1\": \"2026-01-17\", \"arg2\": \"19:00\"}\n\n## 9. help\nPurpose: Show available commands\nTrigger words: help, pomoc, pomoc, помощь\nNo arguments.\n\n## 10. start\nPurpose: Start the bot / welcome message\nTrigger words: start, begin, начать, zacznij\nNo arguments.\n\n---\n\n# DATE CONVERSION RULES\n\n| Input | Output |\n|-------|--------|\n| today | {{ $today.format('yyyy-MM-dd') }} |\n| tomorrow | {{ $today.plus({days: 1}).format('yyyy-MM-dd') }} |\n| Saturday | this week Saturday's date OR next week Saturday's date, if today is Saturday or Sunday |\n| 27.12 | {{ $today.format('yyyy') }}-12-27 |\n\nRULE: Always use FUTURE dates.\n\n---\n\n# TIME CONVERSION RULES\n\n| Input | Output |\n|-------|--------|\n| 7pm | 19:00 |\n| 16:00 | 16:00 |\n| at 18 | 18:00 |\n| в 19 часов | 19:00 |\n| o 16 | 16:00 |\n\n---\n\n# OUTPUT RULES\n1. Return ONLY valid JSON\n2. Fields: \"command\" (required), \"arg1\" (optional), \"arg2\" (optional)\n3. NO explanation, NO thinking, NO markdown\n4. arg1 is a string or JSON array (for book), arg2 is always a string"
               }
             ]
           },
@@ -2497,78 +2434,6 @@
         "position": [
           3232,
           432
-        ]
-      },
-      {
-        "parameters": {
-          "workflowId": {
-            "__rl": true,
-            "value": "p5NpS5X1VLPdY3mX",
-            "mode": "id"
-          },
-          "workflowInputs": {
-            "mappingMode": "defineBelow",
-            "value": {
-              "arg1": "={{ $json.arg1 }}",
-              "chat_id": "={{ $json.chat_id }}",
-              "user_id": "={{ $json.user_id }}",
-              "username": "={{ $json.username }}",
-              "fullname": "={{ $json.fullname }}",
-              "lang": "={{ $json.lang }}"
-            },
-            "schema": [
-              {
-                "id": "arg1",
-                "displayName": "arg1",
-                "required": true,
-                "type": "string"
-              },
-              {
-                "id": "chat_id",
-                "displayName": "chat_id",
-                "required": true,
-                "type": "string"
-              },
-              {
-                "id": "user_id",
-                "displayName": "user_id",
-                "required": true,
-                "type": "string"
-              },
-              {
-                "id": "username",
-                "displayName": "username",
-                "required": true,
-                "type": "string"
-              },
-              {
-                "id": "fullname",
-                "displayName": "fullname",
-                "required": true,
-                "type": "string"
-              },
-              {
-                "id": "lang",
-                "displayName": "lang",
-                "required": true,
-                "type": "string"
-              }
-            ],
-            "matchingColumns": [],
-            "attemptToConvertTypes": false,
-            "convertFieldsToString": true
-          },
-          "options": {
-            "waitForSubWorkflow": true
-          }
-        },
-        "id": "nlp-exec-book",
-        "name": "Execute Book",
-        "type": "n8n-nodes-base.executeWorkflow",
-        "typeVersion": 1.3,
-        "position": [
-          3376,
-          256
         ]
       },
       {
@@ -3429,9 +3294,18 @@
       }
     },
     "authors": "Sergei Vedishchev",
-    "name": "Version 1e625f5c",
+    "name": "Version 82228d08",
     "description": "",
-    "autosaved": false
-  },
-  "tags": []
+    "autosaved": true,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-03-26T21:33:31.593Z",
+        "id": 249,
+        "workflowId": "QbD3Epml4ANF9vr0",
+        "versionId": "82228d08-da58-4ee8-87dd-9540ddf919a2",
+        "event": "activated",
+        "userId": "53af7452-7a67-4d31-8a0d-967083ebc818"
+      }
+    ]
+  }
 }

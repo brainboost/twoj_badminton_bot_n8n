@@ -3,6 +3,7 @@
   "createdAt": "2025-12-25T12:24:14.384Z",
   "id": "51Y9SIV139LvX5jl",
   "name": "List Bookings Command",
+  "description": null,
   "active": true,
   "isArchived": false,
   "nodes": [
@@ -587,6 +588,7 @@
   },
   "versionId": "854810d2-d5ad-4521-a267-ca7dea6fb410",
   "activeVersionId": "854810d2-d5ad-4521-a267-ca7dea6fb410",
+  "versionCounter": 76,
   "triggerCount": 0,
   "shared": [
     {
@@ -594,7 +596,25 @@
       "createdAt": "2025-12-25T12:24:14.385Z",
       "role": "workflow:owner",
       "workflowId": "51Y9SIV139LvX5jl",
-      "projectId": "66rzfRQbAnEionlx"
+      "projectId": "66rzfRQbAnEionlx",
+      "project": {
+        "updatedAt": "2025-09-19T18:39:13.257Z",
+        "createdAt": "2025-09-18T20:36:06.558Z",
+        "id": "66rzfRQbAnEionlx",
+        "name": "Sergei Vedishchev <brainboost@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "53af7452-7a67-4d31-8a0d-967083ebc818"
+      }
+    }
+  ],
+  "tags": [
+    {
+      "updatedAt": "2025-12-27T11:51:52.051Z",
+      "createdAt": "2025-12-27T11:51:52.051Z",
+      "id": "3W7RR758UwICVpEC",
+      "name": "bot_command"
     }
   ],
   "activeVersion": {
@@ -1176,14 +1196,16 @@
     "authors": "Sergei Vedishchev",
     "name": "Version 854810d2",
     "description": "",
-    "autosaved": false
-  },
-  "tags": [
-    {
-      "updatedAt": "2025-12-27T11:51:52.051Z",
-      "createdAt": "2025-12-27T11:51:52.051Z",
-      "id": "3W7RR758UwICVpEC",
-      "name": "bot_command"
-    }
-  ]
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-01-02T13:44:35.658Z",
+        "id": 121,
+        "workflowId": "51Y9SIV139LvX5jl",
+        "versionId": "854810d2-d5ad-4521-a267-ca7dea6fb410",
+        "event": "activated",
+        "userId": "53af7452-7a67-4d31-8a0d-967083ebc818"
+      }
+    ]
+  }
 }

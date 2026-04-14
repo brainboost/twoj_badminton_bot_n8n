@@ -1,8 +1,9 @@
 {
-  "updatedAt": "2026-01-01T12:55:44.042Z",
+  "updatedAt": "2026-03-25T21:58:44.490Z",
   "createdAt": "2025-12-31T15:42:26.918Z",
   "id": "b7xXjE899CcIb9eo",
   "name": "Delete All Command",
+  "description": null,
   "active": true,
   "isArchived": false,
   "nodes": [
@@ -14,8 +15,8 @@
       "name": "When Executed by Another Workflow",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "position": [
-        -864,
-        176
+        -1024,
+        192
       ],
       "typeVersion": 1.1
     },
@@ -27,7 +28,7 @@
       "name": "Validate Input",
       "type": "n8n-nodes-base.code",
       "position": [
-        -640,
+        -592,
         176
       ],
       "typeVersion": 2
@@ -533,7 +534,7 @@
       "type": "n8n-nodes-base.telegram",
       "position": [
         2080,
-        176
+        288
       ],
       "typeVersion": 1.2,
       "webhookId": "deleteall-msg",
@@ -543,20 +544,150 @@
           "name": "twoj_badminton_bot"
         }
       }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "check-confirmed-flag",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.confirmed }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "check-confirmed",
+      "name": "Check Confirmed",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -816,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const crypto = require('crypto');\nconst input = $input.first().json;\nconst confirmation_id = crypto.randomBytes(8).toString('hex');\nreturn [{ json: { ...input, confirmation_id } }];"
+      },
+      "id": "generate-confirmation-id",
+      "name": "Generate Confirmation ID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -544,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO pending_confirmations (confirmation_id, chat_id, user_id, lang, command, payload) VALUES ($1, $2, $3, $4, 'deleteall', $5::jsonb)",
+        "options": {
+          "queryReplacement": "={{ $json.confirmation_id }},{{ $json.chat_id }},{{ $json.user_id }},{{ $json.lang }},{{ $json }}"
+        }
+      },
+      "id": "store-pending-confirmation",
+      "name": "Store Pending Confirmation",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -288,
+        432
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "3SDluWLUa1vIU50a",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT text FROM translations WHERE key = 'confirm_deleteall' AND lang = $1 UNION ALL SELECT text FROM translations WHERE key = 'confirm_deleteall' AND lang = 'en' LIMIT 1",
+        "options": {
+          "queryReplacement": "={{ $('Generate Confirmation ID').item.json.lang }}"
+        }
+      },
+      "id": "get-deleteall-confirm-translation",
+      "name": "Get DeleteAll Confirm Translation",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -32,
+        432
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "3SDluWLUa1vIU50a",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Generate Confirmation ID').first().json.chat_id }}",
+        "text": "={{ $json.text }}",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "✅ Confirm",
+                    "additionalFields": {
+                      "callback_data": "={{ 'confirm:' + $('Generate Confirmation ID').first().json.confirmation_id }}"
+                    }
+                  },
+                  {
+                    "text": "❌ Cancel",
+                    "additionalFields": {
+                      "callback_data": "={{ 'cancel:' + $('Generate Confirmation ID').first().json.confirmation_id }}"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "send-deleteall-confirm-keyboard",
+      "name": "Send DeleteAll Confirm Keyboard",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        432
+      ],
+      "webhookId": "2caf5d1a-2cd6-4cf3-9c93-2678643281dc",
+      "credentials": {
+        "telegramApi": {
+          "id": "pHQDqhsnrwimdaY2",
+          "name": "twoj_badminton_bot"
+        }
+      }
     }
   ],
   "connections": {
-    "When Executed by Another Workflow": {
-      "main": [
-        [
-          {
-            "node": "Validate Input",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Validate Input": {
       "main": [
         [
@@ -742,6 +873,68 @@
           }
         ]
       ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Check Confirmed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Confirmed": {
+      "main": [
+        [
+          {
+            "node": "Validate Input",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Generate Confirmation ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Confirmation ID": {
+      "main": [
+        [
+          {
+            "node": "Store Pending Confirmation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store Pending Confirmation": {
+      "main": [
+        [
+          {
+            "node": "Get DeleteAll Confirm Translation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get DeleteAll Confirm Translation": {
+      "main": [
+        [
+          {
+            "node": "Send DeleteAll Confirm Keyboard",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -751,8 +944,9 @@
   },
   "staticData": null,
   "meta": null,
-  "versionId": "bcb53b07-3664-4b55-9c71-870a90d5e871",
-  "activeVersionId": "bcb53b07-3664-4b55-9c71-870a90d5e871",
+  "versionId": "ca519389-1751-4ac1-ace8-7d802e305663",
+  "activeVersionId": "ca519389-1751-4ac1-ace8-7d802e305663",
+  "versionCounter": 47,
   "triggerCount": 0,
   "shared": [
     {
@@ -760,50 +954,60 @@
       "createdAt": "2025-12-31T15:42:26.920Z",
       "role": "workflow:owner",
       "workflowId": "b7xXjE899CcIb9eo",
-      "projectId": "66rzfRQbAnEionlx"
+      "projectId": "66rzfRQbAnEionlx",
+      "project": {
+        "updatedAt": "2025-09-19T18:39:13.257Z",
+        "createdAt": "2025-09-18T20:36:06.558Z",
+        "id": "66rzfRQbAnEionlx",
+        "name": "Sergei Vedishchev <brainboost@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "53af7452-7a67-4d31-8a0d-967083ebc818"
+      }
+    }
+  ],
+  "tags": [
+    {
+      "updatedAt": "2025-12-27T11:51:52.051Z",
+      "createdAt": "2025-12-27T11:51:52.051Z",
+      "id": "3W7RR758UwICVpEC",
+      "name": "bot_command"
     }
   ],
   "activeVersion": {
-    "updatedAt": "2025-12-31T16:50:12.000Z",
-    "createdAt": "2025-12-31T15:42:26.923Z",
-    "versionId": "bcb53b07-3664-4b55-9c71-870a90d5e871",
+    "updatedAt": "2026-03-25T21:58:44.492Z",
+    "createdAt": "2026-03-25T21:58:44.492Z",
+    "versionId": "ca519389-1751-4ac1-ace8-7d802e305663",
     "workflowId": "b7xXjE899CcIb9eo",
     "nodes": [
       {
+        "parameters": {
+          "inputSource": "passthrough"
+        },
         "id": "trigger-deleteall",
         "name": "When Executed by Another Workflow",
         "type": "n8n-nodes-base.executeWorkflowTrigger",
         "position": [
-          -864,
-          176
+          -1024,
+          192
         ],
-        "typeVersion": 1.1,
-        "parameters": {
-          "inputSource": "passthrough"
-        }
+        "typeVersion": 1.1
       },
       {
+        "parameters": {
+          "jsCode": "const input = $input.first().json;\nconst chat_id = input.chat_id;\nconst lang = input.lang || 'en';\n\nreturn [{ json: {\n  chat_id,\n  lang,\n  user_id: input.user_id\n}}];"
+        },
         "id": "validate-input",
         "name": "Validate Input",
         "type": "n8n-nodes-base.code",
         "position": [
-          -640,
+          -592,
           176
         ],
-        "typeVersion": 2,
-        "parameters": {
-          "jsCode": "const input = $input.first().json;\nconst chat_id = input.chat_id;\nconst lang = input.lang || 'en';\n\nreturn [{ json: {\n  chat_id,\n  lang,\n  user_id: input.user_id\n}}];"
-        }
+        "typeVersion": 2
       },
       {
-        "id": "get-user-credentials",
-        "name": "Get User Credentials",
-        "type": "n8n-nodes-base.postgres",
-        "position": [
-          -416,
-          176
-        ],
-        "typeVersion": 2.6,
         "parameters": {
           "operation": "select",
           "schema": {
@@ -827,6 +1031,14 @@
           },
           "options": {}
         },
+        "id": "get-user-credentials",
+        "name": "Get User Credentials",
+        "type": "n8n-nodes-base.postgres",
+        "position": [
+          -416,
+          176
+        ],
+        "typeVersion": 2.6,
         "credentials": {
           "postgres": {
             "id": "3SDluWLUa1vIU50a",
@@ -835,21 +1047,13 @@
         }
       },
       {
-        "id": "check-hash-exists",
-        "name": "Check Hash Exists",
-        "type": "n8n-nodes-base.if",
-        "position": [
-          -176,
-          176
-        ],
-        "typeVersion": 2.3,
         "parameters": {
           "conditions": {
             "options": {
-              "caseSensitive": true,
+              "version": 3,
               "leftValue": "",
-              "typeValidation": "strict",
-              "version": 3
+              "caseSensitive": true,
+              "typeValidation": "strict"
             },
             "conditions": [
               {
@@ -874,9 +1078,22 @@
             "combinator": "and"
           },
           "options": {}
-        }
+        },
+        "id": "check-hash-exists",
+        "name": "Check Hash Exists",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          -176,
+          176
+        ],
+        "typeVersion": 2.3
       },
       {
+        "parameters": {
+          "operation": "executeTool",
+          "toolName": "login",
+          "toolParameters": "={\"email\":\"{{$json.email}}\", \"password\": \"{{ $json.hash }}\"}"
+        },
         "id": "login",
         "name": "Login",
         "type": "n8n-nodes-mcp.mcpClient",
@@ -885,11 +1102,6 @@
           160
         ],
         "typeVersion": 1,
-        "parameters": {
-          "operation": "executeTool",
-          "toolName": "login",
-          "toolParameters": "={\"email\":\"{{$json.email}}\", \"password\": \"{{ $json.hash }}\"}"
-        },
         "credentials": {
           "mcpClientApi": {
             "id": "G9CyzT9PT67tg4V7",
@@ -898,14 +1110,6 @@
         }
       },
       {
-        "id": "check-user-credentials",
-        "name": "Check User Credentials",
-        "type": "n8n-nodes-base.if",
-        "position": [
-          304,
-          160
-        ],
-        "typeVersion": 2.2,
         "parameters": {
           "conditions": {
             "options": {
@@ -928,17 +1132,17 @@
             "combinator": "and"
           },
           "options": {}
-        }
+        },
+        "id": "check-user-credentials",
+        "name": "Check User Credentials",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          304,
+          160
+        ],
+        "typeVersion": 2.2
       },
       {
-        "id": "set-context",
-        "name": "Set Delete All Context",
-        "type": "n8n-nodes-base.set",
-        "position": [
-          544,
-          -48
-        ],
-        "typeVersion": 3.4,
         "parameters": {
           "assignments": {
             "assignments": [
@@ -969,9 +1173,22 @@
             ]
           },
           "options": {}
-        }
+        },
+        "id": "set-context",
+        "name": "Set Delete All Context",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          544,
+          -48
+        ],
+        "typeVersion": 3.4
       },
       {
+        "parameters": {
+          "operation": "executeTool",
+          "toolName": "delete_all_reservations",
+          "toolParameters": "={{ JSON.stringify({ session_id: $json.session_id }) }}"
+        },
         "id": "mcp-delete-all",
         "name": "MCP Delete All Reservations",
         "type": "n8n-nodes-mcp.mcpClient",
@@ -980,11 +1197,6 @@
           -48
         ],
         "typeVersion": 1,
-        "parameters": {
-          "operation": "executeTool",
-          "toolName": "delete_all_reservations",
-          "toolParameters": "={{ JSON.stringify({ session_id: $json.session_id }) }}"
-        },
         "credentials": {
           "mcpClientApi": {
             "id": "G9CyzT9PT67tg4V7",
@@ -993,14 +1205,6 @@
         }
       },
       {
-        "id": "check-delete-result",
-        "name": "Check Delete Result",
-        "type": "n8n-nodes-base.if",
-        "position": [
-          1056,
-          -48
-        ],
-        "typeVersion": 2.2,
         "parameters": {
           "conditions": {
             "options": {
@@ -1024,17 +1228,17 @@
             ]
           },
           "options": {}
-        }
+        },
+        "id": "check-delete-result",
+        "name": "Check Delete Result",
+        "type": "n8n-nodes-base.if",
+        "position": [
+          1056,
+          -48
+        ],
+        "typeVersion": 2.2
       },
       {
-        "id": "delete-all-from-db",
-        "name": "Delete All from DB",
-        "type": "n8n-nodes-base.postgres",
-        "position": [
-          1312,
-          -64
-        ],
-        "typeVersion": 2.6,
         "parameters": {
           "operation": "deleteTable",
           "schema": {
@@ -1059,6 +1263,14 @@
           },
           "options": {}
         },
+        "id": "delete-all-from-db",
+        "name": "Delete All from DB",
+        "type": "n8n-nodes-base.postgres",
+        "position": [
+          1312,
+          -64
+        ],
+        "typeVersion": 2.6,
         "credentials": {
           "postgres": {
             "id": "3SDluWLUa1vIU50a",
@@ -1067,14 +1279,6 @@
         }
       },
       {
-        "id": "get-success-translation",
-        "name": "Get Success Translation",
-        "type": "n8n-nodes-base.postgres",
-        "position": [
-          1568,
-          -64
-        ],
-        "typeVersion": 2.6,
         "parameters": {
           "operation": "select",
           "schema": {
@@ -1102,6 +1306,14 @@
           },
           "options": {}
         },
+        "id": "get-success-translation",
+        "name": "Get Success Translation",
+        "type": "n8n-nodes-base.postgres",
+        "position": [
+          1568,
+          -64
+        ],
+        "typeVersion": 2.6,
         "credentials": {
           "postgres": {
             "id": "3SDluWLUa1vIU50a",
@@ -1110,14 +1322,6 @@
         }
       },
       {
-        "id": "format-success-message",
-        "name": "Format Success Message",
-        "type": "n8n-nodes-base.set",
-        "position": [
-          1824,
-          -64
-        ],
-        "typeVersion": 3.4,
         "parameters": {
           "assignments": {
             "assignments": [
@@ -1136,17 +1340,17 @@
             ]
           },
           "options": {}
-        }
+        },
+        "id": "format-success-message",
+        "name": "Format Success Message",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1824,
+          -64
+        ],
+        "typeVersion": 3.4
       },
       {
-        "id": "get-no-creds-translation",
-        "name": "Get No Credentials Translation",
-        "type": "n8n-nodes-base.postgres",
-        "position": [
-          544,
-          288
-        ],
-        "typeVersion": 2.6,
         "parameters": {
           "operation": "select",
           "schema": {
@@ -1174,6 +1378,14 @@
           },
           "options": {}
         },
+        "id": "get-no-creds-translation",
+        "name": "Get No Credentials Translation",
+        "type": "n8n-nodes-base.postgres",
+        "position": [
+          544,
+          288
+        ],
+        "typeVersion": 2.6,
         "credentials": {
           "postgres": {
             "id": "3SDluWLUa1vIU50a",
@@ -1182,14 +1394,6 @@
         }
       },
       {
-        "id": "format-no-creds-message",
-        "name": "Format No Credentials Message",
-        "type": "n8n-nodes-base.set",
-        "position": [
-          800,
-          288
-        ],
-        "typeVersion": 3.4,
         "parameters": {
           "assignments": {
             "assignments": [
@@ -1208,17 +1412,17 @@
             ]
           },
           "options": {}
-        }
+        },
+        "id": "format-no-creds-message",
+        "name": "Format No Credentials Message",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          800,
+          288
+        ],
+        "typeVersion": 3.4
       },
       {
-        "id": "get-api-error-translation",
-        "name": "Get API Error Translation",
-        "type": "n8n-nodes-base.postgres",
-        "position": [
-          1568,
-          112
-        ],
-        "typeVersion": 2.6,
         "parameters": {
           "operation": "select",
           "schema": {
@@ -1246,6 +1450,14 @@
           },
           "options": {}
         },
+        "id": "get-api-error-translation",
+        "name": "Get API Error Translation",
+        "type": "n8n-nodes-base.postgres",
+        "position": [
+          1568,
+          112
+        ],
+        "typeVersion": 2.6,
         "credentials": {
           "postgres": {
             "id": "3SDluWLUa1vIU50a",
@@ -1254,14 +1466,6 @@
         }
       },
       {
-        "id": "format-api-error-message",
-        "name": "Format API Error Message",
-        "type": "n8n-nodes-base.set",
-        "position": [
-          1824,
-          112
-        ],
-        "typeVersion": 3.4,
         "parameters": {
           "assignments": {
             "assignments": [
@@ -1280,18 +1484,17 @@
             ]
           },
           "options": {}
-        }
+        },
+        "id": "format-api-error-message",
+        "name": "Format API Error Message",
+        "type": "n8n-nodes-base.set",
+        "position": [
+          1824,
+          112
+        ],
+        "typeVersion": 3.4
       },
       {
-        "id": "send-message",
-        "name": "Send a text message",
-        "type": "n8n-nodes-base.telegram",
-        "position": [
-          2080,
-          176
-        ],
-        "typeVersion": 1.2,
-        "webhookId": "deleteall-msg",
         "parameters": {
           "chatId": "={{ $('Validate Input').item.json.chat_id }}",
           "text": "={{ $json.message }}",
@@ -1300,6 +1503,156 @@
             "parse_mode": "HTML"
           }
         },
+        "id": "send-message",
+        "name": "Send a text message",
+        "type": "n8n-nodes-base.telegram",
+        "position": [
+          2080,
+          288
+        ],
+        "typeVersion": 1.2,
+        "webhookId": "deleteall-msg",
+        "credentials": {
+          "telegramApi": {
+            "id": "pHQDqhsnrwimdaY2",
+            "name": "twoj_badminton_bot"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "check-confirmed-flag",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                },
+                "leftValue": "={{ $json.confirmed }}",
+                "rightValue": ""
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "check-confirmed",
+        "name": "Check Confirmed",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          -816,
+          192
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const crypto = require('crypto');\nconst input = $input.first().json;\nconst confirmation_id = crypto.randomBytes(8).toString('hex');\nreturn [{ json: { ...input, confirmation_id } }];"
+        },
+        "id": "generate-confirmation-id",
+        "name": "Generate Confirmation ID",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -544,
+          432
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "INSERT INTO pending_confirmations (confirmation_id, chat_id, user_id, lang, command, payload) VALUES ($1, $2, $3, $4, 'deleteall', $5::jsonb)",
+          "options": {
+            "queryReplacement": "={{ $json.confirmation_id }},{{ $json.chat_id }},{{ $json.user_id }},{{ $json.lang }},{{ $json }}"
+          }
+        },
+        "id": "store-pending-confirmation",
+        "name": "Store Pending Confirmation",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          -288,
+          432
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "3SDluWLUa1vIU50a",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT text FROM translations WHERE key = 'confirm_deleteall' AND lang = $1 UNION ALL SELECT text FROM translations WHERE key = 'confirm_deleteall' AND lang = 'en' LIMIT 1",
+          "options": {
+            "queryReplacement": "={{ $('Generate Confirmation ID').item.json.lang }}"
+          }
+        },
+        "id": "get-deleteall-confirm-translation",
+        "name": "Get DeleteAll Confirm Translation",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          -32,
+          432
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "3SDluWLUa1vIU50a",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "chatId": "={{ $('Generate Confirmation ID').first().json.chat_id }}",
+          "text": "={{ $json.text }}",
+          "replyMarkup": "inlineKeyboard",
+          "inlineKeyboard": {
+            "rows": [
+              {
+                "row": {
+                  "buttons": [
+                    {
+                      "text": "✅ Confirm",
+                      "additionalFields": {
+                        "callback_data": "={{ 'confirm:' + $('Generate Confirmation ID').first().json.confirmation_id }}"
+                      }
+                    },
+                    {
+                      "text": "❌ Cancel",
+                      "additionalFields": {
+                        "callback_data": "={{ 'cancel:' + $('Generate Confirmation ID').first().json.confirmation_id }}"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "additionalFields": {
+            "appendAttribution": false,
+            "parse_mode": "HTML"
+          }
+        },
+        "id": "send-deleteall-confirm-keyboard",
+        "name": "Send DeleteAll Confirm Keyboard",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          224,
+          432
+        ],
+        "webhookId": "2caf5d1a-2cd6-4cf3-9c93-2678643281dc",
         "credentials": {
           "telegramApi": {
             "id": "pHQDqhsnrwimdaY2",
@@ -1309,17 +1662,6 @@
       }
     ],
     "connections": {
-      "When Executed by Another Workflow": {
-        "main": [
-          [
-            {
-              "node": "Validate Input",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
       "Validate Input": {
         "main": [
           [
@@ -1505,19 +1847,91 @@
             }
           ]
         ]
+      },
+      "When Executed by Another Workflow": {
+        "main": [
+          [
+            {
+              "node": "Check Confirmed",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check Confirmed": {
+        "main": [
+          [
+            {
+              "node": "Validate Input",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Generate Confirmation ID",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Generate Confirmation ID": {
+        "main": [
+          [
+            {
+              "node": "Store Pending Confirmation",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Store Pending Confirmation": {
+        "main": [
+          [
+            {
+              "node": "Get DeleteAll Confirm Translation",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get DeleteAll Confirm Translation": {
+        "main": [
+          [
+            {
+              "node": "Send DeleteAll Confirm Keyboard",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "authors": "Sergei Vedishchev",
-    "name": "Version bcb53b07",
-    "description": "",
-    "autosaved": false
-  },
-  "tags": [
-    {
-      "updatedAt": "2025-12-27T11:51:52.051Z",
-      "createdAt": "2025-12-27T11:51:52.051Z",
-      "id": "3W7RR758UwICVpEC",
-      "name": "bot_command"
-    }
-  ]
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-03-25T21:58:44.533Z",
+        "id": 209,
+        "workflowId": "b7xXjE899CcIb9eo",
+        "versionId": "ca519389-1751-4ac1-ace8-7d802e305663",
+        "event": "activated",
+        "userId": "53af7452-7a67-4d31-8a0d-967083ebc818"
+      },
+      {
+        "createdAt": "2026-03-25T21:58:44.520Z",
+        "id": 208,
+        "workflowId": "b7xXjE899CcIb9eo",
+        "versionId": "ca519389-1751-4ac1-ace8-7d802e305663",
+        "event": "deactivated",
+        "userId": "53af7452-7a67-4d31-8a0d-967083ebc818"
+      }
+    ]
+  }
 }

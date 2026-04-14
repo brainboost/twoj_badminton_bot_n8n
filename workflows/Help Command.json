@@ -1,8 +1,9 @@
 {
-  "updatedAt": "2026-03-01T21:22:01.278Z",
+  "updatedAt": "2026-04-13T18:53:54.733Z",
   "createdAt": "2026-01-11T18:29:43.968Z",
   "id": "ZLkal1BIG7llifwz",
   "name": "Help Command",
+  "description": null,
   "active": true,
   "isArchived": false,
   "nodes": [
@@ -59,7 +60,7 @@
               "id": "chat-id-help",
               "name": "chat_id",
               "type": "string",
-              "value": "={{ $('Start').first().json.chat_id_firstItem }}"
+              "value": "={{ $('Start').item.json.chat_id }}"
             },
             {
               "id": "message-help",
@@ -168,12 +169,14 @@
   },
   "settings": {
     "executionOrder": "v1",
-    "availableInMCP": false
+    "availableInMCP": false,
+    "binaryMode": "separate"
   },
   "staticData": null,
   "meta": null,
-  "versionId": "c46427b9-52ae-47cd-9c66-45172c41b61f",
-  "activeVersionId": "c46427b9-52ae-47cd-9c66-45172c41b61f",
+  "versionId": "43b05dca-00ba-4def-a46a-b7092ac1110d",
+  "activeVersionId": "43b05dca-00ba-4def-a46a-b7092ac1110d",
+  "versionCounter": 22,
   "triggerCount": 0,
   "shared": [
     {
@@ -181,13 +184,31 @@
       "createdAt": "2026-01-11T18:29:43.973Z",
       "role": "workflow:owner",
       "workflowId": "ZLkal1BIG7llifwz",
-      "projectId": "66rzfRQbAnEionlx"
+      "projectId": "66rzfRQbAnEionlx",
+      "project": {
+        "updatedAt": "2025-09-19T18:39:13.257Z",
+        "createdAt": "2025-09-18T20:36:06.558Z",
+        "id": "66rzfRQbAnEionlx",
+        "name": "Sergei Vedishchev <brainboost@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "53af7452-7a67-4d31-8a0d-967083ebc818"
+      }
+    }
+  ],
+  "tags": [
+    {
+      "updatedAt": "2025-12-27T11:51:52.051Z",
+      "createdAt": "2025-12-27T11:51:52.051Z",
+      "id": "3W7RR758UwICVpEC",
+      "name": "bot_command"
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-03-01T21:22:05.000Z",
-    "createdAt": "2026-03-01T21:22:01.279Z",
-    "versionId": "c46427b9-52ae-47cd-9c66-45172c41b61f",
+    "updatedAt": "2026-04-13T18:54:11.000Z",
+    "createdAt": "2026-04-13T18:53:54.734Z",
+    "versionId": "43b05dca-00ba-4def-a46a-b7092ac1110d",
     "workflowId": "ZLkal1BIG7llifwz",
     "nodes": [
       {
@@ -243,7 +264,7 @@
                 "id": "chat-id-help",
                 "name": "chat_id",
                 "type": "string",
-                "value": "={{ $('Start').first().json.chat_id_firstItem }}"
+                "value": "={{ $('Start').item.json.chat_id }}"
               },
               {
                 "id": "message-help",
@@ -351,16 +372,18 @@
       }
     },
     "authors": "Sergei Vedishchev",
-    "name": "Version c46427b9",
+    "name": "Version 43b05dca",
     "description": "",
-    "autosaved": false
-  },
-  "tags": [
-    {
-      "updatedAt": "2025-12-27T11:51:52.051Z",
-      "createdAt": "2025-12-27T11:51:52.051Z",
-      "id": "3W7RR758UwICVpEC",
-      "name": "bot_command"
-    }
-  ]
+    "autosaved": true,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-04-13T18:54:11.838Z",
+        "id": 297,
+        "workflowId": "ZLkal1BIG7llifwz",
+        "versionId": "43b05dca-00ba-4def-a46a-b7092ac1110d",
+        "event": "activated",
+        "userId": "53af7452-7a67-4d31-8a0d-967083ebc818"
+      }
+    ]
+  }
 }

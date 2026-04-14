@@ -43,7 +43,6 @@ body:
         Provide a real-world example of when you'd use this feature.
         Walk us through a scenario step-by-step.
       placeholder: |
-        Example scenario:
         - With this feature, I could [...]
         - This would save me time if it had [...]
         - I'm always frustrated when [...]

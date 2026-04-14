@@ -1,0 +1,1875 @@
+{
+  "updatedAt": "2026-03-29T10:22:06.070Z",
+  "createdAt": "2026-03-25T19:46:43.757Z",
+  "id": "31GNbFtZYmHTfiL8",
+  "name": "Confirmation Handler",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "callback-handler-trigger",
+      "name": "When Called by Assistant",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        -800,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const cbq = $input.first().json.callback_query;\nconst raw = cbq.data || '';\nconst parts = raw.split(':');\nconst action = parts[0];\nconst confirmation_id = parts.length > 1 ? parts[1] : '';\nconst extra = parts.length > 2 ? parts.slice(2).join(':') : '';\n\nreturn [{\n  json: {\n    action,\n    confirmation_id,\n    extra,\n    callback_query_id: cbq.id,\n    chat_id: String(cbq.message.chat.id),\n    user_id: String(cbq.from.id),\n    message_id: cbq.message.message_id\n  }\n}];"
+      },
+      "id": "extract-callback-data",
+      "name": "Extract Callback Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -576,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM pending_confirmations WHERE confirmation_id = $1 AND expires_at > NOW()",
+        "options": {
+          "queryReplacement": "={{ $json.confirmation_id }}"
+        }
+      },
+      "id": "get-pending-confirmation",
+      "name": "Get Pending Confirmation",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -352,
+        576
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "3SDluWLUa1vIU50a",
+          "name": "Postgres account"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "row-found",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-found",
+      "name": "Check Found",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -128,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "callback",
+        "queryId": "={{ $('Extract Callback Data').first().json.callback_query_id }}",
+        "additionalFields": {
+          "show_alert": false
+        }
+      },
+      "id": "answer-callback-query",
+      "name": "Answer Callback Query",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        96,
+        464
+      ],
+      "webhookId": "cd895204-7015-482c-a745-99f296f60a9e",
+      "credentials": {
+        "telegramApi": {
+          "id": "pHQDqhsnrwimdaY2",
+          "name": "twoj_badminton_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "DELETE FROM pending_confirmations WHERE confirmation_id = $1 RETURNING command, payload, chat_id, lang",
+        "options": {
+          "queryReplacement": "={{ $('Extract Callback Data').first().json.confirmation_id }}"
+        }
+      },
+      "id": "delete-pending-record",
+      "name": "Delete Pending Record",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        320,
+        464
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "3SDluWLUa1vIU50a",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "confirm-action",
+                    "leftValue": "={{ $('Extract Callback Data').first().json.action }}",
+                    "rightValue": "confirm",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "cancel-action",
+                    "leftValue": "={{ $('Extract Callback Data').first().json.action }}",
+                    "rightValue": "cancel",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "dd-action",
+                    "leftValue": "={{ $('Extract Callback Data').first().json.action }}",
+                    "rightValue": "dd",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "route-by-action",
+      "name": "Route by Action",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        544,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const record = $('Delete Pending Record').first().json;\nconst payload = typeof record.payload === 'string' ? JSON.parse(record.payload) : record.payload;\nreturn [{ json: { ...payload, command: record.command, confirmed: true } }];"
+      },
+      "id": "build-confirmed-input",
+      "name": "Build Confirmed Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        768,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "book-cmd",
+                    "leftValue": "={{ $json.command }}",
+                    "rightValue": "book",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "delete-cmd",
+                    "leftValue": "={{ $json.command }}",
+                    "rightValue": "delete",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "deleteall-cmd",
+                    "leftValue": "={{ $json.command }}",
+                    "rightValue": "deleteall",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "register-cmd",
+                    "leftValue": "={{ $json.command }}",
+                    "rightValue": "register",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "play-cmd",
+                    "leftValue": "={{ $json.command }}",
+                    "rightValue": "play",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "route-by-command",
+      "name": "Route by Command",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        992,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "p5NpS5X1VLPdY3mX"
+        },
+        "options": {}
+      },
+      "id": "exec-book",
+      "name": "Execute Book Command",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        1216,
+        -160
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "wYEfXMLutTlrEgBq"
+        },
+        "options": {}
+      },
+      "id": "exec-delete",
+      "name": "Execute Delete Command",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        1216,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "b7xXjE899CcIb9eo"
+        },
+        "options": {}
+      },
+      "id": "exec-deleteall",
+      "name": "Execute Delete All Command",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        1216,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "w8lC6D3QXh47u6w1"
+        },
+        "options": {}
+      },
+      "id": "exec-register",
+      "name": "Execute Register Command",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        1216,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "CRCVg9hV0gdk0WNb"
+        },
+        "options": {}
+      },
+      "id": "exec-play",
+      "name": "Execute Play Command",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        1216,
+        608
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT text FROM translations WHERE key = 'cancelled' AND lang = $1 UNION ALL SELECT text FROM translations WHERE key = 'cancelled' AND lang = 'en' LIMIT 1",
+        "options": {
+          "queryReplacement": "={{ $('Delete Pending Record').first().json.lang }}"
+        }
+      },
+      "id": "get-cancel-translation",
+      "name": "Get Cancel Translation",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        768,
+        528
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "3SDluWLUa1vIU50a",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": {
+          "__rl": true,
+          "mode": "expression",
+          "value": "={{ $('Extract Callback Data').first().json.chat_id }}"
+        },
+        "text": "={{ $json.text }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "send-cancelled-message",
+      "name": "Send Cancelled Message",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        992,
+        528
+      ],
+      "webhookId": "5b5218c8-78f3-43f1-9caa-9df638d870e9",
+      "credentials": {
+        "telegramApi": {
+          "id": "pHQDqhsnrwimdaY2",
+          "name": "twoj_badminton_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "callback",
+        "queryId": "={{ $('Extract Callback Data').first().json.callback_query_id }}",
+        "additionalFields": {
+          "text": "Session expired"
+        }
+      },
+      "id": "answer-expired-callback",
+      "name": "Answer Expired Callback",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        96,
+        672
+      ],
+      "webhookId": "f84c4b57-b1f0-4bc3-9e9f-3ee98dbaf60d",
+      "credentials": {
+        "telegramApi": {
+          "id": "pHQDqhsnrwimdaY2",
+          "name": "twoj_badminton_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT text FROM translations WHERE key = 'expired' AND lang = 'en' LIMIT 1",
+        "options": {}
+      },
+      "id": "get-expired-translation",
+      "name": "Get Expired Translation",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        320,
+        672
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "3SDluWLUa1vIU50a",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": {
+          "__rl": true,
+          "mode": "expression",
+          "value": "={{ $('Extract Callback Data').first().json.chat_id }}"
+        },
+        "text": "={{ $json.text }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "send-expired-message",
+      "name": "Send Expired Message",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        544,
+        672
+      ],
+      "webhookId": "0a710675-95c8-4923-9e9d-c7bd1809b56d",
+      "credentials": {
+        "telegramApi": {
+          "id": "pHQDqhsnrwimdaY2",
+          "name": "twoj_badminton_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "editMessageText",
+        "chatId": {
+          "__rl": true,
+          "mode": "expression",
+          "value": "={{ $('Extract Callback Data').first().json.chat_id }}"
+        },
+        "messageId": "={{ $('Extract Callback Data').item.json.message_id }}",
+        "text": "={{ '📅 ' + $('Extract Callback Data').first().json.extra }}",
+        "additionalFields": {
+          "disable_web_page_preview": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "edit-disambiguation-message",
+      "name": "Edit Disambiguation Message",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        768,
+        800
+      ],
+      "webhookId": "d806b0b4-aaad-4361-a068-818d47703fe3",
+      "credentials": {
+        "telegramApi": {
+          "id": "pHQDqhsnrwimdaY2",
+          "name": "twoj_badminton_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cancel-check",
+              "leftValue": "={{ $('Extract Callback Data').first().json.extra }}",
+              "rightValue": "cancel",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "is-disambiguation-cancel",
+      "name": "Is Disambiguation Cancel?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        992,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": {
+          "__rl": true,
+          "mode": "expression",
+          "value": "={{ $('Extract Callback Data').first().json.chat_id }}"
+        },
+        "text": "❌ Cancelled.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "send-disambiguation-cancelled",
+      "name": "Send Disambiguation Cancelled",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1216,
+        800
+      ],
+      "webhookId": "c3995fd4-cadd-4132-8214-486720dc26d6",
+      "credentials": {
+        "telegramApi": {
+          "id": "pHQDqhsnrwimdaY2",
+          "name": "twoj_badminton_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const rec = $('Delete Pending Record').first().json;\nconst payload = typeof rec.payload === 'string' ? JSON.parse(rec.payload) : rec.payload;\nconst selectedDate = $('Extract Callback Data').first().json.extra;\n\nreturn [{ json: {\n  chat_id:  rec.chat_id  || payload.chat_id,\n  user_id:  payload.user_id,\n  username: payload.username,\n  fullname: payload.fullname,\n  lang:     rec.lang     || payload.lang,\n  command:  'show',\n  arg1:     selectedDate\n} }];"
+      },
+      "id": "build-show-input",
+      "name": "Build Show Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1216,
+        992
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "HFeE52YK9tAzKTpk"
+        },
+        "options": {}
+      },
+      "id": "call-show-command-dd",
+      "name": "Call Show Command",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        1440,
+        992
+      ]
+    }
+  ],
+  "connections": {
+    "When Called by Assistant": {
+      "main": [
+        [
+          {
+            "node": "Extract Callback Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Callback Data": {
+      "main": [
+        [
+          {
+            "node": "Get Pending Confirmation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Pending Confirmation": {
+      "main": [
+        [
+          {
+            "node": "Check Found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Found": {
+      "main": [
+        [
+          {
+            "node": "Answer Callback Query",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Answer Expired Callback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Answer Callback Query": {
+      "main": [
+        [
+          {
+            "node": "Delete Pending Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Pending Record": {
+      "main": [
+        [
+          {
+            "node": "Route by Action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Action": {
+      "main": [
+        [
+          {
+            "node": "Build Confirmed Input",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Cancel Translation",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Disambiguation Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Confirmed Input": {
+      "main": [
+        [
+          {
+            "node": "Route by Command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Command": {
+      "main": [
+        [
+          {
+            "node": "Execute Book Command",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute Delete Command",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute Delete All Command",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute Register Command",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute Play Command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Cancel Translation": {
+      "main": [
+        [
+          {
+            "node": "Send Cancelled Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Answer Expired Callback": {
+      "main": [
+        [
+          {
+            "node": "Get Expired Translation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Expired Translation": {
+      "main": [
+        [
+          {
+            "node": "Send Expired Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Disambiguation Message": {
+      "main": [
+        [
+          {
+            "node": "Is Disambiguation Cancel?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Disambiguation Cancel?": {
+      "main": [
+        [
+          {
+            "node": "Send Disambiguation Cancelled",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Build Show Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Show Input": {
+      "main": [
+        [
+          {
+            "node": "Call Show Command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "meta": null,
+  "versionId": "dec6e43e-bf42-451b-9723-fbb8eb2677f4",
+  "activeVersionId": "dec6e43e-bf42-451b-9723-fbb8eb2677f4",
+  "versionCounter": 66,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-03-25T19:46:43.759Z",
+      "createdAt": "2026-03-25T19:46:43.759Z",
+      "role": "workflow:owner",
+      "workflowId": "31GNbFtZYmHTfiL8",
+      "projectId": "66rzfRQbAnEionlx",
+      "project": {
+        "updatedAt": "2025-09-19T18:39:13.257Z",
+        "createdAt": "2025-09-18T20:36:06.558Z",
+        "id": "66rzfRQbAnEionlx",
+        "name": "Sergei Vedishchev <brainboost@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "53af7452-7a67-4d31-8a0d-967083ebc818"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-03-27T19:22:41.000Z",
+    "createdAt": "2026-03-27T19:22:36.909Z",
+    "versionId": "dec6e43e-bf42-451b-9723-fbb8eb2677f4",
+    "workflowId": "31GNbFtZYmHTfiL8",
+    "nodes": [
+      {
+        "parameters": {},
+        "id": "callback-handler-trigger",
+        "name": "When Called by Assistant",
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1,
+        "position": [
+          -800,
+          576
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const cbq = $input.first().json.callback_query;\nconst raw = cbq.data || '';\nconst parts = raw.split(':');\nconst action = parts[0];\nconst confirmation_id = parts.length > 1 ? parts[1] : '';\nconst extra = parts.length > 2 ? parts.slice(2).join(':') : '';\n\nreturn [{\n  json: {\n    action,\n    confirmation_id,\n    extra,\n    callback_query_id: cbq.id,\n    chat_id: String(cbq.message.chat.id),\n    user_id: String(cbq.from.id),\n    message_id: cbq.message.message_id\n  }\n}];"
+        },
+        "id": "extract-callback-data",
+        "name": "Extract Callback Data",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -576,
+          576
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT * FROM pending_confirmations WHERE confirmation_id = $1 AND expires_at > NOW()",
+          "options": {
+            "queryReplacement": "={{ $json.confirmation_id }}"
+          }
+        },
+        "id": "get-pending-confirmation",
+        "name": "Get Pending Confirmation",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.5,
+        "position": [
+          -352,
+          576
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "3SDluWLUa1vIU50a",
+            "name": "Postgres account"
+          }
+        },
+        "continueOnFail": true
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 1
+            },
+            "conditions": [
+              {
+                "id": "row-found",
+                "leftValue": "={{ $json.id }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "number",
+                  "operation": "notEmpty",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "check-found",
+        "name": "Check Found",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          -128,
+          576
+        ]
+      },
+      {
+        "parameters": {
+          "resource": "callback",
+          "queryId": "={{ $('Extract Callback Data').first().json.callback_query_id }}",
+          "additionalFields": {
+            "show_alert": false
+          }
+        },
+        "id": "answer-callback-query",
+        "name": "Answer Callback Query",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          96,
+          464
+        ],
+        "webhookId": "cd895204-7015-482c-a745-99f296f60a9e",
+        "credentials": {
+          "telegramApi": {
+            "id": "pHQDqhsnrwimdaY2",
+            "name": "twoj_badminton_bot"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "DELETE FROM pending_confirmations WHERE confirmation_id = $1 RETURNING command, payload, chat_id, lang",
+          "options": {
+            "queryReplacement": "={{ $('Extract Callback Data').first().json.confirmation_id }}"
+          }
+        },
+        "id": "delete-pending-record",
+        "name": "Delete Pending Record",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.5,
+        "position": [
+          320,
+          464
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "3SDluWLUa1vIU50a",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "rules": {
+            "values": [
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict"
+                  },
+                  "conditions": [
+                    {
+                      "id": "confirm-action",
+                      "leftValue": "={{ $('Extract Callback Data').first().json.action }}",
+                      "rightValue": "confirm",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                }
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict"
+                  },
+                  "conditions": [
+                    {
+                      "id": "cancel-action",
+                      "leftValue": "={{ $('Extract Callback Data').first().json.action }}",
+                      "rightValue": "cancel",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                }
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict"
+                  },
+                  "conditions": [
+                    {
+                      "id": "dd-action",
+                      "leftValue": "={{ $('Extract Callback Data').first().json.action }}",
+                      "rightValue": "dd",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                }
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "route-by-action",
+        "name": "Route by Action",
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3,
+        "position": [
+          544,
+          448
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const record = $('Delete Pending Record').first().json;\nconst payload = typeof record.payload === 'string' ? JSON.parse(record.payload) : record.payload;\nreturn [{ json: { ...payload, command: record.command, confirmed: true } }];"
+        },
+        "id": "build-confirmed-input",
+        "name": "Build Confirmed Input",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          768,
+          224
+        ]
+      },
+      {
+        "parameters": {
+          "rules": {
+            "values": [
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict"
+                  },
+                  "conditions": [
+                    {
+                      "id": "book-cmd",
+                      "leftValue": "={{ $json.command }}",
+                      "rightValue": "book",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                }
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict"
+                  },
+                  "conditions": [
+                    {
+                      "id": "delete-cmd",
+                      "leftValue": "={{ $json.command }}",
+                      "rightValue": "delete",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                }
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict"
+                  },
+                  "conditions": [
+                    {
+                      "id": "deleteall-cmd",
+                      "leftValue": "={{ $json.command }}",
+                      "rightValue": "deleteall",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                }
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict"
+                  },
+                  "conditions": [
+                    {
+                      "id": "register-cmd",
+                      "leftValue": "={{ $json.command }}",
+                      "rightValue": "register",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                }
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict"
+                  },
+                  "conditions": [
+                    {
+                      "id": "play-cmd",
+                      "leftValue": "={{ $json.command }}",
+                      "rightValue": "play",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                }
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "route-by-command",
+        "name": "Route by Command",
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3,
+        "position": [
+          992,
+          176
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "p5NpS5X1VLPdY3mX"
+          },
+          "options": {}
+        },
+        "id": "exec-book",
+        "name": "Execute Book Command",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.1,
+        "position": [
+          1216,
+          -160
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "wYEfXMLutTlrEgBq"
+          },
+          "options": {}
+        },
+        "id": "exec-delete",
+        "name": "Execute Delete Command",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.1,
+        "position": [
+          1216,
+          32
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "b7xXjE899CcIb9eo"
+          },
+          "options": {}
+        },
+        "id": "exec-deleteall",
+        "name": "Execute Delete All Command",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.1,
+        "position": [
+          1216,
+          224
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "w8lC6D3QXh47u6w1"
+          },
+          "options": {}
+        },
+        "id": "exec-register",
+        "name": "Execute Register Command",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.1,
+        "position": [
+          1216,
+          416
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "CRCVg9hV0gdk0WNb"
+          },
+          "options": {}
+        },
+        "id": "exec-play",
+        "name": "Execute Play Command",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.1,
+        "position": [
+          1216,
+          608
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT text FROM translations WHERE key = 'cancelled' AND lang = $1 UNION ALL SELECT text FROM translations WHERE key = 'cancelled' AND lang = 'en' LIMIT 1",
+          "options": {
+            "queryReplacement": "={{ $('Delete Pending Record').first().json.lang }}"
+          }
+        },
+        "id": "get-cancel-translation",
+        "name": "Get Cancel Translation",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.5,
+        "position": [
+          768,
+          528
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "3SDluWLUa1vIU50a",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "chatId": {
+            "__rl": true,
+            "mode": "expression",
+            "value": "={{ $('Extract Callback Data').first().json.chat_id }}"
+          },
+          "text": "={{ $json.text }}",
+          "additionalFields": {
+            "appendAttribution": false,
+            "parse_mode": "HTML"
+          }
+        },
+        "id": "send-cancelled-message",
+        "name": "Send Cancelled Message",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          992,
+          528
+        ],
+        "webhookId": "5b5218c8-78f3-43f1-9caa-9df638d870e9",
+        "credentials": {
+          "telegramApi": {
+            "id": "pHQDqhsnrwimdaY2",
+            "name": "twoj_badminton_bot"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "callback",
+          "queryId": "={{ $('Extract Callback Data').first().json.callback_query_id }}",
+          "additionalFields": {
+            "text": "Session expired"
+          }
+        },
+        "id": "answer-expired-callback",
+        "name": "Answer Expired Callback",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          96,
+          672
+        ],
+        "webhookId": "f84c4b57-b1f0-4bc3-9e9f-3ee98dbaf60d",
+        "credentials": {
+          "telegramApi": {
+            "id": "pHQDqhsnrwimdaY2",
+            "name": "twoj_badminton_bot"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT text FROM translations WHERE key = 'expired' AND lang = 'en' LIMIT 1",
+          "options": {}
+        },
+        "id": "get-expired-translation",
+        "name": "Get Expired Translation",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.5,
+        "position": [
+          320,
+          672
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "3SDluWLUa1vIU50a",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "chatId": {
+            "__rl": true,
+            "mode": "expression",
+            "value": "={{ $('Extract Callback Data').first().json.chat_id }}"
+          },
+          "text": "={{ $json.text }}",
+          "additionalFields": {
+            "appendAttribution": false,
+            "parse_mode": "HTML"
+          }
+        },
+        "id": "send-expired-message",
+        "name": "Send Expired Message",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          544,
+          672
+        ],
+        "webhookId": "0a710675-95c8-4923-9e9d-c7bd1809b56d",
+        "credentials": {
+          "telegramApi": {
+            "id": "pHQDqhsnrwimdaY2",
+            "name": "twoj_badminton_bot"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "editMessageText",
+          "chatId": {
+            "__rl": true,
+            "mode": "expression",
+            "value": "={{ $('Extract Callback Data').first().json.chat_id }}"
+          },
+          "messageId": "={{ $('Extract Callback Data').item.json.message_id }}",
+          "text": "={{ '📅 ' + $('Extract Callback Data').first().json.extra }}",
+          "additionalFields": {
+            "disable_web_page_preview": false,
+            "parse_mode": "HTML"
+          }
+        },
+        "id": "edit-disambiguation-message",
+        "name": "Edit Disambiguation Message",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          768,
+          800
+        ],
+        "webhookId": "d806b0b4-aaad-4361-a068-818d47703fe3",
+        "credentials": {
+          "telegramApi": {
+            "id": "pHQDqhsnrwimdaY2",
+            "name": "twoj_badminton_bot"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            },
+            "conditions": [
+              {
+                "id": "cancel-check",
+                "leftValue": "={{ $('Extract Callback Data').first().json.extra }}",
+                "rightValue": "cancel",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "is-disambiguation-cancel",
+        "name": "Is Disambiguation Cancel?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          992,
+          800
+        ]
+      },
+      {
+        "parameters": {
+          "chatId": {
+            "__rl": true,
+            "mode": "expression",
+            "value": "={{ $('Extract Callback Data').first().json.chat_id }}"
+          },
+          "text": "❌ Cancelled.",
+          "additionalFields": {
+            "appendAttribution": false
+          }
+        },
+        "id": "send-disambiguation-cancelled",
+        "name": "Send Disambiguation Cancelled",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          1216,
+          800
+        ],
+        "webhookId": "c3995fd4-cadd-4132-8214-486720dc26d6",
+        "credentials": {
+          "telegramApi": {
+            "id": "pHQDqhsnrwimdaY2",
+            "name": "twoj_badminton_bot"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const rec = $('Delete Pending Record').first().json;\nconst payload = typeof rec.payload === 'string' ? JSON.parse(rec.payload) : rec.payload;\nconst selectedDate = $('Extract Callback Data').first().json.extra;\n\nreturn [{ json: {\n  chat_id:  rec.chat_id  || payload.chat_id,\n  user_id:  payload.user_id,\n  username: payload.username,\n  fullname: payload.fullname,\n  lang:     rec.lang     || payload.lang,\n  command:  'show',\n  arg1:     selectedDate\n} }];"
+        },
+        "id": "build-show-input",
+        "name": "Build Show Input",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1216,
+          992
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "HFeE52YK9tAzKTpk"
+          },
+          "options": {}
+        },
+        "id": "call-show-command-dd",
+        "name": "Call Show Command",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.1,
+        "position": [
+          1440,
+          992
+        ]
+      }
+    ],
+    "connections": {
+      "When Called by Assistant": {
+        "main": [
+          [
+            {
+              "node": "Extract Callback Data",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Extract Callback Data": {
+        "main": [
+          [
+            {
+              "node": "Get Pending Confirmation",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Pending Confirmation": {
+        "main": [
+          [
+            {
+              "node": "Check Found",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check Found": {
+        "main": [
+          [
+            {
+              "node": "Answer Callback Query",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Answer Expired Callback",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Answer Callback Query": {
+        "main": [
+          [
+            {
+              "node": "Delete Pending Record",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Delete Pending Record": {
+        "main": [
+          [
+            {
+              "node": "Route by Action",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Route by Action": {
+        "main": [
+          [
+            {
+              "node": "Build Confirmed Input",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Get Cancel Translation",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Edit Disambiguation Message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build Confirmed Input": {
+        "main": [
+          [
+            {
+              "node": "Route by Command",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Route by Command": {
+        "main": [
+          [
+            {
+              "node": "Execute Book Command",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Execute Delete Command",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Execute Delete All Command",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Execute Register Command",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Execute Play Command",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Cancel Translation": {
+        "main": [
+          [
+            {
+              "node": "Send Cancelled Message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Answer Expired Callback": {
+        "main": [
+          [
+            {
+              "node": "Get Expired Translation",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Expired Translation": {
+        "main": [
+          [
+            {
+              "node": "Send Expired Message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Edit Disambiguation Message": {
+        "main": [
+          [
+            {
+              "node": "Is Disambiguation Cancel?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Is Disambiguation Cancel?": {
+        "main": [
+          [
+            {
+              "node": "Send Disambiguation Cancelled",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Build Show Input",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build Show Input": {
+        "main": [
+          [
+            {
+              "node": "Call Show Command",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Sergei Vedishchev",
+    "name": "Version dec6e43e",
+    "description": "",
+    "autosaved": true,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-03-27T19:22:41.280Z",
+        "id": 293,
+        "workflowId": "31GNbFtZYmHTfiL8",
+        "versionId": "dec6e43e-bf42-451b-9723-fbb8eb2677f4",
+        "event": "activated",
+        "userId": "53af7452-7a67-4d31-8a0d-967083ebc818"
+      }
+    ]
+  }
+}

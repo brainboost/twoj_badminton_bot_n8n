@@ -1,8 +1,9 @@
 {
-  "updatedAt": "2026-03-01T21:11:59.734Z",
+  "updatedAt": "2026-03-27T11:08:47.927Z",
   "createdAt": "2025-10-14T10:11:33.990Z",
   "id": "uf7MYoeaspA2V85u",
   "name": "Assistant agent",
+  "description": null,
   "active": true,
   "isArchived": false,
   "nodes": [
@@ -11,7 +12,8 @@
         "updates": [
           "message",
           "edited_message",
-          "poll"
+          "poll",
+          "callback_query"
         ],
         "additionalFields": {
           "download": true
@@ -22,8 +24,8 @@
       "type": "n8n-nodes-base.telegramTrigger",
       "typeVersion": 1.2,
       "position": [
-        -1024,
-        -96
+        -1344,
+        -80
       ],
       "webhookId": "55acc711-c248-4ac9-b6cd-e295c2d33f4b",
       "credentials": {
@@ -42,7 +44,7 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        -352,
+        -176,
         288
       ],
       "id": "66219c83-6371-4cc6-ad43-57cee44f52da",
@@ -56,33 +58,11 @@
       }
     },
     {
-      "parameters": {
-        "resource": "audio",
-        "operation": "transcribe",
-        "binaryPropertyName": "=data",
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.openAi",
-      "typeVersion": 1.8,
-      "position": [
-        -128,
-        288
-      ],
-      "id": "6f314aef-7ff1-4211-8656-e2c1f8fea374",
-      "name": "Transcribe audio",
-      "credentials": {
-        "openAiApi": {
-          "id": "gmq5u3CqvxIc2nEW",
-          "name": "OpenAi"
-        }
-      }
-    },
-    {
       "parameters": {},
       "type": "@n8n/n8n-nodes-langchain.toolCalculator",
       "typeVersion": 1,
       "position": [
-        1600,
+        2176,
         560
       ],
       "id": "3122d37e-a446-4f7c-aba0-76a6564b2ee9",
@@ -118,7 +98,7 @@
       "type": "@n8n/n8n-nodes-langchain.guardrails",
       "typeVersion": 1,
       "position": [
-        1328,
+        1904,
         320
       ],
       "id": "0716d4f2-4aa2-45f9-8930-ae2b9f79cdab",
@@ -129,7 +109,7 @@
       "type": "@n8n/n8n-nodes-langchain.toolWikipedia",
       "typeVersion": 1,
       "position": [
-        1728,
+        2304,
         560
       ],
       "id": "913b9eb7-14e2-4b5a-9f5f-14d93aa0275b",
@@ -152,7 +132,7 @@
       "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
       "typeVersion": 1.3,
       "position": [
-        1856,
+        2432,
         560
       ],
       "id": "924753ce-2c02-49e1-826b-fe741d84717e",
@@ -171,7 +151,7 @@
       "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
       "typeVersion": 1,
       "position": [
-        1856,
+        2432,
         752
       ],
       "id": "d5693f10-1cfd-4ae5-9ae3-17fd5a93997c",
@@ -200,7 +180,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        320,
+        688,
         288
       ],
       "id": "925b1cdf-fbd8-4b01-bcd9-be4177be6c79",
@@ -274,7 +254,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        2352,
+        2928,
         464
       ],
       "credentials": {
@@ -341,20 +321,19 @@
       "parameters": {
         "conditions": {
           "options": {
-            "caseSensitive": true,
+            "version": 3,
             "leftValue": "",
-            "typeValidation": "strict",
-            "version": 3
+            "caseSensitive": true,
+            "typeValidation": "strict"
           },
           "conditions": [
             {
               "id": "6cbf4be1-777d-439e-821b-08185d5846eb",
-              "leftValue": "={{ $('Telegram Message Trigger').item.json.message?.voice }}",
-              "rightValue": "",
+              "leftValue": "={{ $('Telegram Message Trigger').item.json.message?.voice === undefined }}",
+              "rightValue": true,
               "operator": {
-                "type": "object",
-                "operation": "notExists",
-                "singleValue": true
+                "type": "boolean",
+                "operation": "equals"
               }
             }
           ],
@@ -379,8 +358,8 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        -800,
-        -144
+        -576,
+        -64
       ],
       "id": "44df1e02-a88d-49a9-bae2-a337b24cd045",
       "name": "Send a typing",
@@ -400,7 +379,7 @@
       "type": "@n8n/n8n-nodes-langchain.lmOllama",
       "typeVersion": 1,
       "position": [
-        544,
+        1120,
         448
       ],
       "id": "c81cce17-67d8-472c-b8c0-63d3335ff6fb",
@@ -415,7 +394,7 @@
     {
       "parameters": {
         "chatId": "={{ $('Set fields').item.json.chat_id }}",
-        "text": "={{ $json.text }}",
+        "text": "={{ $json.content.parts[0].text }}",
         "additionalFields": {
           "appendAttribution": false
         }
@@ -423,7 +402,7 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        96,
+        368,
         288
       ],
       "id": "a29216dc-52c9-46f1-b7b6-f764a9f1a6ed",
@@ -447,7 +426,7 @@
       "type": "@tavily/n8n-nodes-tavily.tavilyTool",
       "typeVersion": 1,
       "position": [
-        2144,
+        2720,
         560
       ],
       "id": "82ae02fd-570d-4439-9502-ce3e415e7807",
@@ -471,7 +450,7 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        2848,
+        3424,
         640
       ],
       "id": "6def4a5a-1e35-42f4-9770-475280c7f72f",
@@ -493,7 +472,7 @@
       "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
       "typeVersion": 1.3,
       "position": [
-        1472,
+        2048,
         560
       ],
       "id": "a74dfcb7-3e35-4397-b81e-c9572a4e223a",
@@ -515,7 +494,7 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3,
       "position": [
-        1600,
+        2176,
         320
       ],
       "id": "aa3250fe-7fd3-4956-bdaa-c46d09c0731b",
@@ -533,7 +512,7 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        2576,
+        3152,
         272
       ],
       "id": "4138fda1-fc08-4a2c-8365-8007b3cca269",
@@ -566,7 +545,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1008,
+        1584,
         320
       ],
       "id": "8c55dd05-482e-440c-8416-7792f4dd1b0c",
@@ -580,7 +559,7 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
       "typeVersion": 1,
       "position": [
-        1344,
+        1920,
         560
       ],
       "id": "9c07a09b-ca2a-4704-a865-f1266b40dd5d",
@@ -614,7 +593,7 @@
       "type": "@n8n/n8n-nodes-langchain.textClassifier",
       "typeVersion": 1.1,
       "position": [
-        544,
+        1120,
         240
       ],
       "id": "15736666-7dff-454d-aeef-a82675a5b553",
@@ -629,7 +608,7 @@
       "type": "n8n-nodes-base.evaluation",
       "typeVersion": 4.8,
       "position": [
-        2352,
+        2928,
         176
       ]
     },
@@ -664,13 +643,13 @@
       "type": "n8n-nodes-base.evaluation",
       "typeVersion": 4.8,
       "position": [
-        2576,
+        3152,
         80
       ],
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "rwNejW7L2Lym8SJi",
-          "name": "Google Sheets account"
+          "name": "Google Sheets IsokDis"
         }
       }
     },
@@ -683,7 +662,7 @@
       "type": "n8n-nodes-base.evaluation",
       "typeVersion": 4.8,
       "position": [
-        1200,
+        1776,
         32
       ]
     },
@@ -710,13 +689,13 @@
       "type": "n8n-nodes-base.evaluation",
       "typeVersion": 4.8,
       "position": [
-        1744,
+        2320,
         -96
       ],
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "rwNejW7L2Lym8SJi",
-          "name": "Google Sheets account"
+          "name": "Google Sheets IsokDis"
         }
       }
     },
@@ -733,7 +712,7 @@
       "type": "n8n-nodes-base.evaluation",
       "typeVersion": 4.8,
       "position": [
-        2784,
+        3360,
         80
       ]
     },
@@ -746,7 +725,7 @@
       "type": "n8n-nodes-base.evaluation",
       "typeVersion": 4.8,
       "position": [
-        2576,
+        3152,
         464
       ]
     },
@@ -773,13 +752,13 @@
       "type": "n8n-nodes-base.evaluation",
       "typeVersion": 4.8,
       "position": [
-        2848,
+        3424,
         448
       ],
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "rwNejW7L2Lym8SJi",
-          "name": "Google Sheets account"
+          "name": "Google Sheets IsokDis"
         }
       }
     },
@@ -812,7 +791,7 @@
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "rwNejW7L2Lym8SJi",
-          "name": "Google Sheets account"
+          "name": "Google Sheets IsokDis"
         }
       }
     },
@@ -845,7 +824,7 @@
       "type": "n8n-nodes-base.evaluation",
       "typeVersion": 4.8,
       "position": [
-        3120,
+        3696,
         80
       ],
       "id": "dbb292de-5352-48ce-8ddc-3b324eb18d0c",
@@ -853,7 +832,7 @@
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "rwNejW7L2Lym8SJi",
-          "name": "Google Sheets account"
+          "name": "Google Sheets IsokDis"
         }
       }
     },
@@ -865,7 +844,7 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
       "typeVersion": 1,
       "position": [
-        2928,
+        3504,
         288
       ],
       "id": "26f16e4e-c70f-42d6-99aa-8fac0e0cbafc",
@@ -966,7 +945,7 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.2,
       "position": [
-        960,
+        1536,
         32
       ],
       "name": "Call Command Parser",
@@ -1068,41 +1047,94 @@
       ],
       "name": "Call Command Parser1",
       "id": "be929140-238a-4d95-9c0e-511646dbccc7"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "is-callback",
+              "leftValue": "={{ $json.callback_query !== undefined }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-callback-query",
+      "name": "Check Callback Query",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1056,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "31GNbFtZYmHTfiL8"
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "id": "exec-confirmation-handler",
+      "name": "Execute Confirmation Handler",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        -576,
+        -288
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "inputType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        64,
+        288
+      ],
+      "id": "19413715-bebd-4fd5-9005-15a2de915c07",
+      "name": "Transcribe a recording1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "pjc8HhkT3zBo5IUU",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
     }
   ],
   "connections": {
-    "Telegram Message Trigger": {
-      "main": [
-        [
-          {
-            "node": "Set fields",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Send a typing",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Get a file": {
       "main": [
         [
           {
-            "node": "Transcribe audio",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Transcribe audio": {
-      "main": [
-        [
-          {
-            "node": "Send a text message1",
+            "node": "Transcribe a recording1",
             "type": "main",
             "index": 0
           }
@@ -1448,21 +1480,68 @@
           }
         ]
       ]
+    },
+    "Telegram Message Trigger": {
+      "main": [
+        [
+          {
+            "node": "Check Callback Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Callback Query": {
+      "main": [
+        [
+          {
+            "node": "Execute Confirmation Handler",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set fields",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a typing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe a recording1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
     "executionOrder": "v1",
     "timezone": "Europe/Warsaw",
     "callerPolicy": "workflowsFromSameOwner",
-    "availableInMCP": false
+    "availableInMCP": false,
+    "binaryMode": "separate"
   },
   "staticData": null,
   "meta": {
     "templateId": "voice_assistant_agent_with_telegram",
     "templateCredsSetupCompleted": true
   },
-  "versionId": "f4f5fd0b-e432-4bfd-944c-2fb65dff4ee6",
-  "activeVersionId": "f4f5fd0b-e432-4bfd-944c-2fb65dff4ee6",
+  "versionId": "5bb153d0-2f9d-44d0-a511-58f91a3a5a2b",
+  "activeVersionId": "5bb153d0-2f9d-44d0-a511-58f91a3a5a2b",
+  "versionCounter": 871,
   "triggerCount": 1,
   "shared": [
     {
@@ -1470,13 +1549,24 @@
       "createdAt": "2025-10-14T10:11:33.992Z",
       "role": "workflow:owner",
       "workflowId": "uf7MYoeaspA2V85u",
-      "projectId": "66rzfRQbAnEionlx"
+      "projectId": "66rzfRQbAnEionlx",
+      "project": {
+        "updatedAt": "2025-09-19T18:39:13.257Z",
+        "createdAt": "2025-09-18T20:36:06.558Z",
+        "id": "66rzfRQbAnEionlx",
+        "name": "Sergei Vedishchev <brainboost@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "53af7452-7a67-4d31-8a0d-967083ebc818"
+      }
     }
   ],
+  "tags": [],
   "activeVersion": {
-    "updatedAt": "2026-01-26T13:33:57.000Z",
-    "createdAt": "2026-01-26T13:33:53.620Z",
-    "versionId": "f4f5fd0b-e432-4bfd-944c-2fb65dff4ee6",
+    "updatedAt": "2026-03-27T11:08:50.000Z",
+    "createdAt": "2026-03-27T11:08:47.928Z",
+    "versionId": "5bb153d0-2f9d-44d0-a511-58f91a3a5a2b",
     "workflowId": "uf7MYoeaspA2V85u",
     "nodes": [
       {
@@ -1484,7 +1574,8 @@
           "updates": [
             "message",
             "edited_message",
-            "poll"
+            "poll",
+            "callback_query"
           ],
           "additionalFields": {
             "download": true
@@ -1495,8 +1586,8 @@
         "type": "n8n-nodes-base.telegramTrigger",
         "typeVersion": 1.2,
         "position": [
-          -1024,
-          -96
+          -1344,
+          -80
         ],
         "webhookId": "55acc711-c248-4ac9-b6cd-e295c2d33f4b",
         "credentials": {
@@ -1515,7 +1606,7 @@
         "type": "n8n-nodes-base.telegram",
         "typeVersion": 1.2,
         "position": [
-          -352,
+          -176,
           288
         ],
         "id": "66219c83-6371-4cc6-ad43-57cee44f52da",
@@ -1529,33 +1620,11 @@
         }
       },
       {
-        "parameters": {
-          "resource": "audio",
-          "operation": "transcribe",
-          "binaryPropertyName": "=data",
-          "options": {}
-        },
-        "type": "@n8n/n8n-nodes-langchain.openAi",
-        "typeVersion": 1.8,
-        "position": [
-          -128,
-          288
-        ],
-        "id": "6f314aef-7ff1-4211-8656-e2c1f8fea374",
-        "name": "Transcribe audio",
-        "credentials": {
-          "openAiApi": {
-            "id": "gmq5u3CqvxIc2nEW",
-            "name": "OpenAi"
-          }
-        }
-      },
-      {
         "parameters": {},
         "type": "@n8n/n8n-nodes-langchain.toolCalculator",
         "typeVersion": 1,
         "position": [
-          1600,
+          2176,
           560
         ],
         "id": "3122d37e-a446-4f7c-aba0-76a6564b2ee9",
@@ -1591,7 +1660,7 @@
         "type": "@n8n/n8n-nodes-langchain.guardrails",
         "typeVersion": 1,
         "position": [
-          1328,
+          1904,
           320
         ],
         "id": "0716d4f2-4aa2-45f9-8930-ae2b9f79cdab",
@@ -1602,7 +1671,7 @@
         "type": "@n8n/n8n-nodes-langchain.toolWikipedia",
         "typeVersion": 1,
         "position": [
-          1728,
+          2304,
           560
         ],
         "id": "913b9eb7-14e2-4b5a-9f5f-14d93aa0275b",
@@ -1625,7 +1694,7 @@
         "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
         "typeVersion": 1.3,
         "position": [
-          1856,
+          2432,
           560
         ],
         "id": "924753ce-2c02-49e1-826b-fe741d84717e",
@@ -1644,7 +1713,7 @@
         "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
         "typeVersion": 1,
         "position": [
-          1856,
+          2432,
           752
         ],
         "id": "d5693f10-1cfd-4ae5-9ae3-17fd5a93997c",
@@ -1673,7 +1742,7 @@
         "type": "n8n-nodes-base.set",
         "typeVersion": 3.4,
         "position": [
-          320,
+          688,
           288
         ],
         "id": "925b1cdf-fbd8-4b01-bcd9-be4177be6c79",
@@ -1747,7 +1816,7 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          2352,
+          2928,
           464
         ],
         "credentials": {
@@ -1814,20 +1883,19 @@
         "parameters": {
           "conditions": {
             "options": {
-              "caseSensitive": true,
+              "version": 3,
               "leftValue": "",
-              "typeValidation": "strict",
-              "version": 3
+              "caseSensitive": true,
+              "typeValidation": "strict"
             },
             "conditions": [
               {
                 "id": "6cbf4be1-777d-439e-821b-08185d5846eb",
-                "leftValue": "={{ $('Telegram Message Trigger').item.json.message?.voice }}",
-                "rightValue": "",
+                "leftValue": "={{ $('Telegram Message Trigger').item.json.message?.voice === undefined }}",
+                "rightValue": true,
                 "operator": {
-                  "type": "object",
-                  "operation": "notExists",
-                  "singleValue": true
+                  "type": "boolean",
+                  "operation": "equals"
                 }
               }
             ],
@@ -1852,8 +1920,8 @@
         "type": "n8n-nodes-base.telegram",
         "typeVersion": 1.2,
         "position": [
-          -800,
-          -144
+          -576,
+          -64
         ],
         "id": "44df1e02-a88d-49a9-bae2-a337b24cd045",
         "name": "Send a typing",
@@ -1873,7 +1941,7 @@
         "type": "@n8n/n8n-nodes-langchain.lmOllama",
         "typeVersion": 1,
         "position": [
-          544,
+          1120,
           448
         ],
         "id": "c81cce17-67d8-472c-b8c0-63d3335ff6fb",
@@ -1888,7 +1956,7 @@
       {
         "parameters": {
           "chatId": "={{ $('Set fields').item.json.chat_id }}",
-          "text": "={{ $json.text }}",
+          "text": "={{ $json.content.parts[0].text }}",
           "additionalFields": {
             "appendAttribution": false
           }
@@ -1896,7 +1964,7 @@
         "type": "n8n-nodes-base.telegram",
         "typeVersion": 1.2,
         "position": [
-          96,
+          368,
           288
         ],
         "id": "a29216dc-52c9-46f1-b7b6-f764a9f1a6ed",
@@ -1920,7 +1988,7 @@
         "type": "@tavily/n8n-nodes-tavily.tavilyTool",
         "typeVersion": 1,
         "position": [
-          2144,
+          2720,
           560
         ],
         "id": "82ae02fd-570d-4439-9502-ce3e415e7807",
@@ -1944,7 +2012,7 @@
         "type": "n8n-nodes-base.telegram",
         "typeVersion": 1.2,
         "position": [
-          2848,
+          3424,
           640
         ],
         "id": "6def4a5a-1e35-42f4-9770-475280c7f72f",
@@ -1966,7 +2034,7 @@
         "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
         "typeVersion": 1.3,
         "position": [
-          1472,
+          2048,
           560
         ],
         "id": "a74dfcb7-3e35-4397-b81e-c9572a4e223a",
@@ -1988,7 +2056,7 @@
         "type": "@n8n/n8n-nodes-langchain.agent",
         "typeVersion": 3,
         "position": [
-          1600,
+          2176,
           320
         ],
         "id": "aa3250fe-7fd3-4956-bdaa-c46d09c0731b",
@@ -2006,7 +2074,7 @@
         "type": "n8n-nodes-base.telegram",
         "typeVersion": 1.2,
         "position": [
-          2576,
+          3152,
           272
         ],
         "id": "4138fda1-fc08-4a2c-8365-8007b3cca269",
@@ -2039,7 +2107,7 @@
         "type": "n8n-nodes-base.set",
         "typeVersion": 3.4,
         "position": [
-          1008,
+          1584,
           320
         ],
         "id": "8c55dd05-482e-440c-8416-7792f4dd1b0c",
@@ -2053,7 +2121,7 @@
         "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
         "typeVersion": 1,
         "position": [
-          1344,
+          1920,
           560
         ],
         "id": "9c07a09b-ca2a-4704-a865-f1266b40dd5d",
@@ -2087,7 +2155,7 @@
         "type": "@n8n/n8n-nodes-langchain.textClassifier",
         "typeVersion": 1.1,
         "position": [
-          544,
+          1120,
           240
         ],
         "id": "15736666-7dff-454d-aeef-a82675a5b553",
@@ -2102,7 +2170,7 @@
         "type": "n8n-nodes-base.evaluation",
         "typeVersion": 4.8,
         "position": [
-          2352,
+          2928,
           176
         ]
       },
@@ -2137,13 +2205,13 @@
         "type": "n8n-nodes-base.evaluation",
         "typeVersion": 4.8,
         "position": [
-          2576,
+          3152,
           80
         ],
         "credentials": {
           "googleSheetsOAuth2Api": {
             "id": "rwNejW7L2Lym8SJi",
-            "name": "Google Sheets account"
+            "name": "Google Sheets IsokDis"
           }
         }
       },
@@ -2156,7 +2224,7 @@
         "type": "n8n-nodes-base.evaluation",
         "typeVersion": 4.8,
         "position": [
-          1200,
+          1776,
           32
         ]
       },
@@ -2183,13 +2251,13 @@
         "type": "n8n-nodes-base.evaluation",
         "typeVersion": 4.8,
         "position": [
-          1744,
+          2320,
           -96
         ],
         "credentials": {
           "googleSheetsOAuth2Api": {
             "id": "rwNejW7L2Lym8SJi",
-            "name": "Google Sheets account"
+            "name": "Google Sheets IsokDis"
           }
         }
       },
@@ -2206,7 +2274,7 @@
         "type": "n8n-nodes-base.evaluation",
         "typeVersion": 4.8,
         "position": [
-          2784,
+          3360,
           80
         ]
       },
@@ -2219,7 +2287,7 @@
         "type": "n8n-nodes-base.evaluation",
         "typeVersion": 4.8,
         "position": [
-          2576,
+          3152,
           464
         ]
       },
@@ -2246,13 +2314,13 @@
         "type": "n8n-nodes-base.evaluation",
         "typeVersion": 4.8,
         "position": [
-          2848,
+          3424,
           448
         ],
         "credentials": {
           "googleSheetsOAuth2Api": {
             "id": "rwNejW7L2Lym8SJi",
-            "name": "Google Sheets account"
+            "name": "Google Sheets IsokDis"
           }
         }
       },
@@ -2285,7 +2353,7 @@
         "credentials": {
           "googleSheetsOAuth2Api": {
             "id": "rwNejW7L2Lym8SJi",
-            "name": "Google Sheets account"
+            "name": "Google Sheets IsokDis"
           }
         }
       },
@@ -2318,7 +2386,7 @@
         "type": "n8n-nodes-base.evaluation",
         "typeVersion": 4.8,
         "position": [
-          3120,
+          3696,
           80
         ],
         "id": "dbb292de-5352-48ce-8ddc-3b324eb18d0c",
@@ -2326,7 +2394,7 @@
         "credentials": {
           "googleSheetsOAuth2Api": {
             "id": "rwNejW7L2Lym8SJi",
-            "name": "Google Sheets account"
+            "name": "Google Sheets IsokDis"
           }
         }
       },
@@ -2338,7 +2406,7 @@
         "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
         "typeVersion": 1,
         "position": [
-          2928,
+          3504,
           288
         ],
         "id": "26f16e4e-c70f-42d6-99aa-8fac0e0cbafc",
@@ -2439,7 +2507,7 @@
         "type": "n8n-nodes-base.executeWorkflow",
         "typeVersion": 1.2,
         "position": [
-          960,
+          1536,
           32
         ],
         "name": "Call Command Parser",
@@ -2541,41 +2609,94 @@
         ],
         "name": "Call Command Parser1",
         "id": "be929140-238a-4d95-9c0e-511646dbccc7"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "conditions": [
+              {
+                "id": "is-callback",
+                "leftValue": "={{ $json.callback_query !== undefined }}",
+                "rightValue": true,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "check-callback-query",
+        "name": "Check Callback Query",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          -1056,
+          -80
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "31GNbFtZYmHTfiL8"
+          },
+          "options": {
+            "waitForSubWorkflow": false
+          }
+        },
+        "id": "exec-confirmation-handler",
+        "name": "Execute Confirmation Handler",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.1,
+        "position": [
+          -576,
+          -288
+        ]
+      },
+      {
+        "parameters": {
+          "resource": "audio",
+          "modelId": {
+            "__rl": true,
+            "value": "models/gemini-2.5-flash",
+            "mode": "list",
+            "cachedResultName": "models/gemini-2.5-flash"
+          },
+          "inputType": "binary",
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.googleGemini",
+        "typeVersion": 1.1,
+        "position": [
+          64,
+          288
+        ],
+        "id": "19413715-bebd-4fd5-9005-15a2de915c07",
+        "name": "Transcribe a recording1",
+        "credentials": {
+          "googlePalmApi": {
+            "id": "pjc8HhkT3zBo5IUU",
+            "name": "Google Gemini(PaLM) Api account"
+          }
+        }
       }
     ],
     "connections": {
-      "Telegram Message Trigger": {
-        "main": [
-          [
-            {
-              "node": "Set fields",
-              "type": "main",
-              "index": 0
-            },
-            {
-              "node": "Send a typing",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
       "Get a file": {
         "main": [
           [
             {
-              "node": "Transcribe audio",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Transcribe audio": {
-        "main": [
-          [
-            {
-              "node": "Send a text message1",
+              "node": "Transcribe a recording1",
               "type": "main",
               "index": 0
             }
@@ -2921,12 +3042,66 @@
             }
           ]
         ]
+      },
+      "Telegram Message Trigger": {
+        "main": [
+          [
+            {
+              "node": "Check Callback Query",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check Callback Query": {
+        "main": [
+          [
+            {
+              "node": "Execute Confirmation Handler",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Set fields",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Send a typing",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Transcribe a recording1": {
+        "main": [
+          [
+            {
+              "node": "Send a text message1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "authors": "Sergei Vedishchev",
-    "name": "Version f4f5fd0b",
+    "name": "Version 5bb153d0",
     "description": "",
-    "autosaved": false
-  },
-  "tags": []
+    "autosaved": true,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-03-27T11:08:50.244Z",
+        "id": 251,
+        "workflowId": "uf7MYoeaspA2V85u",
+        "versionId": "5bb153d0-2f9d-44d0-a511-58f91a3a5a2b",
+        "event": "activated",
+        "userId": "53af7452-7a67-4d31-8a0d-967083ebc818"
+      }
+    ]
+  }
 }
