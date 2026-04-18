@@ -3,7 +3,6 @@
   "createdAt": "2025-12-25T17:19:17.184Z",
   "id": "wYEfXMLutTlrEgBq",
   "name": "Delete command",
-  "description": null,
   "active": true,
   "isArchived": false,
   "nodes": [
@@ -1231,7 +1230,6 @@
   },
   "versionId": "a628c3ba-e238-4837-a04d-d5496728c8cf",
   "activeVersionId": "a628c3ba-e238-4837-a04d-d5496728c8cf",
-  "versionCounter": 77,
   "triggerCount": 0,
   "shared": [
     {
@@ -1239,25 +1237,7 @@
       "createdAt": "2025-12-25T17:19:17.186Z",
       "role": "workflow:owner",
       "workflowId": "wYEfXMLutTlrEgBq",
-      "projectId": "66rzfRQbAnEionlx",
-      "project": {
-        "updatedAt": "2025-09-19T18:39:13.257Z",
-        "createdAt": "2025-09-18T20:36:06.558Z",
-        "id": "66rzfRQbAnEionlx",
-        "name": "Sergei Vedishchev <brainboost@gmail.com>",
-        "type": "personal",
-        "icon": null,
-        "description": null,
-        "creatorId": "53af7452-7a67-4d31-8a0d-967083ebc818"
-      }
-    }
-  ],
-  "tags": [
-    {
-      "updatedAt": "2025-12-27T11:51:52.051Z",
-      "createdAt": "2025-12-27T11:51:52.051Z",
-      "id": "3W7RR758UwICVpEC",
-      "name": "bot_command"
+      "projectId": "66rzfRQbAnEionlx"
     }
   ],
   "activeVersion": {
@@ -2481,24 +2461,14 @@
     "authors": "Sergei Vedishchev",
     "name": null,
     "description": null,
-    "autosaved": false,
-    "workflowPublishHistory": [
-      {
-        "createdAt": "2026-03-26T08:34:27.895Z",
-        "id": 224,
-        "workflowId": "wYEfXMLutTlrEgBq",
-        "versionId": "a628c3ba-e238-4837-a04d-d5496728c8cf",
-        "event": "activated",
-        "userId": "53af7452-7a67-4d31-8a0d-967083ebc818"
-      },
-      {
-        "createdAt": "2026-03-26T08:34:27.883Z",
-        "id": 223,
-        "workflowId": "wYEfXMLutTlrEgBq",
-        "versionId": "a628c3ba-e238-4837-a04d-d5496728c8cf",
-        "event": "deactivated",
-        "userId": "53af7452-7a67-4d31-8a0d-967083ebc818"
-      }
-    ]
-  }
+    "autosaved": false
+  },
+  "tags": [
+    {
+      "updatedAt": "2025-12-27T11:51:52.051Z",
+      "createdAt": "2025-12-27T11:51:52.051Z",
+      "id": "3W7RR758UwICVpEC",
+      "name": "bot_command"
+    }
+  ]
 }
