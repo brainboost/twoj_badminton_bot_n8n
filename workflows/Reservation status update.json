@@ -3,7 +3,6 @@
   "createdAt": "2025-12-08T21:22:17.172Z",
   "id": "ocCWq7TGjPACPwTL",
   "name": "Reservation status update",
-  "description": null,
   "active": true,
   "isArchived": false,
   "nodes": [
@@ -483,7 +482,6 @@
   },
   "versionId": "92acc7e2-cd63-4479-a94c-a87090a83417",
   "activeVersionId": "92acc7e2-cd63-4479-a94c-a87090a83417",
-  "versionCounter": 65,
   "triggerCount": 1,
   "shared": [
     {
@@ -491,25 +489,7 @@
       "createdAt": "2025-12-08T21:22:17.175Z",
       "role": "workflow:owner",
       "workflowId": "ocCWq7TGjPACPwTL",
-      "projectId": "66rzfRQbAnEionlx",
-      "project": {
-        "updatedAt": "2025-09-19T18:39:13.257Z",
-        "createdAt": "2025-09-18T20:36:06.558Z",
-        "id": "66rzfRQbAnEionlx",
-        "name": "Sergei Vedishchev <brainboost@gmail.com>",
-        "type": "personal",
-        "icon": null,
-        "description": null,
-        "creatorId": "53af7452-7a67-4d31-8a0d-967083ebc818"
-      }
-    }
-  ],
-  "tags": [
-    {
-      "updatedAt": "2026-01-02T14:03:19.232Z",
-      "createdAt": "2026-01-02T14:03:19.232Z",
-      "id": "umllye9UwUVxl6um",
-      "name": "job"
+      "projectId": "66rzfRQbAnEionlx"
     }
   ],
   "activeVersion": {
@@ -982,16 +962,14 @@
     "authors": "Sergei Vedishchev",
     "name": null,
     "description": null,
-    "autosaved": false,
-    "workflowPublishHistory": [
-      {
-        "createdAt": "2026-03-25T19:40:17.053Z",
-        "id": 186,
-        "workflowId": "ocCWq7TGjPACPwTL",
-        "versionId": "92acc7e2-cd63-4479-a94c-a87090a83417",
-        "event": "activated",
-        "userId": "53af7452-7a67-4d31-8a0d-967083ebc818"
-      }
-    ]
-  }
+    "autosaved": false
+  },
+  "tags": [
+    {
+      "updatedAt": "2026-01-02T14:03:19.232Z",
+      "createdAt": "2026-01-02T14:03:19.232Z",
+      "id": "umllye9UwUVxl6um",
+      "name": "job"
+    }
+  ]
 }
