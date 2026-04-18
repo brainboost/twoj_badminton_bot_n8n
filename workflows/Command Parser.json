@@ -3,7 +3,6 @@
   "createdAt": "2026-01-11T18:21:47.330Z",
   "id": "QbD3Epml4ANF9vr0",
   "name": "Command Parser",
-  "description": null,
   "active": true,
   "isArchived": false,
   "nodes": [
@@ -1641,7 +1640,6 @@
   "meta": null,
   "versionId": "82228d08-da58-4ee8-87dd-9540ddf919a2",
   "activeVersionId": "82228d08-da58-4ee8-87dd-9540ddf919a2",
-  "versionCounter": 110,
   "triggerCount": 0,
   "shared": [
     {
@@ -1649,20 +1647,9 @@
       "createdAt": "2026-01-11T18:21:47.335Z",
       "role": "workflow:owner",
       "workflowId": "QbD3Epml4ANF9vr0",
-      "projectId": "66rzfRQbAnEionlx",
-      "project": {
-        "updatedAt": "2025-09-19T18:39:13.257Z",
-        "createdAt": "2025-09-18T20:36:06.558Z",
-        "id": "66rzfRQbAnEionlx",
-        "name": "Sergei Vedishchev <brainboost@gmail.com>",
-        "type": "personal",
-        "icon": null,
-        "description": null,
-        "creatorId": "53af7452-7a67-4d31-8a0d-967083ebc818"
-      }
+      "projectId": "66rzfRQbAnEionlx"
     }
   ],
-  "tags": [],
   "activeVersion": {
     "updatedAt": "2026-03-26T21:33:31.000Z",
     "createdAt": "2026-03-26T21:33:13.500Z",
@@ -3296,16 +3283,7 @@
     "authors": "Sergei Vedishchev",
     "name": "Version 82228d08",
     "description": "",
-    "autosaved": true,
-    "workflowPublishHistory": [
-      {
-        "createdAt": "2026-03-26T21:33:31.593Z",
-        "id": 249,
-        "workflowId": "QbD3Epml4ANF9vr0",
-        "versionId": "82228d08-da58-4ee8-87dd-9540ddf919a2",
-        "event": "activated",
-        "userId": "53af7452-7a67-4d31-8a0d-967083ebc818"
-      }
-    ]
-  }
+    "autosaved": true
+  },
+  "tags": []
 }
