@@ -3,7 +3,6 @@
   "createdAt": "2025-12-22T13:22:52.158Z",
   "id": "p5NpS5X1VLPdY3mX",
   "name": "Book Command",
-  "description": null,
   "active": true,
   "isArchived": false,
   "nodes": [
@@ -1036,7 +1035,6 @@
   },
   "versionId": "bd9b6a0a-897f-44d2-abbf-5e158aeeda74",
   "activeVersionId": "bd9b6a0a-897f-44d2-abbf-5e158aeeda74",
-  "versionCounter": 160,
   "triggerCount": 0,
   "shared": [
     {
@@ -1044,25 +1042,7 @@
       "createdAt": "2025-12-22T13:22:52.160Z",
       "role": "workflow:owner",
       "workflowId": "p5NpS5X1VLPdY3mX",
-      "projectId": "66rzfRQbAnEionlx",
-      "project": {
-        "updatedAt": "2025-09-19T18:39:13.257Z",
-        "createdAt": "2025-09-18T20:36:06.558Z",
-        "id": "66rzfRQbAnEionlx",
-        "name": "Sergei Vedishchev <brainboost@gmail.com>",
-        "type": "personal",
-        "icon": null,
-        "description": null,
-        "creatorId": "53af7452-7a67-4d31-8a0d-967083ebc818"
-      }
-    }
-  ],
-  "tags": [
-    {
-      "updatedAt": "2025-12-27T11:51:52.051Z",
-      "createdAt": "2025-12-27T11:51:52.051Z",
-      "id": "3W7RR758UwICVpEC",
-      "name": "bot_command"
+      "projectId": "66rzfRQbAnEionlx"
     }
   ],
   "activeVersion": {
@@ -2091,16 +2071,14 @@
     "authors": "Sergei Vedishchev",
     "name": "Version bd9b6a0a",
     "description": "",
-    "autosaved": true,
-    "workflowPublishHistory": [
-      {
-        "createdAt": "2026-04-14T10:35:40.400Z",
-        "id": 301,
-        "workflowId": "p5NpS5X1VLPdY3mX",
-        "versionId": "bd9b6a0a-897f-44d2-abbf-5e158aeeda74",
-        "event": "activated",
-        "userId": "53af7452-7a67-4d31-8a0d-967083ebc818"
-      }
-    ]
-  }
+    "autosaved": true
+  },
+  "tags": [
+    {
+      "updatedAt": "2025-12-27T11:51:52.051Z",
+      "createdAt": "2025-12-27T11:51:52.051Z",
+      "id": "3W7RR758UwICVpEC",
+      "name": "bot_command"
+    }
+  ]
 }
