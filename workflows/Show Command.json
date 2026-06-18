@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-27T18:06:01.613Z",
+  "updatedAt": "2026-06-17T14:26:46.264Z",
   "createdAt": "2025-12-27T11:51:58.987Z",
   "id": "HFeE52YK9tAzKTpk",
   "name": "Show Command",
@@ -43,7 +43,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT  cs.club_id,  cs.sport_id,  cs.date,  cs.court_number,  cs.time_slot,  cs.is_available,  cs.updated_at,  r.user_id   AS bot_user_id, u.full_name AS bot_user_name,  u.user_name AS bot_username \nFROM club_schedules cs\nLEFT JOIN reservations r  ON  cs.date = r.date  AND cs.time_slot::time = r.time_start::time  AND cs.court_number = 'Badminton ' || r.court\nLEFT JOIN users u  ON r.user_id = u.id WHERE cs.date = $1::date  AND cs.sport_id = 84\nORDER BY cs.time_slot, cs.court_number",
+        "query": "SELECT  cs.club_id,  cs.sport_id,  cs.date,  cs.court_number,  cs.time_slot,  cs.is_available,  cs.updated_at,  r.user_id   AS bot_user_id, u.full_name AS bot_user_name,  u.user_name AS bot_username \nFROM club_schedules cs\nLEFT JOIN reservations r  ON  cs.date = r.date  AND cs.time_slot::time = r.time_start::time  AND cs.court_number = 'Badminton ' || r.court\nLEFT JOIN users u  ON r.user_id = u.id WHERE cs.date = $1::date  AND cs.court_number like '_adminton%'\nORDER BY cs.time_slot, cs.court_number",
         "options": {
           "queryReplacement": "={{ $json.resolved_date || $json.arg1 || $today }}"
         }
@@ -121,7 +121,8 @@
           "options": {
             "caseSensitive": true,
             "leftValue": "",
-            "typeValidation": "strict"
+            "typeValidation": "strict",
+            "version": 1
           },
           "conditions": [
             {
@@ -426,8 +427,8 @@
   "meta": {
     "templateCredsSetupCompleted": true
   },
-  "versionId": "53754049-31d4-4819-9e67-0781332662ea",
-  "activeVersionId": "53754049-31d4-4819-9e67-0781332662ea",
+  "versionId": "aeeb0590-929b-441b-bcd5-0705c55961a8",
+  "activeVersionId": "aeeb0590-929b-441b-bcd5-0705c55961a8",
   "triggerCount": 0,
   "shared": [
     {
@@ -439,9 +440,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-03-27T18:06:06.000Z",
-    "createdAt": "2026-03-27T18:06:01.614Z",
-    "versionId": "53754049-31d4-4819-9e67-0781332662ea",
+    "updatedAt": "2026-06-17T14:27:10.000Z",
+    "createdAt": "2026-06-17T14:26:46.265Z",
+    "versionId": "aeeb0590-929b-441b-bcd5-0705c55961a8",
     "workflowId": "HFeE52YK9tAzKTpk",
     "nodes": [
       {
@@ -481,7 +482,7 @@
       {
         "parameters": {
           "operation": "executeQuery",
-          "query": "SELECT  cs.club_id,  cs.sport_id,  cs.date,  cs.court_number,  cs.time_slot,  cs.is_available,  cs.updated_at,  r.user_id   AS bot_user_id, u.full_name AS bot_user_name,  u.user_name AS bot_username \nFROM club_schedules cs\nLEFT JOIN reservations r  ON  cs.date = r.date  AND cs.time_slot::time = r.time_start::time  AND cs.court_number = 'Badminton ' || r.court\nLEFT JOIN users u  ON r.user_id = u.id WHERE cs.date = $1::date  AND cs.sport_id = 84\nORDER BY cs.time_slot, cs.court_number",
+          "query": "SELECT  cs.club_id,  cs.sport_id,  cs.date,  cs.court_number,  cs.time_slot,  cs.is_available,  cs.updated_at,  r.user_id   AS bot_user_id, u.full_name AS bot_user_name,  u.user_name AS bot_username \nFROM club_schedules cs\nLEFT JOIN reservations r  ON  cs.date = r.date  AND cs.time_slot::time = r.time_start::time  AND cs.court_number = 'Badminton ' || r.court\nLEFT JOIN users u  ON r.user_id = u.id WHERE cs.date = $1::date  AND cs.court_number like '_adminton%'\nORDER BY cs.time_slot, cs.court_number",
           "options": {
             "queryReplacement": "={{ $json.resolved_date || $json.arg1 || $today }}"
           }
@@ -559,7 +560,8 @@
             "options": {
               "caseSensitive": true,
               "leftValue": "",
-              "typeValidation": "strict"
+              "typeValidation": "strict",
+              "version": 1
             },
             "conditions": [
               {
@@ -853,8 +855,9 @@
         ]
       }
     },
+    "nodeGroups": [],
     "authors": "Sergei Vedishchev",
-    "name": "Version 53754049",
+    "name": "Version aeeb0590",
     "description": "",
     "autosaved": true
   },
