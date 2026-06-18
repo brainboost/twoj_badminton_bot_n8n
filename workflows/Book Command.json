@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-14T10:35:22.679Z",
+  "updatedAt": "2026-06-18T11:20:51.690Z",
   "createdAt": "2025-12-22T13:22:52.158Z",
   "id": "p5NpS5X1VLPdY3mX",
   "name": "Book Command",
@@ -36,10 +36,10 @@
       "parameters": {
         "conditions": {
           "options": {
-            "version": 2,
-            "leftValue": "",
             "caseSensitive": true,
-            "typeValidation": "strict"
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
           },
           "combinator": "and",
           "conditions": [
@@ -108,24 +108,25 @@
       "parameters": {
         "conditions": {
           "options": {
-            "version": 2,
-            "leftValue": "",
             "caseSensitive": true,
-            "typeValidation": "strict"
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
           },
           "conditions": [
             {
               "id": "check-session",
               "operator": {
-                "type": "string",
-                "operation": "exists"
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
               },
-              "leftValue": "={{ $json.result.structuredContent.session_id }}",
+              "leftValue": "={{ $json.result.structuredContent.success }}",
               "rightValue": ""
             },
             {
               "id": "4c7b988b-8496-45fd-9efd-822fab76ffe2",
-              "leftValue": "={{ $json.result.structuredContent.session_id }}",
+              "leftValue": "={{ $json.result.structuredContent.access_token }}",
               "rightValue": "",
               "operator": {
                 "type": "string",
@@ -150,12 +151,6 @@
       "parameters": {
         "assignments": {
           "assignments": [
-            {
-              "id": "session-id",
-              "name": "session_id",
-              "type": "string",
-              "value": "={{ $('Login').item.json.result.structuredContent.session_id }}"
-            },
             {
               "id": "chat-id",
               "name": "chat_id",
@@ -185,6 +180,12 @@
               "name": "fullname",
               "value": "={{ $('When Executed by Another Workflow').item.json.fullname }}",
               "type": "string"
+            },
+            {
+              "id": "5bb188c0-5929-4252-92ac-569fb3bd8077",
+              "name": "access_token",
+              "value": "={{ $json.result.structuredContent.access_token }}",
+              "type": "string"
             }
           ]
         },
@@ -201,13 +202,13 @@
     },
     {
       "parameters": {
-        "jsCode": "// Prepare court_bookings array for bulk reservation API\nconst context = $('Set Booking Context').first().json;\nconst bookings = context.bookings;\nconst session_id = context.session_id;\n\n// Format bookings for put_bulk_reservation API\nconst court_bookings = bookings.map(booking => ({\n  court: String(booking.court),\n  date: booking.date,\n  time_start: booking.time_start,\n  time_end: booking.time_end\n}));\n\nreturn [{\n  json: {\n    session_id: session_id,\n    court_bookings: court_bookings,\n    original_bookings: bookings,\n    user_id: context.user_id,\n    username: context.username,\n    fullname: context.fullname,\n    chat_id: context.chat_id,\n    lang: context.lang\n  }\n}];"
+        "jsCode": "const context = $('Set Booking Context').first().json;\nconst bookings = context.bookings;\nconst court = bookings[0].court;\nconst access_token = context.access_token;\nconst locations = JSON.parse($input.first().json.result.content[0].text);\nconst court_location = locations.find(loc => loc.name.toLowerCase().includes(court));\n\nconst court_bookings = bookings.map(booking => ({\n  location_id: court_location.id, \n  location_name: court_location.name,\n  date: booking.date,\n  start_time: booking.time_start,\n  end_time: booking.time_end\n}));\n\nreturn [{\n  json: {\n    access_token: access_token,\n    court_bookings: court_bookings,\n    original_bookings: bookings,\n    user_id: context.user_id,\n    username: context.username,\n    fullname: context.fullname,\n    chat_id: context.chat_id,\n    lang: context.lang\n  }\n}];"
       },
       "id": "prepare-bookings-loop",
       "name": "Prepare Bulk Bookings",
       "type": "n8n-nodes-base.code",
       "position": [
-        1264,
+        1472,
         96
       ],
       "typeVersion": 2
@@ -216,14 +217,14 @@
       "parameters": {
         "operation": "executeTool",
         "toolName": "put_bulk_reservation",
-        "toolParameters": "={{ JSON.stringify({ session_id: $json.session_id, club_id: \"blonia_sport\", sport_id: 84, court_bookings: $json.court_bookings }) }}"
+        "toolParameters": "={{ JSON.stringify({ access_token: $json.access_token, club_id: \"958662f0-0bd2-4fdc-8bef-bb2d69761adb\", court_bookings: $json.court_bookings }) }}"
       },
       "id": "mcp-bulk-reservation",
       "name": "MCP Bulk Reservation",
       "type": "n8n-nodes-mcp.mcpClient",
       "typeVersion": 1,
       "position": [
-        1488,
+        1696,
         96
       ],
       "credentials": {
@@ -237,10 +238,10 @@
       "parameters": {
         "conditions": {
           "options": {
-            "version": 3,
-            "leftValue": "",
             "caseSensitive": true,
-            "typeValidation": "strict"
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
           },
           "conditions": [
             {
@@ -261,7 +262,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        1712,
+        1920,
         96
       ],
       "id": "b675edb4-9347-4d44-bba9-fa3d6e7d38ad",
@@ -276,7 +277,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1936,
+        2144,
         0
       ]
     },
@@ -290,7 +291,7 @@
       "name": "Save All Reservations",
       "type": "n8n-nodes-base.postgres",
       "position": [
-        2160,
+        2368,
         0
       ],
       "typeVersion": 2.6,
@@ -309,7 +310,7 @@
       "name": "Prepare Success Data",
       "type": "n8n-nodes-base.code",
       "position": [
-        2384,
+        2592,
         0
       ],
       "typeVersion": 2
@@ -346,7 +347,7 @@
       "name": "Get Book Success Translation",
       "type": "n8n-nodes-base.postgres",
       "position": [
-        2608,
+        2816,
         0
       ],
       "typeVersion": 2.6,
@@ -365,39 +366,10 @@
       "name": "Format Success Message",
       "type": "n8n-nodes-base.code",
       "position": [
-        2832,
+        3040,
         0
       ],
       "typeVersion": 2
-    },
-    {
-      "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "bulk-error-msg",
-              "name": "message",
-              "value": "={{ $('MCP Bulk Reservation').first().json.result.structuredContent.message || 'Bulk reservation failed' }}",
-              "type": "string"
-            },
-            {
-              "id": "bulk-error-chat",
-              "name": "chat_id",
-              "value": "={{ $('Prepare Bulk Bookings').first().json.chat_id }}",
-              "type": "string"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        2832,
-        192
-      ],
-      "id": "c2b57987-7a40-4e5a-9b05-019e44e0fab8",
-      "name": "Return Bulk Error"
     },
     {
       "parameters": {
@@ -555,7 +527,7 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        3056,
+        3264,
         288
       ],
       "id": "f1fed62a-bc39-4a06-84d6-2633f7ae8852",
@@ -571,7 +543,7 @@
     {
       "parameters": {
         "operation": "executeTool",
-        "toolName": "login",
+        "toolName": "login_oauth",
         "toolParameters": "={\"email\":\"{{$json.email}}\", \"password\": \"{{ $json.hash }}\"}"
       },
       "id": "54ecba5f-816b-4fec-998d-969356b946c2",
@@ -582,6 +554,7 @@
         592,
         192
       ],
+      "retryOnFail": true,
       "credentials": {
         "mcpClientApi": {
           "id": "G9CyzT9PT67tg4V7",
@@ -595,7 +568,8 @@
           "options": {
             "caseSensitive": true,
             "leftValue": "",
-            "typeValidation": "strict"
+            "typeValidation": "strict",
+            "version": 1
           },
           "conditions": [
             {
@@ -631,7 +605,7 @@
       "typeVersion": 2,
       "position": [
         -80,
-        744
+        752
       ]
     },
     {
@@ -648,7 +622,7 @@
       "typeVersion": 2.6,
       "position": [
         144,
-        744
+        752
       ],
       "credentials": {
         "postgres": {
@@ -671,7 +645,7 @@
       "typeVersion": 2.6,
       "position": [
         368,
-        744
+        752
       ],
       "credentials": {
         "postgres": {
@@ -718,7 +692,7 @@
       "typeVersion": 1.2,
       "position": [
         592,
-        744
+        752
       ],
       "webhookId": "b9ba5bf4-ff84-4e10-a8f9-6c6958a9be17",
       "credentials": {
@@ -727,6 +701,40 @@
           "name": "twoj_badminton_bot"
         }
       }
+    },
+    {
+      "parameters": {
+        "operation": "executeTool",
+        "toolName": "get_club_locations",
+        "toolParameters": "={\"club_id\":\"958662f0-0bd2-4fdc-8bef-bb2d69761adb\",\"sport\":\"badminton\"}"
+      },
+      "type": "n8n-nodes-mcp.mcpClient",
+      "typeVersion": 1,
+      "position": [
+        1248,
+        96
+      ],
+      "id": "44decded-43ff-4dca-8d47-68c366020483",
+      "name": "Get locations",
+      "credentials": {
+        "mcpClientApi": {
+          "id": "G9CyzT9PT67tg4V7",
+          "name": "Twojtenis MCP Client (STDIO)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json.result.structuredContent;\nconst chat_id = $('Parse Booking JSON').first().json.chat_id;\nconst err_msg = raw.message;\nconst details = raw.details;\nconst body = JSON.parse(details.body);\nconst args = body.args;\nconst message = `<b>Booking Failed</b>\n❌ Error: ${err_msg}\n📋 Reason: ${body.error}\n⚠️ Details: <pre>${args}</pre>`;\n\nreturn [{ json: { message, chat_id } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2512,
+        176
+      ],
+      "id": "00cb46cb-ed2b-4b94-9c8f-e00aa35a4f41",
+      "name": "Code in JavaScript"
     }
   ],
   "connections": {
@@ -792,7 +800,7 @@
       "main": [
         [
           {
-            "node": "Prepare Bulk Bookings",
+            "node": "Get locations",
             "type": "main",
             "index": 0
           }
@@ -832,7 +840,7 @@
         ],
         [
           {
-            "node": "Return Bulk Error",
+            "node": "Code in JavaScript",
             "type": "main",
             "index": 0
           }
@@ -884,17 +892,6 @@
       ]
     },
     "Format Success Message": {
-      "main": [
-        [
-          {
-            "node": "Send a text message",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Return Bulk Error": {
       "main": [
         [
           {
@@ -1021,6 +1018,28 @@
           }
         ]
       ]
+    },
+    "Get locations": {
+      "main": [
+        [
+          {
+            "node": "Prepare Bulk Bookings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -1033,8 +1052,8 @@
   "meta": {
     "templateCredsSetupCompleted": true
   },
-  "versionId": "bd9b6a0a-897f-44d2-abbf-5e158aeeda74",
-  "activeVersionId": "bd9b6a0a-897f-44d2-abbf-5e158aeeda74",
+  "versionId": "5f4f43ef-4c70-4b4b-9b52-35263da9bbf2",
+  "activeVersionId": "5f4f43ef-4c70-4b4b-9b52-35263da9bbf2",
   "triggerCount": 0,
   "shared": [
     {
@@ -1046,9 +1065,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-04-14T10:35:40.000Z",
-    "createdAt": "2026-04-14T10:35:22.680Z",
-    "versionId": "bd9b6a0a-897f-44d2-abbf-5e158aeeda74",
+    "updatedAt": "2026-06-18T11:21:31.000Z",
+    "createdAt": "2026-06-18T11:20:51.022Z",
+    "versionId": "5f4f43ef-4c70-4b4b-9b52-35263da9bbf2",
     "workflowId": "p5NpS5X1VLPdY3mX",
     "nodes": [
       {
@@ -1081,10 +1100,10 @@
         "parameters": {
           "conditions": {
             "options": {
-              "version": 2,
-              "leftValue": "",
               "caseSensitive": true,
-              "typeValidation": "strict"
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
             },
             "combinator": "and",
             "conditions": [
@@ -1153,24 +1172,25 @@
         "parameters": {
           "conditions": {
             "options": {
-              "version": 2,
-              "leftValue": "",
               "caseSensitive": true,
-              "typeValidation": "strict"
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
             },
             "conditions": [
               {
                 "id": "check-session",
                 "operator": {
-                  "type": "string",
-                  "operation": "exists"
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
                 },
-                "leftValue": "={{ $json.result.structuredContent.session_id }}",
+                "leftValue": "={{ $json.result.structuredContent.success }}",
                 "rightValue": ""
               },
               {
                 "id": "4c7b988b-8496-45fd-9efd-822fab76ffe2",
-                "leftValue": "={{ $json.result.structuredContent.session_id }}",
+                "leftValue": "={{ $json.result.structuredContent.access_token }}",
                 "rightValue": "",
                 "operator": {
                   "type": "string",
@@ -1195,12 +1215,6 @@
         "parameters": {
           "assignments": {
             "assignments": [
-              {
-                "id": "session-id",
-                "name": "session_id",
-                "type": "string",
-                "value": "={{ $('Login').item.json.result.structuredContent.session_id }}"
-              },
               {
                 "id": "chat-id",
                 "name": "chat_id",
@@ -1230,6 +1244,12 @@
                 "name": "fullname",
                 "value": "={{ $('When Executed by Another Workflow').item.json.fullname }}",
                 "type": "string"
+              },
+              {
+                "id": "5bb188c0-5929-4252-92ac-569fb3bd8077",
+                "name": "access_token",
+                "value": "={{ $json.result.structuredContent.access_token }}",
+                "type": "string"
               }
             ]
           },
@@ -1246,13 +1266,13 @@
       },
       {
         "parameters": {
-          "jsCode": "// Prepare court_bookings array for bulk reservation API\nconst context = $('Set Booking Context').first().json;\nconst bookings = context.bookings;\nconst session_id = context.session_id;\n\n// Format bookings for put_bulk_reservation API\nconst court_bookings = bookings.map(booking => ({\n  court: String(booking.court),\n  date: booking.date,\n  time_start: booking.time_start,\n  time_end: booking.time_end\n}));\n\nreturn [{\n  json: {\n    session_id: session_id,\n    court_bookings: court_bookings,\n    original_bookings: bookings,\n    user_id: context.user_id,\n    username: context.username,\n    fullname: context.fullname,\n    chat_id: context.chat_id,\n    lang: context.lang\n  }\n}];"
+          "jsCode": "const context = $('Set Booking Context').first().json;\nconst bookings = context.bookings;\nconst court = bookings[0].court;\nconst access_token = context.access_token;\nconst locations = JSON.parse($input.first().json.result.content[0].text);\nconst court_location = locations.find(loc => loc.name.toLowerCase().includes(court));\n\nconst court_bookings = bookings.map(booking => ({\n  location_id: court_location.id, \n  location_name: court_location.name,\n  date: booking.date,\n  start_time: booking.time_start,\n  end_time: booking.time_end\n}));\n\nreturn [{\n  json: {\n    access_token: access_token,\n    court_bookings: court_bookings,\n    original_bookings: bookings,\n    user_id: context.user_id,\n    username: context.username,\n    fullname: context.fullname,\n    chat_id: context.chat_id,\n    lang: context.lang\n  }\n}];"
         },
         "id": "prepare-bookings-loop",
         "name": "Prepare Bulk Bookings",
         "type": "n8n-nodes-base.code",
         "position": [
-          1264,
+          1472,
           96
         ],
         "typeVersion": 2
@@ -1261,14 +1281,14 @@
         "parameters": {
           "operation": "executeTool",
           "toolName": "put_bulk_reservation",
-          "toolParameters": "={{ JSON.stringify({ session_id: $json.session_id, club_id: \"blonia_sport\", sport_id: 84, court_bookings: $json.court_bookings }) }}"
+          "toolParameters": "={{ JSON.stringify({ access_token: $json.access_token, club_id: \"958662f0-0bd2-4fdc-8bef-bb2d69761adb\", court_bookings: $json.court_bookings }) }}"
         },
         "id": "mcp-bulk-reservation",
         "name": "MCP Bulk Reservation",
         "type": "n8n-nodes-mcp.mcpClient",
         "typeVersion": 1,
         "position": [
-          1488,
+          1696,
           96
         ],
         "credentials": {
@@ -1282,10 +1302,10 @@
         "parameters": {
           "conditions": {
             "options": {
-              "version": 3,
-              "leftValue": "",
               "caseSensitive": true,
-              "typeValidation": "strict"
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
             },
             "conditions": [
               {
@@ -1306,7 +1326,7 @@
         "type": "n8n-nodes-base.if",
         "typeVersion": 2.3,
         "position": [
-          1712,
+          1920,
           96
         ],
         "id": "b675edb4-9347-4d44-bba9-fa3d6e7d38ad",
@@ -1321,7 +1341,7 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          1936,
+          2144,
           0
         ]
       },
@@ -1335,7 +1355,7 @@
         "name": "Save All Reservations",
         "type": "n8n-nodes-base.postgres",
         "position": [
-          2160,
+          2368,
           0
         ],
         "typeVersion": 2.6,
@@ -1354,7 +1374,7 @@
         "name": "Prepare Success Data",
         "type": "n8n-nodes-base.code",
         "position": [
-          2384,
+          2592,
           0
         ],
         "typeVersion": 2
@@ -1391,7 +1411,7 @@
         "name": "Get Book Success Translation",
         "type": "n8n-nodes-base.postgres",
         "position": [
-          2608,
+          2816,
           0
         ],
         "typeVersion": 2.6,
@@ -1410,39 +1430,10 @@
         "name": "Format Success Message",
         "type": "n8n-nodes-base.code",
         "position": [
-          2832,
+          3040,
           0
         ],
         "typeVersion": 2
-      },
-      {
-        "parameters": {
-          "assignments": {
-            "assignments": [
-              {
-                "id": "bulk-error-msg",
-                "name": "message",
-                "value": "={{ $('MCP Bulk Reservation').first().json.result.structuredContent.message || 'Bulk reservation failed' }}",
-                "type": "string"
-              },
-              {
-                "id": "bulk-error-chat",
-                "name": "chat_id",
-                "value": "={{ $('Prepare Bulk Bookings').first().json.chat_id }}",
-                "type": "string"
-              }
-            ]
-          },
-          "options": {}
-        },
-        "type": "n8n-nodes-base.set",
-        "typeVersion": 3.4,
-        "position": [
-          2832,
-          192
-        ],
-        "id": "c2b57987-7a40-4e5a-9b05-019e44e0fab8",
-        "name": "Return Bulk Error"
       },
       {
         "parameters": {
@@ -1600,7 +1591,7 @@
         "type": "n8n-nodes-base.telegram",
         "typeVersion": 1.2,
         "position": [
-          3056,
+          3264,
           288
         ],
         "id": "f1fed62a-bc39-4a06-84d6-2633f7ae8852",
@@ -1616,7 +1607,7 @@
       {
         "parameters": {
           "operation": "executeTool",
-          "toolName": "login",
+          "toolName": "login_oauth",
           "toolParameters": "={\"email\":\"{{$json.email}}\", \"password\": \"{{ $json.hash }}\"}"
         },
         "id": "54ecba5f-816b-4fec-998d-969356b946c2",
@@ -1627,6 +1618,7 @@
           592,
           192
         ],
+        "retryOnFail": true,
         "credentials": {
           "mcpClientApi": {
             "id": "G9CyzT9PT67tg4V7",
@@ -1640,7 +1632,8 @@
             "options": {
               "caseSensitive": true,
               "leftValue": "",
-              "typeValidation": "strict"
+              "typeValidation": "strict",
+              "version": 1
             },
             "conditions": [
               {
@@ -1676,7 +1669,7 @@
         "typeVersion": 2,
         "position": [
           -80,
-          744
+          752
         ]
       },
       {
@@ -1693,7 +1686,7 @@
         "typeVersion": 2.6,
         "position": [
           144,
-          744
+          752
         ],
         "credentials": {
           "postgres": {
@@ -1716,7 +1709,7 @@
         "typeVersion": 2.6,
         "position": [
           368,
-          744
+          752
         ],
         "credentials": {
           "postgres": {
@@ -1763,7 +1756,7 @@
         "typeVersion": 1.2,
         "position": [
           592,
-          744
+          752
         ],
         "webhookId": "b9ba5bf4-ff84-4e10-a8f9-6c6958a9be17",
         "credentials": {
@@ -1772,6 +1765,40 @@
             "name": "twoj_badminton_bot"
           }
         }
+      },
+      {
+        "parameters": {
+          "operation": "executeTool",
+          "toolName": "get_club_locations",
+          "toolParameters": "={\"club_id\":\"958662f0-0bd2-4fdc-8bef-bb2d69761adb\",\"sport\":\"badminton\"}"
+        },
+        "type": "n8n-nodes-mcp.mcpClient",
+        "typeVersion": 1,
+        "position": [
+          1248,
+          96
+        ],
+        "id": "44decded-43ff-4dca-8d47-68c366020483",
+        "name": "Get locations",
+        "credentials": {
+          "mcpClientApi": {
+            "id": "G9CyzT9PT67tg4V7",
+            "name": "Twojtenis MCP Client (STDIO)"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const raw = $input.first().json.result.structuredContent;\nconst chat_id = $('Parse Booking JSON').first().json.chat_id;\nconst err_msg = raw.message;\nconst details = raw.details;\nconst body = JSON.parse(details.body);\nconst args = body.args;\nconst message = `<b>Booking Failed</b>\n❌ Error: ${err_msg}\n📋 Reason: ${body.error}\n⚠️ Details: <pre>${args}</pre>`;\n\nreturn [{ json: { message, chat_id } }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2512,
+          176
+        ],
+        "id": "00cb46cb-ed2b-4b94-9c8f-e00aa35a4f41",
+        "name": "Code in JavaScript"
       }
     ],
     "connections": {
@@ -1837,7 +1864,7 @@
         "main": [
           [
             {
-              "node": "Prepare Bulk Bookings",
+              "node": "Get locations",
               "type": "main",
               "index": 0
             }
@@ -1877,7 +1904,7 @@
           ],
           [
             {
-              "node": "Return Bulk Error",
+              "node": "Code in JavaScript",
               "type": "main",
               "index": 0
             }
@@ -1929,17 +1956,6 @@
         ]
       },
       "Format Success Message": {
-        "main": [
-          [
-            {
-              "node": "Send a text message",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Return Bulk Error": {
         "main": [
           [
             {
@@ -2066,12 +2082,35 @@
             }
           ]
         ]
+      },
+      "Get locations": {
+        "main": [
+          [
+            {
+              "node": "Prepare Bulk Bookings",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code in JavaScript": {
+        "main": [
+          [
+            {
+              "node": "Send a text message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
+    "nodeGroups": [],
     "authors": "Sergei Vedishchev",
-    "name": "Version bd9b6a0a",
+    "name": "Version 5f4f43ef",
     "description": "",
-    "autosaved": true
+    "autosaved": false
   },
   "tags": [
     {
