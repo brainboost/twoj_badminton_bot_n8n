@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-25T19:40:17.024Z",
+  "updatedAt": "2026-06-16T21:52:21.459Z",
   "createdAt": "2025-12-08T21:22:17.172Z",
   "id": "ocCWq7TGjPACPwTL",
   "name": "Reservation status update",
@@ -21,7 +21,7 @@
       "typeVersion": 1.3,
       "position": [
         -592,
-        -16
+        -96
       ],
       "id": "17a3040d-dd14-45bc-b2e2-7746519fb67b",
       "name": "Schedule Trigger"
@@ -31,8 +31,8 @@
       "type": "n8n-nodes-mcp.mcpClient",
       "typeVersion": 1,
       "position": [
-        -384,
-        -16
+        -368,
+        -192
       ],
       "id": "985eeb4d-7e7e-453b-b703-9401417c0dfb",
       "name": "MCP Client",
@@ -52,23 +52,23 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        240,
-        -16
+        80,
+        -192
       ]
     },
     {
       "parameters": {
         "operation": "executeTool",
         "toolName": "=get_club_schedule",
-        "toolParameters": "={\"session_id\":\"{{ $('Set fields').item.json.session_id }}\", \"club_id\":\"{{ $('Set fields').item.json.club_id }}\", \"sport_id\": {{ $('Set fields').item.json.sport_id }}, \"date\": \"{{ $('Generate Date Range').item.json.date }}\"}"
+        "toolParameters": "={\"club_id\":\"{{ $json.club_id }}\", \"date\": \"{{ $('Generate Date Range').item.json.date }}\"}"
       },
       "id": "f736eea0-b12f-4f25-b805-cdf353b20096",
       "name": "Get Club Schedule",
       "type": "n8n-nodes-mcp.mcpClient",
       "typeVersion": 1,
       "position": [
-        848,
-        0
+        752,
+        -272
       ],
       "credentials": {
         "mcpClientApi": {
@@ -79,37 +79,16 @@
     },
     {
       "parameters": {
-        "jsCode": "// Transform schedule API response to database format\n// Input: MCP response with structuredContent containing schedule data\n// Output: Array of records for database insertion\n\nconst mcpResponse = $input.first().json;\n\n// Extract the actual schedule data from the MCP response structure\nlet scheduleData;\nif (mcpResponse.result && mcpResponse.result.structuredContent) {\n  scheduleData = mcpResponse.result.structuredContent.data;\n} else if (mcpResponse.structuredContent) {\n  scheduleData = mcpResponse.structuredContent.data;\n} else if (mcpResponse.data) {\n  scheduleData = mcpResponse.data;\n} else {\n  throw new Error('Could not find schedule data in response');\n}\n\nconst clubId = scheduleData.club_id;\nconst sportId = scheduleData.sport_id;\nconst date = scheduleData.date;\nconst courts = scheduleData.courts;\n\n// Convert DD.MM.YYYY to YYYY-MM-DD for database\nconst [day, month, year] = date.split('.');\nconst dbDate = `${year}-${month}-${day}`;\n\n// Transform into individual records for database\nconst records = [];\n\ncourts.forEach(court => {\n  const courtNumber = court.number;\n  \n  // Process each time slot\n  Object.entries(court.availability).forEach(([timeSlot, isAvailable]) => {\n    // Ensure time slot is in HH:MM:SS format\n    const time = timeSlot.length === 5 ? `${timeSlot}:00` : timeSlot;\n    \n    records.push({\n      club_id: clubId,\n      sport_id: sportId,\n      date: dbDate,\n      court_number: courtNumber,\n      time_slot: time,\n      is_available: isAvailable\n    });\n  });\n});\n\nreturn records;"
+        "jsCode": "// Transform schedule API response to database format\n// Input: MCP response with structuredContent containing schedule data\n// Output: Array of records for database insertion\n\nconst mcpResponse = $input.first().json;\n\n// Extract the actual schedule data from the MCP response structure\nlet scheduleData;\nif (mcpResponse.result && mcpResponse.result.structuredContent) {\n  scheduleData = mcpResponse.result.structuredContent.data;\n} else if (mcpResponse.structuredContent) {\n  scheduleData = mcpResponse.structuredContent.data;\n} else if (mcpResponse.data) {\n  scheduleData = mcpResponse.data;\n} else {\n  throw new Error('Could not find schedule data in response');\n}\n\nconst clubId = scheduleData.club_id;\nconst sportId = scheduleData.sport;\nconst date = scheduleData.date;\nconst courts = scheduleData.availability;\nconst records = [];\n\ncourts.forEach(court => {\n  const courtNumber = court.location_name;\n  \n  // Process each time slot\n  court.slots.forEach(slot => {\n    const start = slot.start;\n    const avail = slot.available;\n    //console.log(time);\n    \n    records.push({\n      club_id: clubId,\n      sport_id: sportId,\n      date: date,\n      court_number: courtNumber,\n      time_slot: start,\n      is_available: avail\n    });\n  });\n});\n\nreturn records;"
       },
       "id": "8a91420f-b4ae-43db-82d3-55dd75156a57",
       "name": "Transform Schedule Data",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1072,
-        0
+        976,
+        -272
       ]
-    },
-    {
-      "parameters": {
-        "operation": "executeTool",
-        "toolName": "login",
-        "toolParameters": "={\"email\":\"{{ $json.email }}\", \"password\": \"{{ $json.hash }}\"}"
-      },
-      "id": "96295091-7509-4384-8812-e393650225d7",
-      "name": "Login",
-      "type": "n8n-nodes-mcp.mcpClient",
-      "typeVersion": 1,
-      "position": [
-        32,
-        -16
-      ],
-      "credentials": {
-        "mcpClientApi": {
-          "id": "G9CyzT9PT67tg4V7",
-          "name": "Twojtenis MCP Client (STDIO)"
-        }
-      }
     },
     {
       "parameters": {
@@ -118,13 +97,7 @@
             {
               "id": "546b879d-21ad-4b51-9b16-cb90efc43dde",
               "name": "club_id",
-              "value": "blonia_sport",
-              "type": "string"
-            },
-            {
-              "id": "e4153f73-f5bb-4140-8166-6845bdf40d83",
-              "name": "session_id",
-              "value": "={{ $('Login').item.json.result.structuredContent.session_id }}",
+              "value": "958662f0-0bd2-4fdc-8bef-bb2d69761adb",
               "type": "string"
             },
             {
@@ -140,11 +113,12 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        432,
-        -16
+        304,
+        -192
       ],
       "id": "6d99b0ab-c4ee-4af7-b7ce-836b2dbfdfe3",
-      "name": "Set fields"
+      "name": "Set fields",
+      "executeOnce": true
     },
     {
       "parameters": {
@@ -163,64 +137,79 @@
           "mappingMode": "defineBelow",
           "value": {
             "club_id": "={{ $json.club_id }}",
-            "sport_id": "={{ $json.sport_id }}",
             "date": "={{ $json.date }}",
             "court_number": "={{ $json.court_number }}",
             "time_slot": "={{ $json.time_slot }}",
-            "is_available": "={{ $json.is_available }}"
+            "is_available": "={{ $json.is_available }}",
+            "sport_id": 84
           },
           "matchingColumns": [
             "club_id",
-            "sport_id",
             "date",
             "court_number",
-            "time_slot"
+            "time_slot",
+            "sport_id"
           ],
           "schema": [
             {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
               "id": "club_id",
               "displayName": "club_id",
-              "required": false,
+              "required": true,
               "defaultMatch": false,
               "display": true,
               "type": "string",
-              "canBeUsedToMatch": true
+              "canBeUsedToMatch": true,
+              "removed": false
             },
             {
               "id": "sport_id",
               "displayName": "sport_id",
-              "required": false,
+              "required": true,
               "defaultMatch": false,
               "display": true,
               "type": "number",
-              "canBeUsedToMatch": true
+              "canBeUsedToMatch": true,
+              "removed": false
             },
             {
               "id": "date",
               "displayName": "date",
-              "required": false,
+              "required": true,
               "defaultMatch": false,
               "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": false
             },
             {
               "id": "court_number",
               "displayName": "court_number",
-              "required": false,
+              "required": true,
               "defaultMatch": false,
               "display": true,
               "type": "string",
-              "canBeUsedToMatch": true
+              "canBeUsedToMatch": true,
+              "removed": false
             },
             {
               "id": "time_slot",
               "displayName": "time_slot",
-              "required": false,
+              "required": true,
               "defaultMatch": false,
               "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
+              "type": "time",
+              "canBeUsedToMatch": true,
+              "removed": false
             },
             {
               "id": "is_available",
@@ -229,9 +218,31 @@
               "defaultMatch": false,
               "display": true,
               "type": "boolean",
-              "canBeUsedToMatch": true
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "user_id",
+              "displayName": "user_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false,
+              "removed": true
             }
-          ]
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
         },
         "options": {}
       },
@@ -240,8 +251,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1312,
-        0
+        1200,
+        -272
       ],
       "credentials": {
         "postgres": {
@@ -257,8 +268,8 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        640,
-        -16
+        528,
+        -192
       ],
       "id": "e2a3a0dc-d07f-4422-8a4a-4d58f1b67e6f",
       "name": "Loop Over Items"
@@ -270,8 +281,8 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        1040,
-        192
+        1424,
+        -192
       ],
       "id": "3b8013c2-8991-491b-8bad-748919ab2a6e",
       "name": "Delay",
@@ -279,56 +290,18 @@
     },
     {
       "parameters": {
-        "operation": "select",
-        "schema": {
-          "__rl": true,
-          "mode": "list",
-          "value": "public"
-        },
-        "table": {
-          "__rl": true,
-          "value": "users",
-          "mode": "list",
-          "cachedResultName": "users"
-        },
-        "limit": 1,
-        "sort": {
-          "values": [
-            {
-              "column": "created"
-            }
-          ]
-        },
+        "operation": "executeQuery",
+        "query": "DELETE FROM pending_confirmations WHERE expires_at < NOW()",
         "options": {}
       },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        -176,
-        -16
-      ],
-      "id": "50d409d0-e245-4842-9e4c-f8c8dd981a55",
-      "name": "Select rows from a table",
-      "credentials": {
-        "postgres": {
-          "id": "3SDluWLUa1vIU50a",
-          "name": "Postgres account"
-        }
-      }
-    },
-    {
       "id": "cleanup-expired-confirmations",
       "name": "Cleanup Expired Confirmations",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.5,
       "position": [
-        -392,
-        134
+        -368,
+        0
       ],
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "DELETE FROM pending_confirmations WHERE expires_at < NOW()"
-      },
       "credentials": {
         "postgres": {
           "id": "3SDluWLUa1vIU50a",
@@ -336,6 +309,28 @@
         }
       },
       "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "select user_id,email,hash,access_token,refresh_token,expires_at \n  from users u\njoin sessions s on u.id = s.user_id\norder by created desc\nlimit 1;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -144,
+        -192
+      ],
+      "id": "50d409d0-e245-4842-9e4c-f8c8dd981a55",
+      "name": "Execute a SQL query",
+      "retryOnFail": false,
+      "credentials": {
+        "postgres": {
+          "id": "3SDluWLUa1vIU50a",
+          "name": "Postgres account"
+        }
+      }
     }
   ],
   "connections": {
@@ -359,7 +354,7 @@
       "main": [
         [
           {
-            "node": "Select rows from a table",
+            "node": "Execute a SQL query",
             "type": "main",
             "index": 0
           }
@@ -382,17 +377,6 @@
         [
           {
             "node": "Transform Schedule Data",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Login": {
-      "main": [
-        [
-          {
-            "node": "Generate Date Range",
             "type": "main",
             "index": 0
           }
@@ -455,11 +439,11 @@
         ]
       ]
     },
-    "Select rows from a table": {
+    "Execute a SQL query": {
       "main": [
         [
           {
-            "node": "Login",
+            "node": "Generate Date Range",
             "type": "main",
             "index": 0
           }
@@ -470,7 +454,9 @@
   "settings": {
     "executionOrder": "v1",
     "callerPolicy": "workflowsFromSameOwner",
-    "availableInMCP": false
+    "availableInMCP": true,
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed"
   },
   "staticData": {
     "node:Schedule Trigger": {
@@ -480,8 +466,8 @@
   "meta": {
     "templateCredsSetupCompleted": true
   },
-  "versionId": "92acc7e2-cd63-4479-a94c-a87090a83417",
-  "activeVersionId": "92acc7e2-cd63-4479-a94c-a87090a83417",
+  "versionId": "ce79ae4f-feaa-4a67-a585-29c282720aa9",
+  "activeVersionId": "ce79ae4f-feaa-4a67-a585-29c282720aa9",
   "triggerCount": 1,
   "shared": [
     {
@@ -493,9 +479,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-03-25T19:40:17.025Z",
-    "createdAt": "2026-03-25T19:40:17.025Z",
-    "versionId": "92acc7e2-cd63-4479-a94c-a87090a83417",
+    "updatedAt": "2026-06-16T21:52:59.000Z",
+    "createdAt": "2026-06-16T21:52:21.459Z",
+    "versionId": "ce79ae4f-feaa-4a67-a585-29c282720aa9",
     "workflowId": "ocCWq7TGjPACPwTL",
     "nodes": [
       {
@@ -513,7 +499,7 @@
         "typeVersion": 1.3,
         "position": [
           -592,
-          -16
+          -96
         ],
         "id": "17a3040d-dd14-45bc-b2e2-7746519fb67b",
         "name": "Schedule Trigger"
@@ -523,8 +509,8 @@
         "type": "n8n-nodes-mcp.mcpClient",
         "typeVersion": 1,
         "position": [
-          -384,
-          -16
+          -368,
+          -192
         ],
         "id": "985eeb4d-7e7e-453b-b703-9401417c0dfb",
         "name": "MCP Client",
@@ -544,23 +530,23 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          240,
-          -16
+          80,
+          -192
         ]
       },
       {
         "parameters": {
           "operation": "executeTool",
           "toolName": "=get_club_schedule",
-          "toolParameters": "={\"session_id\":\"{{ $('Set fields').item.json.session_id }}\", \"club_id\":\"{{ $('Set fields').item.json.club_id }}\", \"sport_id\": {{ $('Set fields').item.json.sport_id }}, \"date\": \"{{ $('Generate Date Range').item.json.date }}\"}"
+          "toolParameters": "={\"club_id\":\"{{ $json.club_id }}\", \"date\": \"{{ $('Generate Date Range').item.json.date }}\"}"
         },
         "id": "f736eea0-b12f-4f25-b805-cdf353b20096",
         "name": "Get Club Schedule",
         "type": "n8n-nodes-mcp.mcpClient",
         "typeVersion": 1,
         "position": [
-          848,
-          0
+          752,
+          -272
         ],
         "credentials": {
           "mcpClientApi": {
@@ -571,37 +557,16 @@
       },
       {
         "parameters": {
-          "jsCode": "// Transform schedule API response to database format\n// Input: MCP response with structuredContent containing schedule data\n// Output: Array of records for database insertion\n\nconst mcpResponse = $input.first().json;\n\n// Extract the actual schedule data from the MCP response structure\nlet scheduleData;\nif (mcpResponse.result && mcpResponse.result.structuredContent) {\n  scheduleData = mcpResponse.result.structuredContent.data;\n} else if (mcpResponse.structuredContent) {\n  scheduleData = mcpResponse.structuredContent.data;\n} else if (mcpResponse.data) {\n  scheduleData = mcpResponse.data;\n} else {\n  throw new Error('Could not find schedule data in response');\n}\n\nconst clubId = scheduleData.club_id;\nconst sportId = scheduleData.sport_id;\nconst date = scheduleData.date;\nconst courts = scheduleData.courts;\n\n// Convert DD.MM.YYYY to YYYY-MM-DD for database\nconst [day, month, year] = date.split('.');\nconst dbDate = `${year}-${month}-${day}`;\n\n// Transform into individual records for database\nconst records = [];\n\ncourts.forEach(court => {\n  const courtNumber = court.number;\n  \n  // Process each time slot\n  Object.entries(court.availability).forEach(([timeSlot, isAvailable]) => {\n    // Ensure time slot is in HH:MM:SS format\n    const time = timeSlot.length === 5 ? `${timeSlot}:00` : timeSlot;\n    \n    records.push({\n      club_id: clubId,\n      sport_id: sportId,\n      date: dbDate,\n      court_number: courtNumber,\n      time_slot: time,\n      is_available: isAvailable\n    });\n  });\n});\n\nreturn records;"
+          "jsCode": "// Transform schedule API response to database format\n// Input: MCP response with structuredContent containing schedule data\n// Output: Array of records for database insertion\n\nconst mcpResponse = $input.first().json;\n\n// Extract the actual schedule data from the MCP response structure\nlet scheduleData;\nif (mcpResponse.result && mcpResponse.result.structuredContent) {\n  scheduleData = mcpResponse.result.structuredContent.data;\n} else if (mcpResponse.structuredContent) {\n  scheduleData = mcpResponse.structuredContent.data;\n} else if (mcpResponse.data) {\n  scheduleData = mcpResponse.data;\n} else {\n  throw new Error('Could not find schedule data in response');\n}\n\nconst clubId = scheduleData.club_id;\nconst sportId = scheduleData.sport;\nconst date = scheduleData.date;\nconst courts = scheduleData.availability;\nconst records = [];\n\ncourts.forEach(court => {\n  const courtNumber = court.location_name;\n  \n  // Process each time slot\n  court.slots.forEach(slot => {\n    const start = slot.start;\n    const avail = slot.available;\n    //console.log(time);\n    \n    records.push({\n      club_id: clubId,\n      sport_id: sportId,\n      date: date,\n      court_number: courtNumber,\n      time_slot: start,\n      is_available: avail\n    });\n  });\n});\n\nreturn records;"
         },
         "id": "8a91420f-b4ae-43db-82d3-55dd75156a57",
         "name": "Transform Schedule Data",
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          1072,
-          0
+          976,
+          -272
         ]
-      },
-      {
-        "parameters": {
-          "operation": "executeTool",
-          "toolName": "login",
-          "toolParameters": "={\"email\":\"{{ $json.email }}\", \"password\": \"{{ $json.hash }}\"}"
-        },
-        "id": "96295091-7509-4384-8812-e393650225d7",
-        "name": "Login",
-        "type": "n8n-nodes-mcp.mcpClient",
-        "typeVersion": 1,
-        "position": [
-          32,
-          -16
-        ],
-        "credentials": {
-          "mcpClientApi": {
-            "id": "G9CyzT9PT67tg4V7",
-            "name": "Twojtenis MCP Client (STDIO)"
-          }
-        }
       },
       {
         "parameters": {
@@ -610,13 +575,7 @@
               {
                 "id": "546b879d-21ad-4b51-9b16-cb90efc43dde",
                 "name": "club_id",
-                "value": "blonia_sport",
-                "type": "string"
-              },
-              {
-                "id": "e4153f73-f5bb-4140-8166-6845bdf40d83",
-                "name": "session_id",
-                "value": "={{ $('Login').item.json.result.structuredContent.session_id }}",
+                "value": "958662f0-0bd2-4fdc-8bef-bb2d69761adb",
                 "type": "string"
               },
               {
@@ -632,11 +591,12 @@
         "type": "n8n-nodes-base.set",
         "typeVersion": 3.4,
         "position": [
-          432,
-          -16
+          304,
+          -192
         ],
         "id": "6d99b0ab-c4ee-4af7-b7ce-836b2dbfdfe3",
-        "name": "Set fields"
+        "name": "Set fields",
+        "executeOnce": true
       },
       {
         "parameters": {
@@ -655,64 +615,79 @@
             "mappingMode": "defineBelow",
             "value": {
               "club_id": "={{ $json.club_id }}",
-              "sport_id": "={{ $json.sport_id }}",
               "date": "={{ $json.date }}",
               "court_number": "={{ $json.court_number }}",
               "time_slot": "={{ $json.time_slot }}",
-              "is_available": "={{ $json.is_available }}"
+              "is_available": "={{ $json.is_available }}",
+              "sport_id": 84
             },
             "matchingColumns": [
               "club_id",
-              "sport_id",
               "date",
               "court_number",
-              "time_slot"
+              "time_slot",
+              "sport_id"
             ],
             "schema": [
               {
+                "id": "id",
+                "displayName": "id",
+                "required": false,
+                "defaultMatch": true,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
                 "id": "club_id",
                 "displayName": "club_id",
-                "required": false,
+                "required": true,
                 "defaultMatch": false,
                 "display": true,
                 "type": "string",
-                "canBeUsedToMatch": true
+                "canBeUsedToMatch": true,
+                "removed": false
               },
               {
                 "id": "sport_id",
                 "displayName": "sport_id",
-                "required": false,
+                "required": true,
                 "defaultMatch": false,
                 "display": true,
                 "type": "number",
-                "canBeUsedToMatch": true
+                "canBeUsedToMatch": true,
+                "removed": false
               },
               {
                 "id": "date",
                 "displayName": "date",
-                "required": false,
+                "required": true,
                 "defaultMatch": false,
                 "display": true,
-                "type": "string",
-                "canBeUsedToMatch": true
+                "type": "dateTime",
+                "canBeUsedToMatch": true,
+                "removed": false
               },
               {
                 "id": "court_number",
                 "displayName": "court_number",
-                "required": false,
+                "required": true,
                 "defaultMatch": false,
                 "display": true,
                 "type": "string",
-                "canBeUsedToMatch": true
+                "canBeUsedToMatch": true,
+                "removed": false
               },
               {
                 "id": "time_slot",
                 "displayName": "time_slot",
-                "required": false,
+                "required": true,
                 "defaultMatch": false,
                 "display": true,
-                "type": "string",
-                "canBeUsedToMatch": true
+                "type": "time",
+                "canBeUsedToMatch": true,
+                "removed": false
               },
               {
                 "id": "is_available",
@@ -721,9 +696,31 @@
                 "defaultMatch": false,
                 "display": true,
                 "type": "boolean",
-                "canBeUsedToMatch": true
+                "canBeUsedToMatch": false
+              },
+              {
+                "id": "updated_at",
+                "displayName": "updated_at",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "dateTime",
+                "canBeUsedToMatch": false,
+                "removed": true
+              },
+              {
+                "id": "user_id",
+                "displayName": "user_id",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": false,
+                "removed": true
               }
-            ]
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
           },
           "options": {}
         },
@@ -732,8 +729,8 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          1312,
-          0
+          1200,
+          -272
         ],
         "credentials": {
           "postgres": {
@@ -749,8 +746,8 @@
         "type": "n8n-nodes-base.splitInBatches",
         "typeVersion": 3,
         "position": [
-          640,
-          -16
+          528,
+          -192
         ],
         "id": "e2a3a0dc-d07f-4422-8a4a-4d58f1b67e6f",
         "name": "Loop Over Items"
@@ -762,8 +759,8 @@
         "type": "n8n-nodes-base.wait",
         "typeVersion": 1.1,
         "position": [
-          1040,
-          192
+          1424,
+          -192
         ],
         "id": "3b8013c2-8991-491b-8bad-748919ab2a6e",
         "name": "Delay",
@@ -771,56 +768,18 @@
       },
       {
         "parameters": {
-          "operation": "select",
-          "schema": {
-            "__rl": true,
-            "mode": "list",
-            "value": "public"
-          },
-          "table": {
-            "__rl": true,
-            "value": "users",
-            "mode": "list",
-            "cachedResultName": "users"
-          },
-          "limit": 1,
-          "sort": {
-            "values": [
-              {
-                "column": "created"
-              }
-            ]
-          },
+          "operation": "executeQuery",
+          "query": "DELETE FROM pending_confirmations WHERE expires_at < NOW()",
           "options": {}
         },
-        "type": "n8n-nodes-base.postgres",
-        "typeVersion": 2.6,
-        "position": [
-          -176,
-          -16
-        ],
-        "id": "50d409d0-e245-4842-9e4c-f8c8dd981a55",
-        "name": "Select rows from a table",
-        "credentials": {
-          "postgres": {
-            "id": "3SDluWLUa1vIU50a",
-            "name": "Postgres account"
-          }
-        }
-      },
-      {
         "id": "cleanup-expired-confirmations",
         "name": "Cleanup Expired Confirmations",
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.5,
         "position": [
-          -392,
-          134
+          -368,
+          0
         ],
-        "parameters": {
-          "operation": "executeQuery",
-          "query": "DELETE FROM pending_confirmations WHERE expires_at < NOW()"
-        },
         "credentials": {
           "postgres": {
             "id": "3SDluWLUa1vIU50a",
@@ -828,6 +787,28 @@
           }
         },
         "continueOnFail": true
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "select user_id,email,hash,access_token,refresh_token,expires_at \n  from users u\njoin sessions s on u.id = s.user_id\norder by created desc\nlimit 1;",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          -144,
+          -192
+        ],
+        "id": "50d409d0-e245-4842-9e4c-f8c8dd981a55",
+        "name": "Execute a SQL query",
+        "retryOnFail": false,
+        "credentials": {
+          "postgres": {
+            "id": "3SDluWLUa1vIU50a",
+            "name": "Postgres account"
+          }
+        }
       }
     ],
     "connections": {
@@ -851,7 +832,7 @@
         "main": [
           [
             {
-              "node": "Select rows from a table",
+              "node": "Execute a SQL query",
               "type": "main",
               "index": 0
             }
@@ -874,17 +855,6 @@
           [
             {
               "node": "Transform Schedule Data",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Login": {
-        "main": [
-          [
-            {
-              "node": "Generate Date Range",
               "type": "main",
               "index": 0
             }
@@ -947,11 +917,11 @@
           ]
         ]
       },
-      "Select rows from a table": {
+      "Execute a SQL query": {
         "main": [
           [
             {
-              "node": "Login",
+              "node": "Generate Date Range",
               "type": "main",
               "index": 0
             }
@@ -959,10 +929,11 @@
         ]
       }
     },
+    "nodeGroups": [],
     "authors": "Sergei Vedishchev",
-    "name": null,
-    "description": null,
-    "autosaved": false
+    "name": "Version ce79ae4f",
+    "description": "",
+    "autosaved": true
   },
   "tags": [
     {
