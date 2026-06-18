@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-27T10:23:58.326Z",
+  "updatedAt": "2026-06-17T16:15:45.834Z",
   "createdAt": "2025-10-14T10:11:33.990Z",
   "id": "uf7MYoeaspA2V85u",
   "name": "Assistant agent",
@@ -49,6 +49,8 @@
       "id": "66219c83-6371-4cc6-ad43-57cee44f52da",
       "name": "Get a file",
       "webhookId": "e0769871-efe3-49da-81a5-2f88a6fdd33f",
+      "retryOnFail": true,
+      "maxTries": 2,
       "credentials": {
         "telegramApi": {
           "id": "pHQDqhsnrwimdaY2",
@@ -157,8 +159,8 @@
       "name": "Embeddings Ollama",
       "credentials": {
         "ollamaApi": {
-          "id": "OwoNqqKy33Tzlan7",
-          "name": "Ollama local"
+          "id": "hpLJnLrrfZiVC03g",
+          "name": "Ollama account"
         }
       }
     },
@@ -189,10 +191,10 @@
       "parameters": {
         "conditions": {
           "options": {
-            "version": 3,
-            "leftValue": "",
             "caseSensitive": true,
-            "typeValidation": "strict"
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
           },
           "conditions": [
             {
@@ -320,10 +322,10 @@
       "parameters": {
         "conditions": {
           "options": {
-            "version": 3,
-            "leftValue": "",
             "caseSensitive": true,
-            "typeValidation": "strict"
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
           },
           "conditions": [
             {
@@ -372,7 +374,7 @@
     },
     {
       "parameters": {
-        "model": "cnshenyang/qwen3-nothink:14b",
+        "model": "gemma4:e4b",
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.lmOllama",
@@ -385,8 +387,8 @@
       "name": "Ollama Model",
       "credentials": {
         "ollamaApi": {
-          "id": "OwoNqqKy33Tzlan7",
-          "name": "Ollama local"
+          "id": "hpLJnLrrfZiVC03g",
+          "name": "Ollama account"
         }
       }
     },
@@ -565,8 +567,8 @@
       "name": "Ollama Chat Model1",
       "credentials": {
         "ollamaApi": {
-          "id": "OwoNqqKy33Tzlan7",
-          "name": "Ollama local"
+          "id": "hpLJnLrrfZiVC03g",
+          "name": "Ollama account"
         }
       }
     },
@@ -850,8 +852,8 @@
       "name": "Ollama Chat Model2",
       "credentials": {
         "ollamaApi": {
-          "id": "OwoNqqKy33Tzlan7",
-          "name": "Ollama local"
+          "id": "hpLJnLrrfZiVC03g",
+          "name": "Ollama account"
         }
       }
     },
@@ -1051,10 +1053,10 @@
       "parameters": {
         "conditions": {
           "options": {
-            "version": 2,
-            "leftValue": "",
             "caseSensitive": true,
-            "typeValidation": "strict"
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
           },
           "conditions": [
             {
@@ -1538,8 +1540,8 @@
     "templateId": "voice_assistant_agent_with_telegram",
     "templateCredsSetupCompleted": true
   },
-  "versionId": "3521405b-9432-4c5c-a63b-b8ea5ee6c010",
-  "activeVersionId": "3521405b-9432-4c5c-a63b-b8ea5ee6c010",
+  "versionId": "338f23f3-c137-4c2f-b5a0-16ed3550cca8",
+  "activeVersionId": "f95ad9f1-003d-4156-b5ac-40f5383f4d40",
   "triggerCount": 1,
   "shared": [
     {
@@ -1551,9 +1553,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-04-27T15:44:45.000Z",
-    "createdAt": "2026-04-27T10:23:58.326Z",
-    "versionId": "3521405b-9432-4c5c-a63b-b8ea5ee6c010",
+    "updatedAt": "2026-06-17T07:24:22.000Z",
+    "createdAt": "2026-06-17T07:20:44.770Z",
+    "versionId": "f95ad9f1-003d-4156-b5ac-40f5383f4d40",
     "workflowId": "uf7MYoeaspA2V85u",
     "nodes": [
       {
@@ -1707,8 +1709,8 @@
         "name": "Embeddings Ollama",
         "credentials": {
           "ollamaApi": {
-            "id": "OwoNqqKy33Tzlan7",
-            "name": "Ollama local"
+            "id": "hpLJnLrrfZiVC03g",
+            "name": "Ollama account"
           }
         }
       },
@@ -1739,10 +1741,10 @@
         "parameters": {
           "conditions": {
             "options": {
-              "version": 3,
-              "leftValue": "",
               "caseSensitive": true,
-              "typeValidation": "strict"
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
             },
             "conditions": [
               {
@@ -1870,10 +1872,10 @@
         "parameters": {
           "conditions": {
             "options": {
-              "version": 3,
-              "leftValue": "",
               "caseSensitive": true,
-              "typeValidation": "strict"
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
             },
             "conditions": [
               {
@@ -1922,7 +1924,7 @@
       },
       {
         "parameters": {
-          "model": "cnshenyang/qwen3-nothink:14b",
+          "model": "gemma4:e4b",
           "options": {}
         },
         "type": "@n8n/n8n-nodes-langchain.lmOllama",
@@ -1935,8 +1937,8 @@
         "name": "Ollama Model",
         "credentials": {
           "ollamaApi": {
-            "id": "OwoNqqKy33Tzlan7",
-            "name": "Ollama local"
+            "id": "hpLJnLrrfZiVC03g",
+            "name": "Ollama account"
           }
         }
       },
@@ -2115,8 +2117,8 @@
         "name": "Ollama Chat Model1",
         "credentials": {
           "ollamaApi": {
-            "id": "OwoNqqKy33Tzlan7",
-            "name": "Ollama local"
+            "id": "hpLJnLrrfZiVC03g",
+            "name": "Ollama account"
           }
         }
       },
@@ -2400,8 +2402,8 @@
         "name": "Ollama Chat Model2",
         "credentials": {
           "ollamaApi": {
-            "id": "OwoNqqKy33Tzlan7",
-            "name": "Ollama local"
+            "id": "hpLJnLrrfZiVC03g",
+            "name": "Ollama account"
           }
         }
       },
@@ -2601,10 +2603,10 @@
         "parameters": {
           "conditions": {
             "options": {
-              "version": 2,
-              "leftValue": "",
               "caseSensitive": true,
-              "typeValidation": "strict"
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
             },
             "conditions": [
               {
@@ -3076,8 +3078,9 @@
         ]
       }
     },
+    "nodeGroups": [],
     "authors": "Sergei Vedishchev",
-    "name": "Version 3521405b",
+    "name": "Version f95ad9f1",
     "description": "",
     "autosaved": true
   },
