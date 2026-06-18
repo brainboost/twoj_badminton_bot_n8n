@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-26T21:35:57.084Z",
+  "updatedAt": "2026-06-17T07:23:56.751Z",
   "createdAt": "2026-01-11T18:21:47.330Z",
   "id": "QbD3Epml4ANF9vr0",
   "name": "Command Parser",
@@ -23,8 +23,8 @@
       "name": "Ollama Model1",
       "credentials": {
         "ollamaApi": {
-          "id": "OwoNqqKy33Tzlan7",
-          "name": "Ollama local"
+          "id": "Fn88PPl7DZzbIPAI",
+          "name": "Ollama cloud"
         }
       }
     },
@@ -107,26 +107,6 @@
       ],
       "id": "fd11d4a8-90b2-4ce9-9451-29bc14ccf1a1",
       "name": "Structured Output Parser"
-    },
-    {
-      "parameters": {
-        "model": "cnshenyang/qwen3-nothink:14b",
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
-      "typeVersion": 1,
-      "position": [
-        1504,
-        1040
-      ],
-      "id": "14e5a540-a2b5-4ae1-a4e0-805e680f8632",
-      "name": "Ollama Chat Model",
-      "credentials": {
-        "ollamaApi": {
-          "id": "OwoNqqKy33Tzlan7",
-          "name": "Ollama local"
-        }
-      }
     },
     {
       "parameters": {
@@ -437,10 +417,10 @@
             {
               "conditions": {
                 "options": {
-                  "version": 2,
-                  "leftValue": "",
                   "caseSensitive": true,
-                  "typeValidation": "strict"
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
                 },
                 "conditions": [
                   {
@@ -461,10 +441,10 @@
             {
               "conditions": {
                 "options": {
-                  "version": 2,
-                  "leftValue": "",
                   "caseSensitive": true,
-                  "typeValidation": "strict"
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
                 },
                 "conditions": [
                   {
@@ -485,10 +465,10 @@
             {
               "conditions": {
                 "options": {
-                  "version": 2,
-                  "leftValue": "",
                   "caseSensitive": true,
-                  "typeValidation": "strict"
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
                 },
                 "conditions": [
                   {
@@ -509,10 +489,10 @@
             {
               "conditions": {
                 "options": {
-                  "version": 2,
-                  "leftValue": "",
                   "caseSensitive": true,
-                  "typeValidation": "strict"
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
                 },
                 "conditions": [
                   {
@@ -533,10 +513,10 @@
             {
               "conditions": {
                 "options": {
-                  "version": 2,
-                  "leftValue": "",
                   "caseSensitive": true,
-                  "typeValidation": "strict"
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
                 },
                 "conditions": [
                   {
@@ -557,10 +537,10 @@
             {
               "conditions": {
                 "options": {
-                  "version": 2,
-                  "leftValue": "",
                   "caseSensitive": true,
-                  "typeValidation": "strict"
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
                 },
                 "conditions": [
                   {
@@ -581,10 +561,10 @@
             {
               "conditions": {
                 "options": {
-                  "version": 2,
-                  "leftValue": "",
                   "caseSensitive": true,
-                  "typeValidation": "strict"
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
                 },
                 "conditions": [
                   {
@@ -605,10 +585,10 @@
             {
               "conditions": {
                 "options": {
-                  "version": 2,
-                  "leftValue": "",
                   "caseSensitive": true,
-                  "typeValidation": "strict"
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
                 },
                 "conditions": [
                   {
@@ -629,10 +609,10 @@
             {
               "conditions": {
                 "options": {
-                  "version": 2,
-                  "leftValue": "",
                   "caseSensitive": true,
-                  "typeValidation": "strict"
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
                 },
                 "conditions": [
                   {
@@ -653,10 +633,10 @@
             {
               "conditions": {
                 "options": {
-                  "version": 2,
-                  "leftValue": "",
                   "caseSensitive": true,
-                  "typeValidation": "strict"
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
                 },
                 "conditions": [
                   {
@@ -986,10 +966,10 @@
       "parameters": {
         "conditions": {
           "options": {
-            "version": 3,
-            "leftValue": "",
             "caseSensitive": true,
-            "typeValidation": "strict"
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
           },
           "conditions": [
             {
@@ -1394,6 +1374,26 @@
       ],
       "id": "92e8e11e-7d55-4e83-afe5-a360abe552e6",
       "name": "Execute Book"
+    },
+    {
+      "parameters": {
+        "model": "gemma4:e4b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        1520,
+        1040
+      ],
+      "id": "6f4d021d-3033-4c3e-9963-d77e18cc14ab",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "hpLJnLrrfZiVC03g",
+          "name": "Ollama account"
+        }
+      }
     }
   ],
   "connections": {
@@ -1540,17 +1540,6 @@
         ]
       ]
     },
-    "Ollama Chat Model": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "Basic LLM Chain",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Ollama Model1": {
       "ai_languageModel": [
         [
@@ -1628,6 +1617,17 @@
           }
         ]
       ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -1637,9 +1637,11 @@
     "binaryMode": "separate"
   },
   "staticData": null,
-  "meta": null,
-  "versionId": "82228d08-da58-4ee8-87dd-9540ddf919a2",
-  "activeVersionId": "82228d08-da58-4ee8-87dd-9540ddf919a2",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "versionId": "4fa6fc33-9d8f-429b-b581-66fa9f633639",
+  "activeVersionId": "4fa6fc33-9d8f-429b-b581-66fa9f633639",
   "triggerCount": 0,
   "shared": [
     {
@@ -1651,9 +1653,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-03-26T21:33:31.000Z",
-    "createdAt": "2026-03-26T21:33:13.500Z",
-    "versionId": "82228d08-da58-4ee8-87dd-9540ddf919a2",
+    "updatedAt": "2026-06-16T22:12:29.000Z",
+    "createdAt": "2026-06-16T22:11:04.016Z",
+    "versionId": "4fa6fc33-9d8f-429b-b581-66fa9f633639",
     "workflowId": "QbD3Epml4ANF9vr0",
     "nodes": [
       {
@@ -1673,8 +1675,8 @@
         "name": "Ollama Model1",
         "credentials": {
           "ollamaApi": {
-            "id": "OwoNqqKy33Tzlan7",
-            "name": "Ollama local"
+            "id": "Fn88PPl7DZzbIPAI",
+            "name": "Ollama cloud"
           }
         }
       },
@@ -1757,26 +1759,6 @@
         ],
         "id": "fd11d4a8-90b2-4ce9-9451-29bc14ccf1a1",
         "name": "Structured Output Parser"
-      },
-      {
-        "parameters": {
-          "model": "cnshenyang/qwen3-nothink:14b",
-          "options": {}
-        },
-        "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
-        "typeVersion": 1,
-        "position": [
-          1504,
-          1040
-        ],
-        "id": "14e5a540-a2b5-4ae1-a4e0-805e680f8632",
-        "name": "Ollama Chat Model",
-        "credentials": {
-          "ollamaApi": {
-            "id": "OwoNqqKy33Tzlan7",
-            "name": "Ollama local"
-          }
-        }
       },
       {
         "parameters": {
@@ -2087,10 +2069,10 @@
               {
                 "conditions": {
                   "options": {
-                    "version": 2,
-                    "leftValue": "",
                     "caseSensitive": true,
-                    "typeValidation": "strict"
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 2
                   },
                   "conditions": [
                     {
@@ -2111,10 +2093,10 @@
               {
                 "conditions": {
                   "options": {
-                    "version": 2,
-                    "leftValue": "",
                     "caseSensitive": true,
-                    "typeValidation": "strict"
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 2
                   },
                   "conditions": [
                     {
@@ -2135,10 +2117,10 @@
               {
                 "conditions": {
                   "options": {
-                    "version": 2,
-                    "leftValue": "",
                     "caseSensitive": true,
-                    "typeValidation": "strict"
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 2
                   },
                   "conditions": [
                     {
@@ -2159,10 +2141,10 @@
               {
                 "conditions": {
                   "options": {
-                    "version": 2,
-                    "leftValue": "",
                     "caseSensitive": true,
-                    "typeValidation": "strict"
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 2
                   },
                   "conditions": [
                     {
@@ -2183,10 +2165,10 @@
               {
                 "conditions": {
                   "options": {
-                    "version": 2,
-                    "leftValue": "",
                     "caseSensitive": true,
-                    "typeValidation": "strict"
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 2
                   },
                   "conditions": [
                     {
@@ -2207,10 +2189,10 @@
               {
                 "conditions": {
                   "options": {
-                    "version": 2,
-                    "leftValue": "",
                     "caseSensitive": true,
-                    "typeValidation": "strict"
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 2
                   },
                   "conditions": [
                     {
@@ -2231,10 +2213,10 @@
               {
                 "conditions": {
                   "options": {
-                    "version": 2,
-                    "leftValue": "",
                     "caseSensitive": true,
-                    "typeValidation": "strict"
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 2
                   },
                   "conditions": [
                     {
@@ -2255,10 +2237,10 @@
               {
                 "conditions": {
                   "options": {
-                    "version": 2,
-                    "leftValue": "",
                     "caseSensitive": true,
-                    "typeValidation": "strict"
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 2
                   },
                   "conditions": [
                     {
@@ -2279,10 +2261,10 @@
               {
                 "conditions": {
                   "options": {
-                    "version": 2,
-                    "leftValue": "",
                     "caseSensitive": true,
-                    "typeValidation": "strict"
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 2
                   },
                   "conditions": [
                     {
@@ -2303,10 +2285,10 @@
               {
                 "conditions": {
                   "options": {
-                    "version": 2,
-                    "leftValue": "",
                     "caseSensitive": true,
-                    "typeValidation": "strict"
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 2
                   },
                   "conditions": [
                     {
@@ -2636,10 +2618,10 @@
         "parameters": {
           "conditions": {
             "options": {
-              "version": 3,
-              "leftValue": "",
               "caseSensitive": true,
-              "typeValidation": "strict"
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
             },
             "conditions": [
               {
@@ -3044,6 +3026,26 @@
         ],
         "id": "92e8e11e-7d55-4e83-afe5-a360abe552e6",
         "name": "Execute Book"
+      },
+      {
+        "parameters": {
+          "model": "gemma4:e4b",
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+        "typeVersion": 1,
+        "position": [
+          1520,
+          1040
+        ],
+        "id": "6f4d021d-3033-4c3e-9963-d77e18cc14ab",
+        "name": "Ollama Chat Model",
+        "credentials": {
+          "ollamaApi": {
+            "id": "hpLJnLrrfZiVC03g",
+            "name": "Ollama account"
+          }
+        }
       }
     ],
     "connections": {
@@ -3190,17 +3192,6 @@
           ]
         ]
       },
-      "Ollama Chat Model": {
-        "ai_languageModel": [
-          [
-            {
-              "node": "Basic LLM Chain",
-              "type": "ai_languageModel",
-              "index": 0
-            }
-          ]
-        ]
-      },
       "Ollama Model1": {
         "ai_languageModel": [
           [
@@ -3278,10 +3269,22 @@
             }
           ]
         ]
+      },
+      "Ollama Chat Model": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Basic LLM Chain",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
+    "nodeGroups": [],
     "authors": "Sergei Vedishchev",
-    "name": "Version 82228d08",
+    "name": "Version 4fa6fc33",
     "description": "",
     "autosaved": true
   },
