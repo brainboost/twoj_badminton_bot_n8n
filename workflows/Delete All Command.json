@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-25T21:58:44.490Z",
+  "updatedAt": "2026-06-18T11:28:01.320Z",
   "createdAt": "2025-12-31T15:42:26.918Z",
   "id": "b7xXjE899CcIb9eo",
   "name": "Delete All Command",
@@ -75,10 +75,10 @@
       "parameters": {
         "conditions": {
           "options": {
-            "version": 3,
-            "leftValue": "",
             "caseSensitive": true,
-            "typeValidation": "strict"
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
           },
           "conditions": [
             {
@@ -116,7 +116,7 @@
     {
       "parameters": {
         "operation": "executeTool",
-        "toolName": "login",
+        "toolName": "login_oauth",
         "toolParameters": "={\"email\":\"{{$json.email}}\", \"password\": \"{{ $json.hash }}\"}"
       },
       "id": "login",
@@ -138,10 +138,10 @@
       "parameters": {
         "conditions": {
           "options": {
-            "version": 2,
-            "leftValue": "",
             "caseSensitive": true,
-            "typeValidation": "strict"
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
           },
           "conditions": [
             {
@@ -150,7 +150,7 @@
                 "type": "string",
                 "operation": "exists"
               },
-              "leftValue": "={{ $json.result.structuredContent.session_id }}",
+              "leftValue": "={{ $json.result.structuredContent.access_token }}",
               "rightValue": ""
             }
           ],
@@ -178,12 +178,6 @@
               "value": "={{ $('Validate Input').item.json.user_id }}"
             },
             {
-              "id": "session-id",
-              "name": "session_id",
-              "type": "string",
-              "value": "={{ $json.result.structuredContent.session_id }}"
-            },
-            {
               "id": "chat-id",
               "name": "chat_id",
               "type": "string",
@@ -194,6 +188,12 @@
               "name": "lang",
               "type": "string",
               "value": "={{ $('Validate Input').first().json.lang }}"
+            },
+            {
+              "id": "a344a81a-d8f7-48f0-8aee-387b316b88aa",
+              "name": "access_token",
+              "value": "={{ $json.result.structuredContent.access_token }}",
+              "type": "string"
             }
           ]
         },
@@ -212,7 +212,7 @@
       "parameters": {
         "operation": "executeTool",
         "toolName": "delete_all_reservations",
-        "toolParameters": "={{ JSON.stringify({ session_id: $json.session_id }) }}"
+        "toolParameters": "={{ JSON.stringify({ access_token: $json.access_token }) }}"
       },
       "id": "mcp-delete-all",
       "name": "MCP Delete All Reservations",
@@ -233,10 +233,10 @@
       "parameters": {
         "conditions": {
           "options": {
-            "version": 2,
-            "leftValue": "",
             "caseSensitive": true,
-            "typeValidation": "strict"
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
           },
           "combinator": "and",
           "conditions": [
@@ -548,10 +548,10 @@
       "parameters": {
         "conditions": {
           "options": {
-            "version": 2,
-            "leftValue": "",
             "caseSensitive": true,
-            "typeValidation": "strict"
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
           },
           "combinator": "and",
           "conditions": [
@@ -939,12 +939,13 @@
   "settings": {
     "executionOrder": "v1",
     "callerPolicy": "workflowsFromSameOwner",
-    "availableInMCP": false
+    "availableInMCP": false,
+    "binaryMode": "separate"
   },
   "staticData": null,
   "meta": null,
-  "versionId": "ca519389-1751-4ac1-ace8-7d802e305663",
-  "activeVersionId": "ca519389-1751-4ac1-ace8-7d802e305663",
+  "versionId": "7ad4a885-af8f-490f-b462-a6b21595e734",
+  "activeVersionId": "7ad4a885-af8f-490f-b462-a6b21595e734",
   "triggerCount": 0,
   "shared": [
     {
@@ -956,9 +957,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-03-25T21:58:44.492Z",
-    "createdAt": "2026-03-25T21:58:44.492Z",
-    "versionId": "ca519389-1751-4ac1-ace8-7d802e305663",
+    "updatedAt": "2026-06-18T11:28:59.000Z",
+    "createdAt": "2026-06-18T11:28:01.322Z",
+    "versionId": "7ad4a885-af8f-490f-b462-a6b21595e734",
     "workflowId": "b7xXjE899CcIb9eo",
     "nodes": [
       {
@@ -1030,10 +1031,10 @@
         "parameters": {
           "conditions": {
             "options": {
-              "version": 3,
-              "leftValue": "",
               "caseSensitive": true,
-              "typeValidation": "strict"
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
             },
             "conditions": [
               {
@@ -1071,7 +1072,7 @@
       {
         "parameters": {
           "operation": "executeTool",
-          "toolName": "login",
+          "toolName": "login_oauth",
           "toolParameters": "={\"email\":\"{{$json.email}}\", \"password\": \"{{ $json.hash }}\"}"
         },
         "id": "login",
@@ -1093,10 +1094,10 @@
         "parameters": {
           "conditions": {
             "options": {
-              "version": 2,
-              "leftValue": "",
               "caseSensitive": true,
-              "typeValidation": "strict"
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
             },
             "conditions": [
               {
@@ -1105,7 +1106,7 @@
                   "type": "string",
                   "operation": "exists"
                 },
-                "leftValue": "={{ $json.result.structuredContent.session_id }}",
+                "leftValue": "={{ $json.result.structuredContent.access_token }}",
                 "rightValue": ""
               }
             ],
@@ -1133,12 +1134,6 @@
                 "value": "={{ $('Validate Input').item.json.user_id }}"
               },
               {
-                "id": "session-id",
-                "name": "session_id",
-                "type": "string",
-                "value": "={{ $json.result.structuredContent.session_id }}"
-              },
-              {
                 "id": "chat-id",
                 "name": "chat_id",
                 "type": "string",
@@ -1149,6 +1144,12 @@
                 "name": "lang",
                 "type": "string",
                 "value": "={{ $('Validate Input').first().json.lang }}"
+              },
+              {
+                "id": "a344a81a-d8f7-48f0-8aee-387b316b88aa",
+                "name": "access_token",
+                "value": "={{ $json.result.structuredContent.access_token }}",
+                "type": "string"
               }
             ]
           },
@@ -1167,7 +1168,7 @@
         "parameters": {
           "operation": "executeTool",
           "toolName": "delete_all_reservations",
-          "toolParameters": "={{ JSON.stringify({ session_id: $json.session_id }) }}"
+          "toolParameters": "={{ JSON.stringify({ access_token: $json.access_token }) }}"
         },
         "id": "mcp-delete-all",
         "name": "MCP Delete All Reservations",
@@ -1188,10 +1189,10 @@
         "parameters": {
           "conditions": {
             "options": {
-              "version": 2,
-              "leftValue": "",
               "caseSensitive": true,
-              "typeValidation": "strict"
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
             },
             "combinator": "and",
             "conditions": [
@@ -1503,10 +1504,10 @@
         "parameters": {
           "conditions": {
             "options": {
-              "version": 2,
-              "leftValue": "",
               "caseSensitive": true,
-              "typeValidation": "strict"
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
             },
             "combinator": "and",
             "conditions": [
@@ -1891,10 +1892,11 @@
         ]
       }
     },
+    "nodeGroups": [],
     "authors": "Sergei Vedishchev",
-    "name": null,
-    "description": null,
-    "autosaved": false
+    "name": "Version 7ad4a885",
+    "description": "",
+    "autosaved": true
   },
   "tags": [
     {
