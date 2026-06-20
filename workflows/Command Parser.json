@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-17T07:23:56.751Z",
+  "updatedAt": "2026-06-18T12:11:51.453Z",
   "createdAt": "2026-01-11T18:21:47.330Z",
   "id": "QbD3Epml4ANF9vr0",
   "name": "Command Parser",
@@ -681,6 +681,7 @@
       "id": "335f530d-a639-4a8e-83dd-d236f51249ca",
       "name": "Send a chat action",
       "webhookId": "ff016420-be64-4d5e-b454-2fc9453945c4",
+      "retryOnFail": true,
       "credentials": {
         "telegramApi": {
           "id": "pHQDqhsnrwimdaY2",
@@ -1640,8 +1641,8 @@
   "meta": {
     "templateCredsSetupCompleted": true
   },
-  "versionId": "4fa6fc33-9d8f-429b-b581-66fa9f633639",
-  "activeVersionId": "4fa6fc33-9d8f-429b-b581-66fa9f633639",
+  "versionId": "b8f71e6c-a9d5-4ba3-ae0a-1b8da7da49fb",
+  "activeVersionId": "b8f71e6c-a9d5-4ba3-ae0a-1b8da7da49fb",
   "triggerCount": 0,
   "shared": [
     {
@@ -1653,9 +1654,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-06-16T22:12:29.000Z",
-    "createdAt": "2026-06-16T22:11:04.016Z",
-    "versionId": "4fa6fc33-9d8f-429b-b581-66fa9f633639",
+    "updatedAt": "2026-06-18T12:12:02.000Z",
+    "createdAt": "2026-06-18T12:11:51.456Z",
+    "versionId": "b8f71e6c-a9d5-4ba3-ae0a-1b8da7da49fb",
     "workflowId": "QbD3Epml4ANF9vr0",
     "nodes": [
       {
@@ -2333,6 +2334,7 @@
         "id": "335f530d-a639-4a8e-83dd-d236f51249ca",
         "name": "Send a chat action",
         "webhookId": "ff016420-be64-4d5e-b454-2fc9453945c4",
+        "retryOnFail": true,
         "credentials": {
           "telegramApi": {
             "id": "pHQDqhsnrwimdaY2",
@@ -3284,7 +3286,7 @@
     },
     "nodeGroups": [],
     "authors": "Sergei Vedishchev",
-    "name": "Version 4fa6fc33",
+    "name": "Version b8f71e6c",
     "description": "",
     "autosaved": true
   },
