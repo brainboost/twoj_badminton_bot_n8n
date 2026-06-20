@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-17T16:15:45.834Z",
+  "updatedAt": "2026-06-18T12:07:32.732Z",
   "createdAt": "2025-10-14T10:11:33.990Z",
   "id": "uf7MYoeaspA2V85u",
   "name": "Assistant agent",
@@ -365,6 +365,7 @@
       "id": "44df1e02-a88d-49a9-bae2-a337b24cd045",
       "name": "Send a typing",
       "webhookId": "2be05714-eb28-4a61-a966-fce0ef53dc79",
+      "retryOnFail": true,
       "credentials": {
         "telegramApi": {
           "id": "pHQDqhsnrwimdaY2",
@@ -1540,8 +1541,8 @@
     "templateId": "voice_assistant_agent_with_telegram",
     "templateCredsSetupCompleted": true
   },
-  "versionId": "338f23f3-c137-4c2f-b5a0-16ed3550cca8",
-  "activeVersionId": "f95ad9f1-003d-4156-b5ac-40f5383f4d40",
+  "versionId": "4ac6e30a-0779-45cf-a8ae-2bc71ab84711",
+  "activeVersionId": "4ac6e30a-0779-45cf-a8ae-2bc71ab84711",
   "triggerCount": 1,
   "shared": [
     {
@@ -1553,9 +1554,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-06-17T07:24:22.000Z",
-    "createdAt": "2026-06-17T07:20:44.770Z",
-    "versionId": "f95ad9f1-003d-4156-b5ac-40f5383f4d40",
+    "updatedAt": "2026-06-18T12:07:46.000Z",
+    "createdAt": "2026-06-18T12:07:32.740Z",
+    "versionId": "4ac6e30a-0779-45cf-a8ae-2bc71ab84711",
     "workflowId": "uf7MYoeaspA2V85u",
     "nodes": [
       {
@@ -1601,6 +1602,8 @@
         "id": "66219c83-6371-4cc6-ad43-57cee44f52da",
         "name": "Get a file",
         "webhookId": "e0769871-efe3-49da-81a5-2f88a6fdd33f",
+        "retryOnFail": true,
+        "maxTries": 2,
         "credentials": {
           "telegramApi": {
             "id": "pHQDqhsnrwimdaY2",
@@ -1915,6 +1918,7 @@
         "id": "44df1e02-a88d-49a9-bae2-a337b24cd045",
         "name": "Send a typing",
         "webhookId": "2be05714-eb28-4a61-a966-fce0ef53dc79",
+        "retryOnFail": true,
         "credentials": {
           "telegramApi": {
             "id": "pHQDqhsnrwimdaY2",
@@ -3080,7 +3084,7 @@
     },
     "nodeGroups": [],
     "authors": "Sergei Vedishchev",
-    "name": "Version f95ad9f1",
+    "name": "Version 4ac6e30a",
     "description": "",
     "autosaved": true
   },
