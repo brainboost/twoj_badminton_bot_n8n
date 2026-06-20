@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-16T21:52:21.459Z",
+  "updatedAt": "2026-06-18T13:05:34.177Z",
   "createdAt": "2025-12-08T21:22:17.172Z",
   "id": "ocCWq7TGjPACPwTL",
   "name": "Reservation status update",
@@ -45,7 +45,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Generate 7 dates from tomorrow to tomorrow + 7 days in DD.MM.YYYY format\nconst dates = [];\nconst today = new Date();\n\nfor (let i = 1; i <= 7; i++) {\n  const futureDate = new Date(today);\n  futureDate.setDate(today.getDate() + i);\n  \n  const day = String(futureDate.getDate()).padStart(2, '0');\n  const month = String(futureDate.getMonth() + 1).padStart(2, '0');\n  const year = futureDate.getFullYear();\n  \n  dates.push({\n    date: `${day}.${month}.${year}`,\n    dayOfWeek: futureDate.toLocaleDateString('en-US', { weekday: 'long' })\n  });\n}\n\nreturn dates;"
+        "jsCode": "// Generate 7 dates from tomorrow to tomorrow + 7 days in DD.MM.YYYY format\nconst dates = [];\nconst today = new Date();\n\nfor (let i = 1; i <= 7; i++) {\n  const futureDate = new Date(today);\n  futureDate.setDate(today.getDate() + i);\n  \n  const day = String(futureDate.getDate()).padStart(2, '0');\n  const month = String(futureDate.getMonth() + 1).padStart(2, '0');\n  const year = futureDate.getFullYear();\n  \n  dates.push({\n    club_id: '958662f0-0bd2-4fdc-8bef-bb2d69761adb',\n    date: `${day}.${month}.${year}`,\n    dayOfWeek: futureDate.toLocaleDateString('en-US', { weekday: 'long' })\n  });\n}\n\nreturn dates;"
       },
       "id": "cdbd258e-8dbe-4e87-8f48-2f5de85d42ac",
       "name": "Generate Date Range",
@@ -67,7 +67,7 @@
       "type": "n8n-nodes-mcp.mcpClient",
       "typeVersion": 1,
       "position": [
-        752,
+        528,
         -272
       ],
       "credentials": {
@@ -86,39 +86,9 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        976,
+        752,
         -272
       ]
-    },
-    {
-      "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "546b879d-21ad-4b51-9b16-cb90efc43dde",
-              "name": "club_id",
-              "value": "958662f0-0bd2-4fdc-8bef-bb2d69761adb",
-              "type": "string"
-            },
-            {
-              "id": "3774cf8c-e819-4f91-8fbe-40844df682a5",
-              "name": "sport_id",
-              "value": "84",
-              "type": "string"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        304,
-        -192
-      ],
-      "id": "6d99b0ab-c4ee-4af7-b7ce-836b2dbfdfe3",
-      "name": "Set fields",
-      "executeOnce": true
     },
     {
       "parameters": {
@@ -251,7 +221,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1200,
+        976,
         -272
       ],
       "credentials": {
@@ -268,7 +238,7 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        528,
+        304,
         -192
       ],
       "id": "e2a3a0dc-d07f-4422-8a4a-4d58f1b67e6f",
@@ -281,7 +251,7 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        1424,
+        1200,
         -192
       ],
       "id": "3b8013c2-8991-491b-8bad-748919ab2a6e",
@@ -365,7 +335,7 @@
       "main": [
         [
           {
-            "node": "Set fields",
+            "node": "Loop Over Items",
             "type": "main",
             "index": 0
           }
@@ -377,17 +347,6 @@
         [
           {
             "node": "Transform Schedule Data",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Set fields": {
-      "main": [
-        [
-          {
-            "node": "Loop Over Items",
             "type": "main",
             "index": 0
           }
@@ -466,8 +425,8 @@
   "meta": {
     "templateCredsSetupCompleted": true
   },
-  "versionId": "ce79ae4f-feaa-4a67-a585-29c282720aa9",
-  "activeVersionId": "ce79ae4f-feaa-4a67-a585-29c282720aa9",
+  "versionId": "cb0f7774-eb4e-458a-8b9b-2795e91b68c6",
+  "activeVersionId": "cb0f7774-eb4e-458a-8b9b-2795e91b68c6",
   "triggerCount": 1,
   "shared": [
     {
@@ -479,9 +438,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-06-16T21:52:59.000Z",
-    "createdAt": "2026-06-16T21:52:21.459Z",
-    "versionId": "ce79ae4f-feaa-4a67-a585-29c282720aa9",
+    "updatedAt": "2026-06-18T13:05:59.000Z",
+    "createdAt": "2026-06-18T13:05:34.177Z",
+    "versionId": "cb0f7774-eb4e-458a-8b9b-2795e91b68c6",
     "workflowId": "ocCWq7TGjPACPwTL",
     "nodes": [
       {
@@ -523,7 +482,7 @@
       },
       {
         "parameters": {
-          "jsCode": "// Generate 7 dates from tomorrow to tomorrow + 7 days in DD.MM.YYYY format\nconst dates = [];\nconst today = new Date();\n\nfor (let i = 1; i <= 7; i++) {\n  const futureDate = new Date(today);\n  futureDate.setDate(today.getDate() + i);\n  \n  const day = String(futureDate.getDate()).padStart(2, '0');\n  const month = String(futureDate.getMonth() + 1).padStart(2, '0');\n  const year = futureDate.getFullYear();\n  \n  dates.push({\n    date: `${day}.${month}.${year}`,\n    dayOfWeek: futureDate.toLocaleDateString('en-US', { weekday: 'long' })\n  });\n}\n\nreturn dates;"
+          "jsCode": "// Generate 7 dates from tomorrow to tomorrow + 7 days in DD.MM.YYYY format\nconst dates = [];\nconst today = new Date();\n\nfor (let i = 1; i <= 7; i++) {\n  const futureDate = new Date(today);\n  futureDate.setDate(today.getDate() + i);\n  \n  const day = String(futureDate.getDate()).padStart(2, '0');\n  const month = String(futureDate.getMonth() + 1).padStart(2, '0');\n  const year = futureDate.getFullYear();\n  \n  dates.push({\n    club_id: '958662f0-0bd2-4fdc-8bef-bb2d69761adb',\n    date: `${day}.${month}.${year}`,\n    dayOfWeek: futureDate.toLocaleDateString('en-US', { weekday: 'long' })\n  });\n}\n\nreturn dates;"
         },
         "id": "cdbd258e-8dbe-4e87-8f48-2f5de85d42ac",
         "name": "Generate Date Range",
@@ -545,7 +504,7 @@
         "type": "n8n-nodes-mcp.mcpClient",
         "typeVersion": 1,
         "position": [
-          752,
+          528,
           -272
         ],
         "credentials": {
@@ -564,39 +523,9 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          976,
+          752,
           -272
         ]
-      },
-      {
-        "parameters": {
-          "assignments": {
-            "assignments": [
-              {
-                "id": "546b879d-21ad-4b51-9b16-cb90efc43dde",
-                "name": "club_id",
-                "value": "958662f0-0bd2-4fdc-8bef-bb2d69761adb",
-                "type": "string"
-              },
-              {
-                "id": "3774cf8c-e819-4f91-8fbe-40844df682a5",
-                "name": "sport_id",
-                "value": "84",
-                "type": "string"
-              }
-            ]
-          },
-          "options": {}
-        },
-        "type": "n8n-nodes-base.set",
-        "typeVersion": 3.4,
-        "position": [
-          304,
-          -192
-        ],
-        "id": "6d99b0ab-c4ee-4af7-b7ce-836b2dbfdfe3",
-        "name": "Set fields",
-        "executeOnce": true
       },
       {
         "parameters": {
@@ -729,7 +658,7 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          1200,
+          976,
           -272
         ],
         "credentials": {
@@ -746,7 +675,7 @@
         "type": "n8n-nodes-base.splitInBatches",
         "typeVersion": 3,
         "position": [
-          528,
+          304,
           -192
         ],
         "id": "e2a3a0dc-d07f-4422-8a4a-4d58f1b67e6f",
@@ -759,7 +688,7 @@
         "type": "n8n-nodes-base.wait",
         "typeVersion": 1.1,
         "position": [
-          1424,
+          1200,
           -192
         ],
         "id": "3b8013c2-8991-491b-8bad-748919ab2a6e",
@@ -843,7 +772,7 @@
         "main": [
           [
             {
-              "node": "Set fields",
+              "node": "Loop Over Items",
               "type": "main",
               "index": 0
             }
@@ -855,17 +784,6 @@
           [
             {
               "node": "Transform Schedule Data",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Set fields": {
-        "main": [
-          [
-            {
-              "node": "Loop Over Items",
               "type": "main",
               "index": 0
             }
@@ -931,7 +849,7 @@
     },
     "nodeGroups": [],
     "authors": "Sergei Vedishchev",
-    "name": "Version ce79ae4f",
+    "name": "Version cb0f7774",
     "description": "",
     "autosaved": true
   },
