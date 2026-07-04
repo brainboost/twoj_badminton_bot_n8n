@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-18T11:20:51.690Z",
+  "updatedAt": "2026-07-03T13:43:30.742Z",
   "createdAt": "2025-12-22T13:22:52.158Z",
   "id": "p5NpS5X1VLPdY3mX",
   "name": "Book Command",
@@ -270,7 +270,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const original_args = $('When Executed by Another Workflow').first().json.arg1;\nconst bookings = JSON.parse(original_args);\nconst user_id = $('When Executed by Another Workflow').first().json.user_id;\nlet queries = [];\nconst inserted = $input.first().json.result.structuredContent.reservation.bookings;\n\nfor (let i = 0; i < inserted.length; i++) {\n  const b = bookings[i];\n  const reservation_id = inserted[i].booking_id;\n\n  // Convert date from DD.MM.YYYY to YYYY-MM-DD for PostgreSQL DATE column\n  let dbDate = b.date;\n  const dateMatch = b.date.match(/^(\\d{1,2})\\.(\\d{1,2})\\.(\\d{4})$/);\n  if (dateMatch) {\n    const day = dateMatch[1].padStart(2, '0');\n    const month = dateMatch[2].padStart(2, '0');\n    const year = dateMatch[3];\n    dbDate = `${year}-${month}-${day}`;\n  }\n\n  // Safe notes: handle null/undefined and escape ALL apostrophes\n  const safeNotes = (b.notes || '').replace(/'/g, \"''\");\n\n  const query = \"INSERT INTO reservations \" +\n    \"(date, time_start, time_end, court, players_num, user_id, notes, reservation_id) \" +\n    \"VALUES(\" +\n    \"'\" + dbDate + \"',\" +\n    \"'\" + b.time_start + \"',\" +\n    \"'\" + b.time_end + \"',\" +\n    \"'\" + b.court + \"',\" +\n    b.players_num + \",\" +\n    \"'\" + user_id + \"',\" +\n    \"'\" + safeNotes + \"',\" +\n    \"'\" + reservation_id + \"'\" +\n    \");\";\n  queries.push(query);\n}\n\nreturn [{ json: { queries: queries } }];"
+        "jsCode": "const original_args = $('When Executed by Another Workflow').first().json.arg1;\nconst bookings = JSON.parse(original_args);\nconst user_id = $('When Executed by Another Workflow').first().json.user_id;\nlet queries = [];\nconst inserted = $input.first().json.result.structuredContent.reservations;\n\nfor (let i = 0; i < inserted.length; i++) {\n  const b = bookings[i];\n  const reservation_id = inserted[i].id;\n\n  // Convert date from DD.MM.YYYY to YYYY-MM-DD for PostgreSQL DATE column\n  let dbDate = b.date;\n  const dateMatch = b.date.match(/^(\\d{1,2})\\.(\\d{1,2})\\.(\\d{4})$/);\n  if (dateMatch) {\n    const day = dateMatch[1].padStart(2, '0');\n    const month = dateMatch[2].padStart(2, '0');\n    const year = dateMatch[3];\n    dbDate = `${year}-${month}-${day}`;\n  }\n\n  // Safe notes: handle null/undefined and escape ALL apostrophes\n  const safeNotes = (b.notes || '').replace(/'/g, \"''\");\n\n  const query = \"INSERT INTO reservations \" +\n    \"(date, time_start, time_end, court, players_num, user_id, notes, reservation_id) \" +\n    \"VALUES(\" +\n    \"'\" + dbDate + \"',\" +\n    \"'\" + b.time_start + \"',\" +\n    \"'\" + b.time_end + \"',\" +\n    \"'\" + b.court + \"',\" +\n    b.players_num + \",\" +\n    \"'\" + user_id + \"',\" +\n    \"'\" + safeNotes + \"',\" +\n    \"'\" + reservation_id + \"'\" +\n    \");\";\n  queries.push(query);\n}\n\nreturn [{ json: { queries: queries } }];"
       },
       "id": "build-insert-query",
       "name": "Build Insert Query",
@@ -360,7 +360,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const template = $input.first().json.text;\nconst context = $('Prepare Success Data').first().json;\nconst bookings = context.bookings;\nconst inserted = context.inserted.reservation.bookings;\nconst username = context.username;\nconst fullname = context.fullname;\n\nlet messages = [];\nfor (let i = 0; i < inserted.length; i++) {\n  const booking = inserted[i];\n// bookings.forEach( => {booking\n  let msg = template\n    .replace('{id}', booking.booking_id)\n    .replace('{date}', booking.date)\n    .replace('{time_start}', booking.time_start)\n    .replace('{time_end}', booking.time_end)\n    .replace('{court}', booking.court)\n    .replace('{players_num}', bookings[i].players_num)\n    .replace('{fullname}', fullname)\n    .replace('{notes}', bookings[i].notes || '-');\n  messages.push(\"✅ \" + msg);\n}\n\nreturn [{\n  json: {\n    chat_id: context.chat_id,\n    message: messages.join('\\n\\n---\\n\\n')\n  }\n}];"
+        "jsCode": "const template = $input.first().json.text;\nconst context = $('Prepare Success Data').first().json;\nconst bookings = context.bookings;\nconst inserted = context.inserted.reservations;\nconst username = context.username;\nconst fullname = context.fullname;\n\nlet messages = [];\nfor (let i = 0; i < inserted.length; i++) {\n  const booking = inserted[i];\n// bookings.forEach( => {booking\n  let msg = template\n    .replace('{id}', booking.id)\n    .replace('{date}', booking.date)\n    .replace('{time_start}', booking.start_time)\n    .replace('{time_end}', booking.end_time)\n    .replace('{court}', booking.location_name)\n    .replace('{players_num}', '4')\n    .replace('{fullname}', fullname)\n    .replace('{notes}', bookings[i].notes || '-');\n  messages.push(\"✅ \" + msg);\n}\n\nreturn [{\n  json: {\n    chat_id: context.chat_id,\n    message: messages.join('\\n\\n---\\n\\n')\n  }\n}];"
       },
       "id": "format-success-message",
       "name": "Format Success Message",
@@ -533,6 +533,7 @@
       "id": "f1fed62a-bc39-4a06-84d6-2633f7ae8852",
       "name": "Send a text message",
       "webhookId": "265b4617-0891-457f-8e48-cb2043a19bb6",
+      "retryOnFail": true,
       "credentials": {
         "telegramApi": {
           "id": "pHQDqhsnrwimdaY2",
@@ -695,6 +696,7 @@
         752
       ],
       "webhookId": "b9ba5bf4-ff84-4e10-a8f9-6c6958a9be17",
+      "retryOnFail": true,
       "credentials": {
         "telegramApi": {
           "id": "pHQDqhsnrwimdaY2",
@@ -1052,8 +1054,8 @@
   "meta": {
     "templateCredsSetupCompleted": true
   },
-  "versionId": "5f4f43ef-4c70-4b4b-9b52-35263da9bbf2",
-  "activeVersionId": "5f4f43ef-4c70-4b4b-9b52-35263da9bbf2",
+  "versionId": "10334843-5858-41d6-b37c-4e0e8269fc97",
+  "activeVersionId": "10334843-5858-41d6-b37c-4e0e8269fc97",
   "triggerCount": 0,
   "shared": [
     {
@@ -1065,9 +1067,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-06-18T11:21:31.000Z",
-    "createdAt": "2026-06-18T11:20:51.022Z",
-    "versionId": "5f4f43ef-4c70-4b4b-9b52-35263da9bbf2",
+    "updatedAt": "2026-07-03T13:43:55.000Z",
+    "createdAt": "2026-07-03T13:43:30.743Z",
+    "versionId": "10334843-5858-41d6-b37c-4e0e8269fc97",
     "workflowId": "p5NpS5X1VLPdY3mX",
     "nodes": [
       {
@@ -1334,7 +1336,7 @@
       },
       {
         "parameters": {
-          "jsCode": "const original_args = $('When Executed by Another Workflow').first().json.arg1;\nconst bookings = JSON.parse(original_args);\nconst user_id = $('When Executed by Another Workflow').first().json.user_id;\nlet queries = [];\nconst inserted = $input.first().json.result.structuredContent.reservation.bookings;\n\nfor (let i = 0; i < inserted.length; i++) {\n  const b = bookings[i];\n  const reservation_id = inserted[i].booking_id;\n\n  // Convert date from DD.MM.YYYY to YYYY-MM-DD for PostgreSQL DATE column\n  let dbDate = b.date;\n  const dateMatch = b.date.match(/^(\\d{1,2})\\.(\\d{1,2})\\.(\\d{4})$/);\n  if (dateMatch) {\n    const day = dateMatch[1].padStart(2, '0');\n    const month = dateMatch[2].padStart(2, '0');\n    const year = dateMatch[3];\n    dbDate = `${year}-${month}-${day}`;\n  }\n\n  // Safe notes: handle null/undefined and escape ALL apostrophes\n  const safeNotes = (b.notes || '').replace(/'/g, \"''\");\n\n  const query = \"INSERT INTO reservations \" +\n    \"(date, time_start, time_end, court, players_num, user_id, notes, reservation_id) \" +\n    \"VALUES(\" +\n    \"'\" + dbDate + \"',\" +\n    \"'\" + b.time_start + \"',\" +\n    \"'\" + b.time_end + \"',\" +\n    \"'\" + b.court + \"',\" +\n    b.players_num + \",\" +\n    \"'\" + user_id + \"',\" +\n    \"'\" + safeNotes + \"',\" +\n    \"'\" + reservation_id + \"'\" +\n    \");\";\n  queries.push(query);\n}\n\nreturn [{ json: { queries: queries } }];"
+          "jsCode": "const original_args = $('When Executed by Another Workflow').first().json.arg1;\nconst bookings = JSON.parse(original_args);\nconst user_id = $('When Executed by Another Workflow').first().json.user_id;\nlet queries = [];\nconst inserted = $input.first().json.result.structuredContent.reservations;\n\nfor (let i = 0; i < inserted.length; i++) {\n  const b = bookings[i];\n  const reservation_id = inserted[i].id;\n\n  // Convert date from DD.MM.YYYY to YYYY-MM-DD for PostgreSQL DATE column\n  let dbDate = b.date;\n  const dateMatch = b.date.match(/^(\\d{1,2})\\.(\\d{1,2})\\.(\\d{4})$/);\n  if (dateMatch) {\n    const day = dateMatch[1].padStart(2, '0');\n    const month = dateMatch[2].padStart(2, '0');\n    const year = dateMatch[3];\n    dbDate = `${year}-${month}-${day}`;\n  }\n\n  // Safe notes: handle null/undefined and escape ALL apostrophes\n  const safeNotes = (b.notes || '').replace(/'/g, \"''\");\n\n  const query = \"INSERT INTO reservations \" +\n    \"(date, time_start, time_end, court, players_num, user_id, notes, reservation_id) \" +\n    \"VALUES(\" +\n    \"'\" + dbDate + \"',\" +\n    \"'\" + b.time_start + \"',\" +\n    \"'\" + b.time_end + \"',\" +\n    \"'\" + b.court + \"',\" +\n    b.players_num + \",\" +\n    \"'\" + user_id + \"',\" +\n    \"'\" + safeNotes + \"',\" +\n    \"'\" + reservation_id + \"'\" +\n    \");\";\n  queries.push(query);\n}\n\nreturn [{ json: { queries: queries } }];"
         },
         "id": "build-insert-query",
         "name": "Build Insert Query",
@@ -1424,7 +1426,7 @@
       },
       {
         "parameters": {
-          "jsCode": "const template = $input.first().json.text;\nconst context = $('Prepare Success Data').first().json;\nconst bookings = context.bookings;\nconst inserted = context.inserted.reservation.bookings;\nconst username = context.username;\nconst fullname = context.fullname;\n\nlet messages = [];\nfor (let i = 0; i < inserted.length; i++) {\n  const booking = inserted[i];\n// bookings.forEach( => {booking\n  let msg = template\n    .replace('{id}', booking.booking_id)\n    .replace('{date}', booking.date)\n    .replace('{time_start}', booking.time_start)\n    .replace('{time_end}', booking.time_end)\n    .replace('{court}', booking.court)\n    .replace('{players_num}', bookings[i].players_num)\n    .replace('{fullname}', fullname)\n    .replace('{notes}', bookings[i].notes || '-');\n  messages.push(\"✅ \" + msg);\n}\n\nreturn [{\n  json: {\n    chat_id: context.chat_id,\n    message: messages.join('\\n\\n---\\n\\n')\n  }\n}];"
+          "jsCode": "const template = $input.first().json.text;\nconst context = $('Prepare Success Data').first().json;\nconst bookings = context.bookings;\nconst inserted = context.inserted.reservations;\nconst username = context.username;\nconst fullname = context.fullname;\n\nlet messages = [];\nfor (let i = 0; i < inserted.length; i++) {\n  const booking = inserted[i];\n// bookings.forEach( => {booking\n  let msg = template\n    .replace('{id}', booking.id)\n    .replace('{date}', booking.date)\n    .replace('{time_start}', booking.start_time)\n    .replace('{time_end}', booking.end_time)\n    .replace('{court}', booking.location_name)\n    .replace('{players_num}', '4')\n    .replace('{fullname}', fullname)\n    .replace('{notes}', bookings[i].notes || '-');\n  messages.push(\"✅ \" + msg);\n}\n\nreturn [{\n  json: {\n    chat_id: context.chat_id,\n    message: messages.join('\\n\\n---\\n\\n')\n  }\n}];"
         },
         "id": "format-success-message",
         "name": "Format Success Message",
@@ -1597,6 +1599,7 @@
         "id": "f1fed62a-bc39-4a06-84d6-2633f7ae8852",
         "name": "Send a text message",
         "webhookId": "265b4617-0891-457f-8e48-cb2043a19bb6",
+        "retryOnFail": true,
         "credentials": {
           "telegramApi": {
             "id": "pHQDqhsnrwimdaY2",
@@ -1759,6 +1762,7 @@
           752
         ],
         "webhookId": "b9ba5bf4-ff84-4e10-a8f9-6c6958a9be17",
+        "retryOnFail": true,
         "credentials": {
           "telegramApi": {
             "id": "pHQDqhsnrwimdaY2",
@@ -2108,9 +2112,9 @@
     },
     "nodeGroups": [],
     "authors": "Sergei Vedishchev",
-    "name": "Version 5f4f43ef",
+    "name": "Version 10334843",
     "description": "",
-    "autosaved": false
+    "autosaved": true
   },
   "tags": [
     {
