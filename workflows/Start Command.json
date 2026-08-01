@@ -285,6 +285,7 @@
   },
   "staticData": null,
   "meta": null,
+  "nodeGroups": [],
   "versionId": "32970e57-045c-4f33-bc02-164371f2cb84",
   "activeVersionId": "32970e57-045c-4f33-bc02-164371f2cb84",
   "triggerCount": 0,
