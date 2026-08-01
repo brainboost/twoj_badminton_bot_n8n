@@ -173,6 +173,7 @@
   },
   "staticData": null,
   "meta": null,
+  "nodeGroups": [],
   "versionId": "43b05dca-00ba-4def-a46a-b7092ac1110d",
   "activeVersionId": "43b05dca-00ba-4def-a46a-b7092ac1110d",
   "triggerCount": 0,
