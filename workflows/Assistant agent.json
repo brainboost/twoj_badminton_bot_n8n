@@ -1541,6 +1541,7 @@
     "templateId": "voice_assistant_agent_with_telegram",
     "templateCredsSetupCompleted": true
   },
+  "nodeGroups": [],
   "versionId": "4ac6e30a-0779-45cf-a8ae-2bc71ab84711",
   "activeVersionId": "4ac6e30a-0779-45cf-a8ae-2bc71ab84711",
   "triggerCount": 1,
