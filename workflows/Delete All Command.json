@@ -944,6 +944,7 @@
   },
   "staticData": null,
   "meta": null,
+  "nodeGroups": [],
   "versionId": "7ad4a885-af8f-490f-b462-a6b21595e734",
   "activeVersionId": "7ad4a885-af8f-490f-b462-a6b21595e734",
   "triggerCount": 0,
