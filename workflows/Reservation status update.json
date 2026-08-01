@@ -419,12 +419,18 @@
   },
   "staticData": {
     "node:Schedule Trigger": {
-      "recurrenceRules": []
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
     }
   },
   "meta": {
     "templateCredsSetupCompleted": true
   },
+  "nodeGroups": [],
   "versionId": "cb0f7774-eb4e-458a-8b9b-2795e91b68c6",
   "activeVersionId": "cb0f7774-eb4e-458a-8b9b-2795e91b68c6",
   "triggerCount": 1,
