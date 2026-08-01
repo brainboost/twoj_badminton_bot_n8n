@@ -745,6 +745,7 @@
   "meta": {
     "templateCredsSetupCompleted": true
   },
+  "nodeGroups": [],
   "versionId": "82cafee0-6640-4830-8a43-8fd97e311fc0",
   "activeVersionId": "82cafee0-6640-4830-8a43-8fd97e311fc0",
   "triggerCount": 0,
