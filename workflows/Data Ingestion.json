@@ -388,6 +388,7 @@
   "meta": {
     "templateCredsSetupCompleted": true
   },
+  "nodeGroups": [],
   "versionId": "74d4f794-93b1-475e-b339-2ca5707e2a08",
   "activeVersionId": "74d4f794-93b1-475e-b339-2ca5707e2a08",
   "triggerCount": 2,
