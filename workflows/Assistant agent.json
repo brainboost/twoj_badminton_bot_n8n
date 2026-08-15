@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-21T07:55:58.802Z",
+  "updatedAt": "2026-08-15T13:09:12.897Z",
   "createdAt": "2025-10-14T10:11:33.990Z",
   "id": "uf7MYoeaspA2V85u",
   "name": "Assistant agent",
@@ -63,7 +63,7 @@
       "type": "@n8n/n8n-nodes-langchain.toolCalculator",
       "typeVersion": 1,
       "position": [
-        2176,
+        2240,
         560
       ],
       "id": "3122d37e-a446-4f7c-aba0-76a6564b2ee9",
@@ -110,7 +110,7 @@
       "type": "@n8n/n8n-nodes-langchain.toolWikipedia",
       "typeVersion": 1,
       "position": [
-        2304,
+        2336,
         560
       ],
       "id": "913b9eb7-14e2-4b5a-9f5f-14d93aa0275b",
@@ -142,25 +142,6 @@
         "qdrantApi": {
           "id": "R97Yi6THM8qVyAcv",
           "name": "QdrantApi account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "model": "nomic-embed-text:latest"
-      },
-      "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
-      "typeVersion": 1,
-      "position": [
-        2432,
-        752
-      ],
-      "id": "d5693f10-1cfd-4ae5-9ae3-17fd5a93997c",
-      "name": "Embeddings Ollama",
-      "credentials": {
-        "ollamaApi": {
-          "id": "hpLJnLrrfZiVC03g",
-          "name": "Ollama account"
         }
       }
     },
@@ -375,26 +356,6 @@
     },
     {
       "parameters": {
-        "model": "gemma4:e4b",
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmOllama",
-      "typeVersion": 1,
-      "position": [
-        1120,
-        448
-      ],
-      "id": "c81cce17-67d8-472c-b8c0-63d3335ff6fb",
-      "name": "Ollama Model",
-      "credentials": {
-        "ollamaApi": {
-          "id": "hpLJnLrrfZiVC03g",
-          "name": "Ollama account"
-        }
-      }
-    },
-    {
-      "parameters": {
         "chatId": "={{ $('Set fields').item.json.chat_id }}",
         "text": "={{ $json.content.parts[0].text }}",
         "additionalFields": {
@@ -428,7 +389,7 @@
       "type": "@tavily/n8n-nodes-tavily.tavilyTool",
       "typeVersion": 1,
       "position": [
-        2720,
+        2688,
         560
       ],
       "id": "82ae02fd-570d-4439-9502-ce3e415e7807",
@@ -474,7 +435,7 @@
       "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
       "typeVersion": 1.3,
       "position": [
-        2048,
+        2144,
         560
       ],
       "id": "a74dfcb7-3e35-4397-b81e-c9572a4e223a",
@@ -490,7 +451,7 @@
       "parameters": {
         "promptType": "guardrails",
         "options": {
-          "systemMessage": "=# ROLE\nYou are a multilingual AI assistant for Telegram bot \"twoj_badminton_bot\". You help users with badminton information, general conversation, and knowledge lookup.\n\n# CONTEXT\n- Remember the current date and time: **Today is {{ $now.format('cccc') }} the {{ $now.format('yyyy-MM-dd HH:mm') }}**, use this information to provide relevant responses.\n- When needed, reference \"today\", \"tomorrow\", \"this week\" appropriately.\n- Platform: Telegram (messages should be concise).\n- User language: Detect and match automatically.\n\n---\n\n# TOOLS\n\n## 1. Badminton Knowledge Base\n**Purpose**: Semantic search for badminton rules, equipment, BWF documents\n**When to use**: Questions about badminton techniques, rules, equipment, tournaments\n**Query language**: Always use English (translate user's query if needed)\n**Example**: User asks \"jakie są zasady gry w debla?\" → Query: \"doubles rules badminton\"\n\n## 2. Calculator\n**Purpose**: Mathematical operations\n**When to use**: Any numerical calculation requiring precision\n**Example**: Shuttle speed conversion, score calculations\n\n## 3. Tavily Web Search\n**Purpose**: Search information and news from specific domains.\n\n**Domains**:\n- https://bwfbadminton.com - Official BWF site for events, news, and tournaments.\n- https://www.internationalbadminton.org - BWF international site\n- https://badmintonsq.com - Mastering Badminton articles, knowledge hub.\n- https://badmintonstatistics.net - Tournament statistics, players, rankings.\n- https://corporate.bwfbadminton.com/statutes - Official BWF laws source.\n- https://www.worldbadminton.com - General Information and list of links.\n- https://badmintoneurope.com - Official Badminton Europe site - latest news.\n​- https://development.bwfbadminton.com/sport-science/global-research/scientific-papers - Scientific Papers search.\n- https://www.tntsports.co.uk/badminton - Badminton news, results, and videos.\n- https://badmintonhq.co.uk/pages/badminton-hq-reviews - real customers reviews.\n- https://victor-polska.pl - Victor badminton equipment.\n​- https://www.ziba.pl/manufacturer/victor-ziba-pl - Victor equipment in Poland.\n- https://www.badmintonplanet.eu - European badminton products.\n- https://www.badmintoncentral.com/forums - History of tournaments, fan forums.\n- https://www.yonex.com/badminton - Yonex official badminton rackets and gear.\n- https://www.reddit.com/r/badminton - Active Reddit community discussions.\n- https://beastbadminton.com - Training videos, drills, reviews and player tips.\n- https://www.badmintonbible.com - Rules, techniques, and fun facts.\n- https://corporate.bwfbadminton.com/events/approved-shuttles - Approved shuttles. \n- https://www.badmintonengland.co.uk - Historical facts, UK news.\n- https://www.britannica.com/sports/badminton - Britannica about badminton.\n- https://pzbad.pl - Polski Związek Badmintona, oficjalna federacja.\n- https://narodowybadminton.pl - Fundacja Narodowy Badminton w Polsce.\n- https://www.badmin.pl - Sklep badmintonowy z rakietami, lotkami i akcesoriami.\n- https://pzbad.pl/turnieje-w-polsce - Turnieje badmintonowe w Polsce.\n- https://www.twojtenis.pl/pl - Rezerwacji kortów w Krakowie i w Polsce.\n\n**When to use**: Recent news, tournament results, current events\n**Example**: \"Who won BWL World Championships 2025?\"\n\n## 4. Wikipedia\n**Purpose**: General encyclopedia lookup\n**When to use**: Historical facts, player biographies, general knowledge\n**Example**: \"When was BWF founded?\"\n\n---\n\n# RESPONSE FORMAT\n\n## Structure\n1. Keep responses brief (2-4 sentences typical for Telegram)\n2. Use emojis sparingly for emotional responses 🏸\n3. Always include source references when using tools. Provide additional meta when possible - art.#, section etc.\n\n## Language Rules\n- Detect user's language from their message\n- Respond in the same language\n- Translate tool queries to English internally\n- Keep quoted sources in original language with translation if helpful\n\n## Voice Messages\n- Treat as direct speech (do not mention transcription)\n- Respond conversationally as if in spoken dialogue\n\n---\n\n# BEHAVIOR\n\n## Do This ✓\n- Use tools for factual questions (prefer accuracy over speed)\n- Ask one clarifying question when request is ambiguous\n- Reference time naturally: \"today\", \"tomorrow\", \"this week\"\n- Match user's communication style and tone\n- Cite sources when information comes from tools\n\n## Boundaries\n- Stay focused on badminton, court sports, and general assistance\n- For political or controversial topics: \"I focus on badminton and general assistance. How can I help with that?\"\n- When no information found: \"I couldn't find this in my available resources. Would you like me to search differently?\"\n\n---\n\n# SPECIAL HANDLING\n\n## Sanitized Text\nUser messages may contain placeholders: <URL>, <LOCATION>, <EMAIL>\n- Treat as real data\n- Never guess original content\n- Reference by placeholder: \"I've noted <LOCATION> for your preferences\"\n\n## Context Memory\n- Maintain conversation context across turns\n- Reference previous messages when relevant\n- Track user preferences mentioned in conversation\n\n---\n\n# EXAMPLES\n\n**User**: Jakie są wymiary kortu do badmintona?\n**Assistant**: Kort do badmintona ma wymiary 13,4m x 6,1m (gra podwójna) lub 13,4m x 5,18m (gra pojedyncza) 🏸 [Źródło: BWF Rules, Part 2, Section 1A, Art. 1.1]\n\n**User**: [voice message about shuttle recommendations]\n**Assistant**: For beginners, I'd recommend feather shuttles with speed 77 for indoor play. They offer good durability while you develop your technique.\n\n**User**: What happened at the recent tournament?\n**Assistant**: [Uses Tavily search] The Denmark Open 2024 concluded last week with Viktor Axelsen winning the men's singles title. [Source: badmintoncore.com]"
+          "systemMessage": "=# ROLE\nYou are a multilingual AI assistant for Telegram bot \"twoj_badminton_bot\". You help users with badminton information, general conversation, and knowledge lookup. Before answering any badminton-related question, query the Badminton Knowledge Base\n\n# CONTEXT\n- Remember the current date and time: **Today is {{ $now.format('cccc') }} the {{ $now.format('yyyy-MM-dd HH:mm') }}**, use this information to provide relevant responses.\n- When needed, reference \"today\", \"tomorrow\", \"this week\" appropriately.\n- Platform: Telegram (messages should be concise).\n- User language: Detect and match automatically.\n\n---\n\n# TOOLS\n\n## 1. Badminton Knowledge Base\n**Purpose**: Semantic search for badminton rules, equipment, BWF documents\n**When to use**: Questions about badminton techniques, rules, equipment, tournaments\n**Query language**: Always use English (translate user's query if needed)\n**Example**: User asks \"jakie są zasady gry w debla?\" → Query: \"doubles rules badminton\"\n\n## 2. Calculator\n**Purpose**: Mathematical operations\n**When to use**: Any numerical calculation requiring precision\n**Example**: Shuttle speed conversion, score calculations\n\n## 3. Tavily Web Search\n**Purpose**: Search information and news from specific domains.\n\n**Domains**:\n- https://bwfbadminton.com - Official BWF site for events, news, and tournaments.\n- https://www.internationalbadminton.org - BWF international site\n- https://badmintonsq.com - Mastering Badminton articles, knowledge hub.\n- https://badmintonstatistics.net - Tournament statistics, players, rankings.\n- https://corporate.bwfbadminton.com/statutes - Official BWF laws source.\n- https://www.worldbadminton.com - General Information and list of links.\n- https://badmintoneurope.com - Official Badminton Europe site - latest news.\n​- https://development.bwfbadminton.com/sport-science/global-research/scientific-papers - Scientific Papers search.\n- https://www.tntsports.co.uk/badminton - Badminton news, results, and videos.\n- https://badmintonhq.co.uk/pages/badminton-hq-reviews - real customers reviews.\n- https://victor-polska.pl - Victor badminton equipment.\n​- https://www.ziba.pl/manufacturer/victor-ziba-pl - Victor equipment in Poland.\n- https://www.badmintonplanet.eu - European badminton products.\n- https://www.badmintoncentral.com/forums - History of tournaments, fan forums.\n- https://www.yonex.com/badminton - Yonex official badminton rackets and gear.\n- https://www.reddit.com/r/badminton - Active Reddit community discussions.\n- https://beastbadminton.com - Training videos, drills, reviews and player tips.\n- https://www.badmintonbible.com - Rules, techniques, and fun facts.\n- https://corporate.bwfbadminton.com/events/approved-shuttles - Approved shuttles. \n- https://www.badmintonengland.co.uk - Historical facts, UK news.\n- https://www.britannica.com/sports/badminton - Britannica about badminton.\n- https://pzbad.pl - Polski Związek Badmintona, oficjalna federacja.\n- https://narodowybadminton.pl - Fundacja Narodowy Badminton w Polsce.\n- https://www.badmin.pl - Sklep badmintonowy z rakietami, lotkami i akcesoriami.\n- https://pzbad.pl/turnieje-w-polsce - Turnieje badmintonowe w Polsce.\n- https://www.twojtenis.pl/pl - Rezerwacji kortów w Krakowie i w Polsce.\n\n**When to use**: Recent news, tournament results, current events\n**Example**: \"Who won BWL World Championships 2025?\"\n\n## 4. Wikipedia\n**Purpose**: General encyclopedia lookup\n**When to use**: Historical facts, player biographies, general knowledge\n**Example**: \"When was BWF founded?\"\n\n---\n\n# RESPONSE FORMAT\n\n## Structure\n1. Keep responses brief (2-4 sentences typical for Telegram)\n2. Use emojis sparingly for emotional responses 🏸\n3. Always include source references when using tools. Provide additional meta when possible - art.#, section etc.\n\n## Language Rules\n- Detect user's language from their message\n- Respond in the same language\n- Translate tool queries to English internally\n- Keep quoted sources in original language with translation if helpful\n\n## Voice Messages\n- Treat as direct speech (do not mention transcription)\n- Respond conversationally as if in spoken dialogue\n\n---\n\n# BEHAVIOR\n\n## Do This ✓\n- Use tools for factual questions (prefer accuracy over speed)\n- Ask one clarifying question when request is ambiguous\n- Reference time naturally: \"today\", \"tomorrow\", \"this week\"\n- Match user's communication style and tone\n- Cite sources when information comes from tools\n\n## Boundaries\n- Stay focused on badminton, court sports, and general assistance\n- For political or controversial topics: \"I focus on badminton and general assistance. How can I help with that?\"\n- When no information found: \"I couldn't find this in my available resources. Would you like me to search differently?\"\n\n---\n\n# SPECIAL HANDLING\n\n## Sanitized Text\nUser messages may contain placeholders: <URL>, <LOCATION>, <EMAIL>\n- Treat as real data\n- Never guess original content\n- Reference by placeholder: \"I've noted <LOCATION> for your preferences\"\n\n## Context Memory\n- Maintain conversation context across turns\n- Reference previous messages when relevant\n- Track user preferences mentioned in conversation\n\n---\n\n# EXAMPLES\n\n**User**: Jakie są wymiary kortu do badmintona?\n**Assistant**: Kort do badmintona ma wymiary 13,4m x 6,1m (gra podwójna) lub 13,4m x 5,18m (gra pojedyncza) 🏸 [Źródło: BWF Rules, Part 2, Section 1A, Art. 1.1]\n\n**User**: [voice message about shuttle recommendations]\n**Assistant**: For beginners, I'd recommend feather shuttles with speed 77 for indoor play. They offer good durability while you develop your technique.\n\n**User**: What happened at the recent tournament?\n**Assistant**: [Uses Tavily search] The Denmark Open 2024 concluded last week with Viktor Axelsen winning the men's singles title. [Source: badmintoncore.com]"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
@@ -555,41 +516,21 @@
     },
     {
       "parameters": {
-        "model": "gemma4:e4b",
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
-      "typeVersion": 1,
-      "position": [
-        1920,
-        560
-      ],
-      "id": "9c07a09b-ca2a-4704-a865-f1266b40dd5d",
-      "name": "Ollama Chat Model1",
-      "credentials": {
-        "ollamaApi": {
-          "id": "hpLJnLrrfZiVC03g",
-          "name": "Ollama account"
-        }
-      }
-    },
-    {
-      "parameters": {
         "inputText": "={{ $json.text }}",
         "categories": {
           "categories": [
             {
               "category": "command",
-              "description": "=User wants the bot to perform an ACTION - viewing court availability, booking courts, listing reservations, canceling reservations, or registering credentials."
+              "description": "=User wants the bot to perform an ACTION - viewing court availability, booking courts, listing reservations, canceling reservations, or registering credentials"
             },
             {
               "category": "regular talk",
-              "description": "Conversational messages that do NOT request bot actions: greetings in all languages, questions about badminton rules/equipment/techniques, general chit-chat, requests for information that don't involve court booking operations"
+              "description": "Conversational messages that do NOT request court reservation actions: greetings in all languages, questions about badminton rules/equipment/techniques, general chit-chat, requests for information that don't involve court booking"
             }
           ]
         },
         "options": {
-          "systemPromptTemplate": "=Classify user input into exactly one category. Input may be in any language (English, Polish, Russian, etc.).\n\nCategories:\n{categories}\n\nExamples:\n- \"What's available tomorrow?\" → command\n- \"Book court 2 at 18:00\" → command\n- \"Show me my reservations\" → command\n- \"Cancel booking 12345\" → command\n- \"Cancel all my bookings\" → command\n- \"Pokaż wolne korty\" (Show free courts) → command\n- \"Cofnij wszystko\" (Cancel all) → command\n- \"Покажи мои брони\" (Show my bookings) → command\n- \"Покажи расписание в Блониа-спорт на субботу\" → command\n- \"я заболел, отмени все мои брони на завтра\" → command\n- \"Отмени все резервации\" → command\n- \"What racket should I buy?\" → regular talk\n- \"Hello!\" → regular talk\n- \"How do I play badminton?\" → regular talk\n- \"Cześć\" (Hi) → regular talk\n- \"Search for current Champion in single men badminton\" → regular talk \n\nIMPORTANT: Output ONLY the JSON with category. No explanation. One label only."
+          "systemPromptTemplate": "=Classify user input into exactly one category. Input may be in any language - English, Polish, Russian, etc. It can be shortened and informal, so recognize user's intention.\nExamples:\n- \"What's available tomorrow?\" → command\n- \"Book court 2 at 18:00\" → command\n- \"Show me my reservations\" → command\n- \"Cancel booking 12345\" → command\n- \"Cancel all my bookings\" → command\n- \"Pokaż wolne korty\" (Show free courts) → command\n- \"Cofnij wszystko\" (Cancel all) → command\n- \"Покажи мои брони\" (Show my bookings) → command\n- \"Покажи расписание в Блониа-спорт на субботу\" → command\n- \"Расписание на субботу\" (short form of \" Show schedule on Saturday\") → command\n- \"я заболел, отмени все мои брони на завтра\" → command\n- \"Отмени все резервации\" → command\n- \"What racket should I buy?\" → regular talk\n- \"Hello!\" → regular talk\n- \"How do I play badminton?\" → regular talk\n- \"Cześć\" (Hi) → regular talk\n- \"Search for current Champion in single men badminton\" → regular talk \n\nIMPORTANT: Answer directly without showing reasoning steps. Output ONLY the JSON with category. No explanation. One label only.\nCategories:\n{categories}\n"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.textClassifier",
@@ -795,7 +736,8 @@
           "id": "rwNejW7L2Lym8SJi",
           "name": "Google Sheets IsokDis"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -835,26 +777,6 @@
         "googleSheetsOAuth2Api": {
           "id": "rwNejW7L2Lym8SJi",
           "name": "Google Sheets IsokDis"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "model": "cnshenyang/qwen3-nothink:14b",
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
-      "typeVersion": 1,
-      "position": [
-        3504,
-        288
-      ],
-      "id": "26f16e4e-c70f-42d6-99aa-8fac0e0cbafc",
-      "name": "Ollama Chat Model2",
-      "credentials": {
-        "ollamaApi": {
-          "id": "hpLJnLrrfZiVC03g",
-          "name": "Ollama account"
         }
       }
     },
@@ -1108,9 +1030,9 @@
         "resource": "audio",
         "modelId": {
           "__rl": true,
-          "value": "models/gemini-2.5-flash",
+          "value": "models/gemini-flash-latest",
           "mode": "list",
-          "cachedResultName": "models/gemini-2.5-flash"
+          "cachedResultName": "models/gemini-flash-latest"
         },
         "inputType": "binary",
         "options": {}
@@ -1127,6 +1049,103 @@
         "googlePalmApi": {
           "id": "pjc8HhkT3zBo5IUU",
           "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "google_gemma-4-E4B-it-Q4_K_M",
+          "mode": "list",
+          "cachedResultName": "google_gemma-4-E4B-it-Q4_K_M"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1120,
+        432
+      ],
+      "id": "8be9cf18-f447-4f8c-9751-1b1b7947d5f1",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "IR5iaIkgChNAvNxE",
+          "name": "llama.cpp"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "google_gemma-4-E4B-it-Q4_K_M",
+          "mode": "list",
+          "cachedResultName": "google_gemma-4-E4B-it-Q4_K_M"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        2048,
+        560
+      ],
+      "id": "5b62f549-5f1c-4864-8d6f-038d7ee97671",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "IR5iaIkgChNAvNxE",
+          "name": "llama.cpp"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "DeepSeek-R1-Distill-Qwen-7B-Q4_K_M",
+          "mode": "list",
+          "cachedResultName": "DeepSeek-R1-Distill-Qwen-7B-Q4_K_M"
+        },
+        "responsesApiEnabled": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        3504,
+        288
+      ],
+      "id": "883479c9-1aed-4123-ac7e-5e8b06b29315",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "IR5iaIkgChNAvNxE",
+          "name": "llama.cpp"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "nomic-embed-text:latest"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
+      "typeVersion": 1,
+      "position": [
+        2432,
+        768
+      ],
+      "id": "45635301-5b66-40af-9919-df53762f3fb6",
+      "name": "Embeddings Ollama",
+      "credentials": {
+        "ollamaApi": {
+          "id": "U7TlGk83BxxHlbpq",
+          "name": "Ollama account 2"
         }
       }
     }
@@ -1182,17 +1201,6 @@
           {
             "node": "AI Agent",
             "type": "ai_tool",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Embeddings Ollama": {
-      "ai_embedding": [
-        [
-          {
-            "node": "Badminton knowledge base",
-            "type": "ai_embedding",
             "index": 0
           }
         ]
@@ -1267,17 +1275,6 @@
         ]
       ]
     },
-    "Ollama Model": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "Text Classifier",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Send a text message1": {
       "main": [
         [
@@ -1335,17 +1332,6 @@
           {
             "node": "Guardrails",
             "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Ollama Chat Model1": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_languageModel",
             "index": 0
           }
         ]
@@ -1450,17 +1436,6 @@
         ]
       ]
     },
-    "Ollama Chat Model2": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "Set Metrics (RAG)",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Call Command Parser": {
       "main": [
         [
@@ -1527,6 +1502,50 @@
           }
         ]
       ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Set Metrics (RAG)",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Ollama": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Badminton knowledge base",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -1542,8 +1561,8 @@
     "templateCredsSetupCompleted": true
   },
   "nodeGroups": [],
-  "versionId": "4ac6e30a-0779-45cf-a8ae-2bc71ab84711",
-  "activeVersionId": "4ac6e30a-0779-45cf-a8ae-2bc71ab84711",
+  "versionId": "cc3a076c-178c-48da-ac98-f408d26359d4",
+  "activeVersionId": "cc3a076c-178c-48da-ac98-f408d26359d4",
   "triggerCount": 1,
   "shared": [
     {
@@ -1555,9 +1574,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-06-18T12:07:46.000Z",
-    "createdAt": "2026-06-18T12:07:32.740Z",
-    "versionId": "4ac6e30a-0779-45cf-a8ae-2bc71ab84711",
+    "updatedAt": "2026-08-15T13:09:34.000Z",
+    "createdAt": "2026-08-15T13:09:12.898Z",
+    "versionId": "cc3a076c-178c-48da-ac98-f408d26359d4",
     "workflowId": "uf7MYoeaspA2V85u",
     "nodes": [
       {
@@ -1617,7 +1636,7 @@
         "type": "@n8n/n8n-nodes-langchain.toolCalculator",
         "typeVersion": 1,
         "position": [
-          2176,
+          2240,
           560
         ],
         "id": "3122d37e-a446-4f7c-aba0-76a6564b2ee9",
@@ -1664,7 +1683,7 @@
         "type": "@n8n/n8n-nodes-langchain.toolWikipedia",
         "typeVersion": 1,
         "position": [
-          2304,
+          2336,
           560
         ],
         "id": "913b9eb7-14e2-4b5a-9f5f-14d93aa0275b",
@@ -1696,25 +1715,6 @@
           "qdrantApi": {
             "id": "R97Yi6THM8qVyAcv",
             "name": "QdrantApi account"
-          }
-        }
-      },
-      {
-        "parameters": {
-          "model": "nomic-embed-text:latest"
-        },
-        "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
-        "typeVersion": 1,
-        "position": [
-          2432,
-          752
-        ],
-        "id": "d5693f10-1cfd-4ae5-9ae3-17fd5a93997c",
-        "name": "Embeddings Ollama",
-        "credentials": {
-          "ollamaApi": {
-            "id": "hpLJnLrrfZiVC03g",
-            "name": "Ollama account"
           }
         }
       },
@@ -1929,26 +1929,6 @@
       },
       {
         "parameters": {
-          "model": "gemma4:e4b",
-          "options": {}
-        },
-        "type": "@n8n/n8n-nodes-langchain.lmOllama",
-        "typeVersion": 1,
-        "position": [
-          1120,
-          448
-        ],
-        "id": "c81cce17-67d8-472c-b8c0-63d3335ff6fb",
-        "name": "Ollama Model",
-        "credentials": {
-          "ollamaApi": {
-            "id": "hpLJnLrrfZiVC03g",
-            "name": "Ollama account"
-          }
-        }
-      },
-      {
-        "parameters": {
           "chatId": "={{ $('Set fields').item.json.chat_id }}",
           "text": "={{ $json.content.parts[0].text }}",
           "additionalFields": {
@@ -1982,7 +1962,7 @@
         "type": "@tavily/n8n-nodes-tavily.tavilyTool",
         "typeVersion": 1,
         "position": [
-          2720,
+          2688,
           560
         ],
         "id": "82ae02fd-570d-4439-9502-ce3e415e7807",
@@ -2028,7 +2008,7 @@
         "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
         "typeVersion": 1.3,
         "position": [
-          2048,
+          2144,
           560
         ],
         "id": "a74dfcb7-3e35-4397-b81e-c9572a4e223a",
@@ -2044,7 +2024,7 @@
         "parameters": {
           "promptType": "guardrails",
           "options": {
-            "systemMessage": "=# ROLE\nYou are a multilingual AI assistant for Telegram bot \"twoj_badminton_bot\". You help users with badminton information, general conversation, and knowledge lookup.\n\n# CONTEXT\n- Remember the current date and time: **Today is {{ $now.format('cccc') }} the {{ $now.format('yyyy-MM-dd HH:mm') }}**, use this information to provide relevant responses.\n- When needed, reference \"today\", \"tomorrow\", \"this week\" appropriately.\n- Platform: Telegram (messages should be concise).\n- User language: Detect and match automatically.\n\n---\n\n# TOOLS\n\n## 1. Badminton Knowledge Base\n**Purpose**: Semantic search for badminton rules, equipment, BWF documents\n**When to use**: Questions about badminton techniques, rules, equipment, tournaments\n**Query language**: Always use English (translate user's query if needed)\n**Example**: User asks \"jakie są zasady gry w debla?\" → Query: \"doubles rules badminton\"\n\n## 2. Calculator\n**Purpose**: Mathematical operations\n**When to use**: Any numerical calculation requiring precision\n**Example**: Shuttle speed conversion, score calculations\n\n## 3. Tavily Web Search\n**Purpose**: Search information and news from specific domains.\n\n**Domains**:\n- https://bwfbadminton.com - Official BWF site for events, news, and tournaments.\n- https://www.internationalbadminton.org - BWF international site\n- https://badmintonsq.com - Mastering Badminton articles, knowledge hub.\n- https://badmintonstatistics.net - Tournament statistics, players, rankings.\n- https://corporate.bwfbadminton.com/statutes - Official BWF laws source.\n- https://www.worldbadminton.com - General Information and list of links.\n- https://badmintoneurope.com - Official Badminton Europe site - latest news.\n​- https://development.bwfbadminton.com/sport-science/global-research/scientific-papers - Scientific Papers search.\n- https://www.tntsports.co.uk/badminton - Badminton news, results, and videos.\n- https://badmintonhq.co.uk/pages/badminton-hq-reviews - real customers reviews.\n- https://victor-polska.pl - Victor badminton equipment.\n​- https://www.ziba.pl/manufacturer/victor-ziba-pl - Victor equipment in Poland.\n- https://www.badmintonplanet.eu - European badminton products.\n- https://www.badmintoncentral.com/forums - History of tournaments, fan forums.\n- https://www.yonex.com/badminton - Yonex official badminton rackets and gear.\n- https://www.reddit.com/r/badminton - Active Reddit community discussions.\n- https://beastbadminton.com - Training videos, drills, reviews and player tips.\n- https://www.badmintonbible.com - Rules, techniques, and fun facts.\n- https://corporate.bwfbadminton.com/events/approved-shuttles - Approved shuttles. \n- https://www.badmintonengland.co.uk - Historical facts, UK news.\n- https://www.britannica.com/sports/badminton - Britannica about badminton.\n- https://pzbad.pl - Polski Związek Badmintona, oficjalna federacja.\n- https://narodowybadminton.pl - Fundacja Narodowy Badminton w Polsce.\n- https://www.badmin.pl - Sklep badmintonowy z rakietami, lotkami i akcesoriami.\n- https://pzbad.pl/turnieje-w-polsce - Turnieje badmintonowe w Polsce.\n- https://www.twojtenis.pl/pl - Rezerwacji kortów w Krakowie i w Polsce.\n\n**When to use**: Recent news, tournament results, current events\n**Example**: \"Who won BWL World Championships 2025?\"\n\n## 4. Wikipedia\n**Purpose**: General encyclopedia lookup\n**When to use**: Historical facts, player biographies, general knowledge\n**Example**: \"When was BWF founded?\"\n\n---\n\n# RESPONSE FORMAT\n\n## Structure\n1. Keep responses brief (2-4 sentences typical for Telegram)\n2. Use emojis sparingly for emotional responses 🏸\n3. Always include source references when using tools. Provide additional meta when possible - art.#, section etc.\n\n## Language Rules\n- Detect user's language from their message\n- Respond in the same language\n- Translate tool queries to English internally\n- Keep quoted sources in original language with translation if helpful\n\n## Voice Messages\n- Treat as direct speech (do not mention transcription)\n- Respond conversationally as if in spoken dialogue\n\n---\n\n# BEHAVIOR\n\n## Do This ✓\n- Use tools for factual questions (prefer accuracy over speed)\n- Ask one clarifying question when request is ambiguous\n- Reference time naturally: \"today\", \"tomorrow\", \"this week\"\n- Match user's communication style and tone\n- Cite sources when information comes from tools\n\n## Boundaries\n- Stay focused on badminton, court sports, and general assistance\n- For political or controversial topics: \"I focus on badminton and general assistance. How can I help with that?\"\n- When no information found: \"I couldn't find this in my available resources. Would you like me to search differently?\"\n\n---\n\n# SPECIAL HANDLING\n\n## Sanitized Text\nUser messages may contain placeholders: <URL>, <LOCATION>, <EMAIL>\n- Treat as real data\n- Never guess original content\n- Reference by placeholder: \"I've noted <LOCATION> for your preferences\"\n\n## Context Memory\n- Maintain conversation context across turns\n- Reference previous messages when relevant\n- Track user preferences mentioned in conversation\n\n---\n\n# EXAMPLES\n\n**User**: Jakie są wymiary kortu do badmintona?\n**Assistant**: Kort do badmintona ma wymiary 13,4m x 6,1m (gra podwójna) lub 13,4m x 5,18m (gra pojedyncza) 🏸 [Źródło: BWF Rules, Part 2, Section 1A, Art. 1.1]\n\n**User**: [voice message about shuttle recommendations]\n**Assistant**: For beginners, I'd recommend feather shuttles with speed 77 for indoor play. They offer good durability while you develop your technique.\n\n**User**: What happened at the recent tournament?\n**Assistant**: [Uses Tavily search] The Denmark Open 2024 concluded last week with Viktor Axelsen winning the men's singles title. [Source: badmintoncore.com]"
+            "systemMessage": "=# ROLE\nYou are a multilingual AI assistant for Telegram bot \"twoj_badminton_bot\". You help users with badminton information, general conversation, and knowledge lookup. Before answering any badminton-related question, query the Badminton Knowledge Base\n\n# CONTEXT\n- Remember the current date and time: **Today is {{ $now.format('cccc') }} the {{ $now.format('yyyy-MM-dd HH:mm') }}**, use this information to provide relevant responses.\n- When needed, reference \"today\", \"tomorrow\", \"this week\" appropriately.\n- Platform: Telegram (messages should be concise).\n- User language: Detect and match automatically.\n\n---\n\n# TOOLS\n\n## 1. Badminton Knowledge Base\n**Purpose**: Semantic search for badminton rules, equipment, BWF documents\n**When to use**: Questions about badminton techniques, rules, equipment, tournaments\n**Query language**: Always use English (translate user's query if needed)\n**Example**: User asks \"jakie są zasady gry w debla?\" → Query: \"doubles rules badminton\"\n\n## 2. Calculator\n**Purpose**: Mathematical operations\n**When to use**: Any numerical calculation requiring precision\n**Example**: Shuttle speed conversion, score calculations\n\n## 3. Tavily Web Search\n**Purpose**: Search information and news from specific domains.\n\n**Domains**:\n- https://bwfbadminton.com - Official BWF site for events, news, and tournaments.\n- https://www.internationalbadminton.org - BWF international site\n- https://badmintonsq.com - Mastering Badminton articles, knowledge hub.\n- https://badmintonstatistics.net - Tournament statistics, players, rankings.\n- https://corporate.bwfbadminton.com/statutes - Official BWF laws source.\n- https://www.worldbadminton.com - General Information and list of links.\n- https://badmintoneurope.com - Official Badminton Europe site - latest news.\n​- https://development.bwfbadminton.com/sport-science/global-research/scientific-papers - Scientific Papers search.\n- https://www.tntsports.co.uk/badminton - Badminton news, results, and videos.\n- https://badmintonhq.co.uk/pages/badminton-hq-reviews - real customers reviews.\n- https://victor-polska.pl - Victor badminton equipment.\n​- https://www.ziba.pl/manufacturer/victor-ziba-pl - Victor equipment in Poland.\n- https://www.badmintonplanet.eu - European badminton products.\n- https://www.badmintoncentral.com/forums - History of tournaments, fan forums.\n- https://www.yonex.com/badminton - Yonex official badminton rackets and gear.\n- https://www.reddit.com/r/badminton - Active Reddit community discussions.\n- https://beastbadminton.com - Training videos, drills, reviews and player tips.\n- https://www.badmintonbible.com - Rules, techniques, and fun facts.\n- https://corporate.bwfbadminton.com/events/approved-shuttles - Approved shuttles. \n- https://www.badmintonengland.co.uk - Historical facts, UK news.\n- https://www.britannica.com/sports/badminton - Britannica about badminton.\n- https://pzbad.pl - Polski Związek Badmintona, oficjalna federacja.\n- https://narodowybadminton.pl - Fundacja Narodowy Badminton w Polsce.\n- https://www.badmin.pl - Sklep badmintonowy z rakietami, lotkami i akcesoriami.\n- https://pzbad.pl/turnieje-w-polsce - Turnieje badmintonowe w Polsce.\n- https://www.twojtenis.pl/pl - Rezerwacji kortów w Krakowie i w Polsce.\n\n**When to use**: Recent news, tournament results, current events\n**Example**: \"Who won BWL World Championships 2025?\"\n\n## 4. Wikipedia\n**Purpose**: General encyclopedia lookup\n**When to use**: Historical facts, player biographies, general knowledge\n**Example**: \"When was BWF founded?\"\n\n---\n\n# RESPONSE FORMAT\n\n## Structure\n1. Keep responses brief (2-4 sentences typical for Telegram)\n2. Use emojis sparingly for emotional responses 🏸\n3. Always include source references when using tools. Provide additional meta when possible - art.#, section etc.\n\n## Language Rules\n- Detect user's language from their message\n- Respond in the same language\n- Translate tool queries to English internally\n- Keep quoted sources in original language with translation if helpful\n\n## Voice Messages\n- Treat as direct speech (do not mention transcription)\n- Respond conversationally as if in spoken dialogue\n\n---\n\n# BEHAVIOR\n\n## Do This ✓\n- Use tools for factual questions (prefer accuracy over speed)\n- Ask one clarifying question when request is ambiguous\n- Reference time naturally: \"today\", \"tomorrow\", \"this week\"\n- Match user's communication style and tone\n- Cite sources when information comes from tools\n\n## Boundaries\n- Stay focused on badminton, court sports, and general assistance\n- For political or controversial topics: \"I focus on badminton and general assistance. How can I help with that?\"\n- When no information found: \"I couldn't find this in my available resources. Would you like me to search differently?\"\n\n---\n\n# SPECIAL HANDLING\n\n## Sanitized Text\nUser messages may contain placeholders: <URL>, <LOCATION>, <EMAIL>\n- Treat as real data\n- Never guess original content\n- Reference by placeholder: \"I've noted <LOCATION> for your preferences\"\n\n## Context Memory\n- Maintain conversation context across turns\n- Reference previous messages when relevant\n- Track user preferences mentioned in conversation\n\n---\n\n# EXAMPLES\n\n**User**: Jakie są wymiary kortu do badmintona?\n**Assistant**: Kort do badmintona ma wymiary 13,4m x 6,1m (gra podwójna) lub 13,4m x 5,18m (gra pojedyncza) 🏸 [Źródło: BWF Rules, Part 2, Section 1A, Art. 1.1]\n\n**User**: [voice message about shuttle recommendations]\n**Assistant**: For beginners, I'd recommend feather shuttles with speed 77 for indoor play. They offer good durability while you develop your technique.\n\n**User**: What happened at the recent tournament?\n**Assistant**: [Uses Tavily search] The Denmark Open 2024 concluded last week with Viktor Axelsen winning the men's singles title. [Source: badmintoncore.com]"
           }
         },
         "type": "@n8n/n8n-nodes-langchain.agent",
@@ -2109,41 +2089,21 @@
       },
       {
         "parameters": {
-          "model": "gemma4:e4b",
-          "options": {}
-        },
-        "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
-        "typeVersion": 1,
-        "position": [
-          1920,
-          560
-        ],
-        "id": "9c07a09b-ca2a-4704-a865-f1266b40dd5d",
-        "name": "Ollama Chat Model1",
-        "credentials": {
-          "ollamaApi": {
-            "id": "hpLJnLrrfZiVC03g",
-            "name": "Ollama account"
-          }
-        }
-      },
-      {
-        "parameters": {
           "inputText": "={{ $json.text }}",
           "categories": {
             "categories": [
               {
                 "category": "command",
-                "description": "=User wants the bot to perform an ACTION - viewing court availability, booking courts, listing reservations, canceling reservations, or registering credentials."
+                "description": "=User wants the bot to perform an ACTION - viewing court availability, booking courts, listing reservations, canceling reservations, or registering credentials"
               },
               {
                 "category": "regular talk",
-                "description": "Conversational messages that do NOT request bot actions: greetings in all languages, questions about badminton rules/equipment/techniques, general chit-chat, requests for information that don't involve court booking operations"
+                "description": "Conversational messages that do NOT request court reservation actions: greetings in all languages, questions about badminton rules/equipment/techniques, general chit-chat, requests for information that don't involve court booking"
               }
             ]
           },
           "options": {
-            "systemPromptTemplate": "=Classify user input into exactly one category. Input may be in any language (English, Polish, Russian, etc.).\n\nCategories:\n{categories}\n\nExamples:\n- \"What's available tomorrow?\" → command\n- \"Book court 2 at 18:00\" → command\n- \"Show me my reservations\" → command\n- \"Cancel booking 12345\" → command\n- \"Cancel all my bookings\" → command\n- \"Pokaż wolne korty\" (Show free courts) → command\n- \"Cofnij wszystko\" (Cancel all) → command\n- \"Покажи мои брони\" (Show my bookings) → command\n- \"Покажи расписание в Блониа-спорт на субботу\" → command\n- \"я заболел, отмени все мои брони на завтра\" → command\n- \"Отмени все резервации\" → command\n- \"What racket should I buy?\" → regular talk\n- \"Hello!\" → regular talk\n- \"How do I play badminton?\" → regular talk\n- \"Cześć\" (Hi) → regular talk\n- \"Search for current Champion in single men badminton\" → regular talk \n\nIMPORTANT: Output ONLY the JSON with category. No explanation. One label only."
+            "systemPromptTemplate": "=Classify user input into exactly one category. Input may be in any language - English, Polish, Russian, etc. It can be shortened and informal, so recognize user's intention.\nExamples:\n- \"What's available tomorrow?\" → command\n- \"Book court 2 at 18:00\" → command\n- \"Show me my reservations\" → command\n- \"Cancel booking 12345\" → command\n- \"Cancel all my bookings\" → command\n- \"Pokaż wolne korty\" (Show free courts) → command\n- \"Cofnij wszystko\" (Cancel all) → command\n- \"Покажи мои брони\" (Show my bookings) → command\n- \"Покажи расписание в Блониа-спорт на субботу\" → command\n- \"Расписание на субботу\" (short form of \" Show schedule on Saturday\") → command\n- \"я заболел, отмени все мои брони на завтра\" → command\n- \"Отмени все резервации\" → command\n- \"What racket should I buy?\" → regular talk\n- \"Hello!\" → regular talk\n- \"How do I play badminton?\" → regular talk\n- \"Cześć\" (Hi) → regular talk\n- \"Search for current Champion in single men badminton\" → regular talk \n\nIMPORTANT: Answer directly without showing reasoning steps. Output ONLY the JSON with category. No explanation. One label only.\nCategories:\n{categories}\n"
           }
         },
         "type": "@n8n/n8n-nodes-langchain.textClassifier",
@@ -2349,7 +2309,8 @@
             "id": "rwNejW7L2Lym8SJi",
             "name": "Google Sheets IsokDis"
           }
-        }
+        },
+        "disabled": true
       },
       {
         "parameters": {
@@ -2389,26 +2350,6 @@
           "googleSheetsOAuth2Api": {
             "id": "rwNejW7L2Lym8SJi",
             "name": "Google Sheets IsokDis"
-          }
-        }
-      },
-      {
-        "parameters": {
-          "model": "cnshenyang/qwen3-nothink:14b",
-          "options": {}
-        },
-        "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
-        "typeVersion": 1,
-        "position": [
-          3504,
-          288
-        ],
-        "id": "26f16e4e-c70f-42d6-99aa-8fac0e0cbafc",
-        "name": "Ollama Chat Model2",
-        "credentials": {
-          "ollamaApi": {
-            "id": "hpLJnLrrfZiVC03g",
-            "name": "Ollama account"
           }
         }
       },
@@ -2662,9 +2603,9 @@
           "resource": "audio",
           "modelId": {
             "__rl": true,
-            "value": "models/gemini-2.5-flash",
+            "value": "models/gemini-flash-latest",
             "mode": "list",
-            "cachedResultName": "models/gemini-2.5-flash"
+            "cachedResultName": "models/gemini-flash-latest"
           },
           "inputType": "binary",
           "options": {}
@@ -2681,6 +2622,103 @@
           "googlePalmApi": {
             "id": "pjc8HhkT3zBo5IUU",
             "name": "Google Gemini(PaLM) Api account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "value": "google_gemma-4-E4B-it-Q4_K_M",
+            "mode": "list",
+            "cachedResultName": "google_gemma-4-E4B-it-Q4_K_M"
+          },
+          "builtInTools": {},
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+        "typeVersion": 1.3,
+        "position": [
+          1120,
+          432
+        ],
+        "id": "8be9cf18-f447-4f8c-9751-1b1b7947d5f1",
+        "name": "OpenAI Chat Model",
+        "credentials": {
+          "openAiApi": {
+            "id": "IR5iaIkgChNAvNxE",
+            "name": "llama.cpp"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "value": "google_gemma-4-E4B-it-Q4_K_M",
+            "mode": "list",
+            "cachedResultName": "google_gemma-4-E4B-it-Q4_K_M"
+          },
+          "builtInTools": {},
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+        "typeVersion": 1.3,
+        "position": [
+          2048,
+          560
+        ],
+        "id": "5b62f549-5f1c-4864-8d6f-038d7ee97671",
+        "name": "OpenAI Chat Model1",
+        "credentials": {
+          "openAiApi": {
+            "id": "IR5iaIkgChNAvNxE",
+            "name": "llama.cpp"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "value": "DeepSeek-R1-Distill-Qwen-7B-Q4_K_M",
+            "mode": "list",
+            "cachedResultName": "DeepSeek-R1-Distill-Qwen-7B-Q4_K_M"
+          },
+          "responsesApiEnabled": false,
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+        "typeVersion": 1.3,
+        "position": [
+          3504,
+          288
+        ],
+        "id": "883479c9-1aed-4123-ac7e-5e8b06b29315",
+        "name": "OpenAI Chat Model2",
+        "credentials": {
+          "openAiApi": {
+            "id": "IR5iaIkgChNAvNxE",
+            "name": "llama.cpp"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "model": "nomic-embed-text:latest"
+        },
+        "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
+        "typeVersion": 1,
+        "position": [
+          2432,
+          768
+        ],
+        "id": "45635301-5b66-40af-9919-df53762f3fb6",
+        "name": "Embeddings Ollama",
+        "credentials": {
+          "ollamaApi": {
+            "id": "U7TlGk83BxxHlbpq",
+            "name": "Ollama account 2"
           }
         }
       }
@@ -2736,17 +2774,6 @@
             {
               "node": "AI Agent",
               "type": "ai_tool",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Embeddings Ollama": {
-        "ai_embedding": [
-          [
-            {
-              "node": "Badminton knowledge base",
-              "type": "ai_embedding",
               "index": 0
             }
           ]
@@ -2821,17 +2848,6 @@
           ]
         ]
       },
-      "Ollama Model": {
-        "ai_languageModel": [
-          [
-            {
-              "node": "Text Classifier",
-              "type": "ai_languageModel",
-              "index": 0
-            }
-          ]
-        ]
-      },
       "Send a text message1": {
         "main": [
           [
@@ -2889,17 +2905,6 @@
             {
               "node": "Guardrails",
               "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Ollama Chat Model1": {
-        "ai_languageModel": [
-          [
-            {
-              "node": "AI Agent",
-              "type": "ai_languageModel",
               "index": 0
             }
           ]
@@ -3004,17 +3009,6 @@
           ]
         ]
       },
-      "Ollama Chat Model2": {
-        "ai_languageModel": [
-          [
-            {
-              "node": "Set Metrics (RAG)",
-              "type": "ai_languageModel",
-              "index": 0
-            }
-          ]
-        ]
-      },
       "Call Command Parser": {
         "main": [
           [
@@ -3081,11 +3075,55 @@
             }
           ]
         ]
+      },
+      "OpenAI Chat Model": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Text Classifier",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "OpenAI Chat Model1": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "OpenAI Chat Model2": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Set Metrics (RAG)",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Embeddings Ollama": {
+        "ai_embedding": [
+          [
+            {
+              "node": "Badminton knowledge base",
+              "type": "ai_embedding",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "nodeGroups": [],
     "authors": "Sergei Vedishchev",
-    "name": "Version 4ac6e30a",
+    "name": "Version cc3a076c",
     "description": "",
     "autosaved": true
   },
