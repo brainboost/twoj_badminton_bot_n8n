@@ -1,33 +1,11 @@
 {
-  "updatedAt": "2026-06-18T12:11:51.453Z",
+  "updatedAt": "2026-08-15T12:26:07.922Z",
   "createdAt": "2026-01-11T18:21:47.330Z",
   "id": "QbD3Epml4ANF9vr0",
   "name": "Command Parser",
   "active": true,
   "isArchived": false,
   "nodes": [
-    {
-      "parameters": {
-        "model": "cnshenyang/qwen3-nothink:14b",
-        "options": {
-          "format": "json"
-        }
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmOllama",
-      "typeVersion": 1,
-      "position": [
-        1712,
-        1232
-      ],
-      "id": "8c1a80e5-56e4-4951-b69b-3b9826599a75",
-      "name": "Ollama Model1",
-      "credentials": {
-        "ollamaApi": {
-          "id": "Fn88PPl7DZzbIPAI",
-          "name": "Ollama cloud"
-        }
-      }
-    },
     {
       "parameters": {
         "workflowId": {
@@ -1378,21 +1356,53 @@
     },
     {
       "parameters": {
-        "model": "gemma4:e4b",
+        "model": {
+          "__rl": true,
+          "value": "google_gemma-4-E4B-it-Q4_K_M",
+          "mode": "list",
+          "cachedResultName": "google_gemma-4-E4B-it-Q4_K_M"
+        },
+        "builtInTools": {},
         "options": {}
       },
-      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
-      "typeVersion": 1,
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
       "position": [
         1520,
         1040
       ],
-      "id": "6f4d021d-3033-4c3e-9963-d77e18cc14ab",
-      "name": "Ollama Chat Model",
+      "id": "adfccc22-1353-4b35-9292-c396347ebaf9",
+      "name": "OpenAI Chat Model1",
       "credentials": {
-        "ollamaApi": {
-          "id": "hpLJnLrrfZiVC03g",
-          "name": "Ollama account"
+        "openAiApi": {
+          "id": "IR5iaIkgChNAvNxE",
+          "name": "llama.cpp"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "google_gemma-4-E4B-it-Q4_K_M",
+          "mode": "list",
+          "cachedResultName": "google_gemma-4-E4B-it-Q4_K_M"
+        },
+        "responsesApiEnabled": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1712,
+        1248
+      ],
+      "id": "88c1feaf-46bf-47e9-b2c2-582c31324c52",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "IR5iaIkgChNAvNxE",
+          "name": "llama.cpp"
         }
       }
     }
@@ -1541,17 +1551,6 @@
         ]
       ]
     },
-    "Ollama Model1": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "Structured Output Parser",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "OpenAI Chat Model": {
       "ai_languageModel": [
         [
@@ -1619,11 +1618,22 @@
         ]
       ]
     },
-    "Ollama Chat Model": {
+    "OpenAI Chat Model1": {
       "ai_languageModel": [
         [
           {
             "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Structured Output Parser",
             "type": "ai_languageModel",
             "index": 0
           }
@@ -1642,8 +1652,8 @@
     "templateCredsSetupCompleted": true
   },
   "nodeGroups": [],
-  "versionId": "b8f71e6c-a9d5-4ba3-ae0a-1b8da7da49fb",
-  "activeVersionId": "b8f71e6c-a9d5-4ba3-ae0a-1b8da7da49fb",
+  "versionId": "4cc5337a-baa7-4c75-a0c8-fe183c6a3b0c",
+  "activeVersionId": "4cc5337a-baa7-4c75-a0c8-fe183c6a3b0c",
   "triggerCount": 0,
   "shared": [
     {
@@ -1655,33 +1665,11 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-06-18T12:12:02.000Z",
-    "createdAt": "2026-06-18T12:11:51.456Z",
-    "versionId": "b8f71e6c-a9d5-4ba3-ae0a-1b8da7da49fb",
+    "updatedAt": "2026-08-15T12:26:11.000Z",
+    "createdAt": "2026-08-15T12:26:07.927Z",
+    "versionId": "4cc5337a-baa7-4c75-a0c8-fe183c6a3b0c",
     "workflowId": "QbD3Epml4ANF9vr0",
     "nodes": [
-      {
-        "parameters": {
-          "model": "cnshenyang/qwen3-nothink:14b",
-          "options": {
-            "format": "json"
-          }
-        },
-        "type": "@n8n/n8n-nodes-langchain.lmOllama",
-        "typeVersion": 1,
-        "position": [
-          1712,
-          1232
-        ],
-        "id": "8c1a80e5-56e4-4951-b69b-3b9826599a75",
-        "name": "Ollama Model1",
-        "credentials": {
-          "ollamaApi": {
-            "id": "Fn88PPl7DZzbIPAI",
-            "name": "Ollama cloud"
-          }
-        }
-      },
       {
         "parameters": {
           "workflowId": {
@@ -3032,21 +3020,53 @@
       },
       {
         "parameters": {
-          "model": "gemma4:e4b",
+          "model": {
+            "__rl": true,
+            "value": "google_gemma-4-E4B-it-Q4_K_M",
+            "mode": "list",
+            "cachedResultName": "google_gemma-4-E4B-it-Q4_K_M"
+          },
+          "builtInTools": {},
           "options": {}
         },
-        "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
-        "typeVersion": 1,
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+        "typeVersion": 1.3,
         "position": [
           1520,
           1040
         ],
-        "id": "6f4d021d-3033-4c3e-9963-d77e18cc14ab",
-        "name": "Ollama Chat Model",
+        "id": "adfccc22-1353-4b35-9292-c396347ebaf9",
+        "name": "OpenAI Chat Model1",
         "credentials": {
-          "ollamaApi": {
-            "id": "hpLJnLrrfZiVC03g",
-            "name": "Ollama account"
+          "openAiApi": {
+            "id": "IR5iaIkgChNAvNxE",
+            "name": "llama.cpp"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "model": {
+            "__rl": true,
+            "value": "google_gemma-4-E4B-it-Q4_K_M",
+            "mode": "list",
+            "cachedResultName": "google_gemma-4-E4B-it-Q4_K_M"
+          },
+          "responsesApiEnabled": false,
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+        "typeVersion": 1.3,
+        "position": [
+          1712,
+          1248
+        ],
+        "id": "88c1feaf-46bf-47e9-b2c2-582c31324c52",
+        "name": "OpenAI Chat Model2",
+        "credentials": {
+          "openAiApi": {
+            "id": "IR5iaIkgChNAvNxE",
+            "name": "llama.cpp"
           }
         }
       }
@@ -3195,17 +3215,6 @@
           ]
         ]
       },
-      "Ollama Model1": {
-        "ai_languageModel": [
-          [
-            {
-              "node": "Structured Output Parser",
-              "type": "ai_languageModel",
-              "index": 0
-            }
-          ]
-        ]
-      },
       "OpenAI Chat Model": {
         "ai_languageModel": [
           [
@@ -3273,7 +3282,7 @@
           ]
         ]
       },
-      "Ollama Chat Model": {
+      "OpenAI Chat Model1": {
         "ai_languageModel": [
           [
             {
@@ -3283,11 +3292,22 @@
             }
           ]
         ]
+      },
+      "OpenAI Chat Model2": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Structured Output Parser",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "nodeGroups": [],
     "authors": "Sergei Vedishchev",
-    "name": "Version b8f71e6c",
+    "name": "Version 4cc5337a",
     "description": "",
     "autosaved": true
   },
