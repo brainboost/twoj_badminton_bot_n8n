@@ -924,6 +924,7 @@
   "versionId": "dec6e43e-bf42-451b-9723-fbb8eb2677f4",
   "activeVersionId": "dec6e43e-bf42-451b-9723-fbb8eb2677f4",
   "triggerCount": 0,
+  "tags": [],
   "shared": [
     {
       "updatedAt": "2026-03-25T19:46:43.759Z",
@@ -1850,6 +1851,5 @@
     "name": "Version dec6e43e",
     "description": "",
     "autosaved": true
-  },
-  "tags": []
+  }
 }
