@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-31T10:28:36.718Z",
+  "updatedAt": "2026-08-21T11:33:09.600Z",
   "createdAt": "2025-12-03T22:10:58.360Z",
   "id": "wpQX6RoYdNRMsPZm",
   "name": "Data Ingestion",
@@ -275,8 +275,8 @@
       "name": "Embeddings Ollama",
       "credentials": {
         "ollamaApi": {
-          "id": "OwoNqqKy33Tzlan7",
-          "name": "Ollama local"
+          "id": "U7TlGk83BxxHlbpq",
+          "name": "Ollama account 2"
         }
       }
     }
@@ -382,16 +382,18 @@
     }
   },
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "binaryMode": "separate"
   },
   "staticData": null,
   "meta": {
     "templateCredsSetupCompleted": true
   },
   "nodeGroups": [],
-  "versionId": "74d4f794-93b1-475e-b339-2ca5707e2a08",
+  "versionId": "3313ca44-c4c1-429c-9342-9e0373357a82",
   "activeVersionId": "74d4f794-93b1-475e-b339-2ca5707e2a08",
   "triggerCount": 2,
+  "tags": [],
   "shared": [
     {
       "updatedAt": "2025-12-03T22:10:58.363Z",
@@ -787,6 +789,5 @@
     "name": "Version 74d4f794",
     "description": "",
     "autosaved": false
-  },
-  "tags": []
+  }
 }
