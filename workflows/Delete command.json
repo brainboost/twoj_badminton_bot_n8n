@@ -1232,6 +1232,14 @@
   "versionId": "a628c3ba-e238-4837-a04d-d5496728c8cf",
   "activeVersionId": "a628c3ba-e238-4837-a04d-d5496728c8cf",
   "triggerCount": 0,
+  "tags": [
+    {
+      "updatedAt": "2025-12-27T11:51:52.051Z",
+      "createdAt": "2025-12-27T11:51:52.051Z",
+      "id": "3W7RR758UwICVpEC",
+      "name": "bot_command"
+    }
+  ],
   "shared": [
     {
       "updatedAt": "2025-12-25T17:19:17.186Z",
@@ -2464,13 +2472,5 @@
     "name": null,
     "description": null,
     "autosaved": false
-  },
-  "tags": [
-    {
-      "updatedAt": "2025-12-27T11:51:52.051Z",
-      "createdAt": "2025-12-27T11:51:52.051Z",
-      "id": "3W7RR758UwICVpEC",
-      "name": "bot_command"
-    }
-  ]
+  }
 }
