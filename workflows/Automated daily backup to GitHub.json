@@ -424,6 +424,7 @@
   "versionId": "09b58038-4804-4921-b36d-d7519537b7ed",
   "activeVersionId": "09b58038-4804-4921-b36d-d7519537b7ed",
   "triggerCount": 1,
+  "tags": [],
   "shared": [
     {
       "updatedAt": "2026-01-01T21:24:59.484Z",
@@ -839,6 +840,5 @@
     "name": "Version 09b58038",
     "description": "",
     "autosaved": true
-  },
-  "tags": []
+  }
 }
