@@ -749,6 +749,14 @@
   "versionId": "82cafee0-6640-4830-8a43-8fd97e311fc0",
   "activeVersionId": "82cafee0-6640-4830-8a43-8fd97e311fc0",
   "triggerCount": 0,
+  "tags": [
+    {
+      "updatedAt": "2025-12-27T11:51:52.051Z",
+      "createdAt": "2025-12-27T11:51:52.051Z",
+      "id": "3W7RR758UwICVpEC",
+      "name": "bot_command"
+    }
+  ],
   "shared": [
     {
       "updatedAt": "2025-12-25T16:16:30.713Z",
@@ -1497,13 +1505,5 @@
     "name": "Version 82cafee0",
     "description": "",
     "autosaved": true
-  },
-  "tags": [
-    {
-      "updatedAt": "2025-12-27T11:51:52.051Z",
-      "createdAt": "2025-12-27T11:51:52.051Z",
-      "id": "3W7RR758UwICVpEC",
-      "name": "bot_command"
-    }
-  ]
+  }
 }
