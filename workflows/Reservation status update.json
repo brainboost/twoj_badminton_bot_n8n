@@ -434,6 +434,14 @@
   "versionId": "cb0f7774-eb4e-458a-8b9b-2795e91b68c6",
   "activeVersionId": "cb0f7774-eb4e-458a-8b9b-2795e91b68c6",
   "triggerCount": 1,
+  "tags": [
+    {
+      "updatedAt": "2026-01-02T14:03:19.232Z",
+      "createdAt": "2026-01-02T14:03:19.232Z",
+      "id": "umllye9UwUVxl6um",
+      "name": "job"
+    }
+  ],
   "shared": [
     {
       "updatedAt": "2025-12-08T21:22:17.175Z",
@@ -858,13 +866,5 @@
     "name": "Version cb0f7774",
     "description": "",
     "autosaved": true
-  },
-  "tags": [
-    {
-      "updatedAt": "2026-01-02T14:03:19.232Z",
-      "createdAt": "2026-01-02T14:03:19.232Z",
-      "id": "umllye9UwUVxl6um",
-      "name": "job"
-    }
-  ]
+  }
 }
