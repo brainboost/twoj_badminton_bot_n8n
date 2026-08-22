@@ -480,6 +480,7 @@
   "versionId": "0abb9a56-84c6-4303-8494-73cec0843982",
   "activeVersionId": "0abb9a56-84c6-4303-8494-73cec0843982",
   "triggerCount": 0,
+  "tags": [],
   "shared": [
     {
       "updatedAt": "2026-01-14T19:37:17.702Z",
@@ -963,6 +964,5 @@
     "name": "Version 0abb9a56",
     "description": "",
     "autosaved": false
-  },
-  "tags": []
+  }
 }
