@@ -1058,6 +1058,14 @@
   "versionId": "10334843-5858-41d6-b37c-4e0e8269fc97",
   "activeVersionId": "10334843-5858-41d6-b37c-4e0e8269fc97",
   "triggerCount": 0,
+  "tags": [
+    {
+      "updatedAt": "2025-12-27T11:51:52.051Z",
+      "createdAt": "2025-12-27T11:51:52.051Z",
+      "id": "3W7RR758UwICVpEC",
+      "name": "bot_command"
+    }
+  ],
   "shared": [
     {
       "updatedAt": "2025-12-22T13:22:52.160Z",
@@ -2116,13 +2124,5 @@
     "name": "Version 10334843",
     "description": "",
     "autosaved": true
-  },
-  "tags": [
-    {
-      "updatedAt": "2025-12-27T11:51:52.051Z",
-      "createdAt": "2025-12-27T11:51:52.051Z",
-      "id": "3W7RR758UwICVpEC",
-      "name": "bot_command"
-    }
-  ]
+  }
 }
