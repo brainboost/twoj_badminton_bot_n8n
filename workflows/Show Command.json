@@ -431,6 +431,14 @@
   "versionId": "0063d509-83c1-48fb-82a0-f35c335aee0f",
   "activeVersionId": "aeeb0590-929b-441b-bcd5-0705c55961a8",
   "triggerCount": 0,
+  "tags": [
+    {
+      "updatedAt": "2025-12-27T11:51:52.051Z",
+      "createdAt": "2025-12-27T11:51:52.051Z",
+      "id": "3W7RR758UwICVpEC",
+      "name": "bot_command"
+    }
+  ],
   "shared": [
     {
       "updatedAt": "2025-12-27T11:51:58.990Z",
@@ -861,13 +869,5 @@
     "name": "Version aeeb0590",
     "description": "",
     "autosaved": true
-  },
-  "tags": [
-    {
-      "updatedAt": "2025-12-27T11:51:52.051Z",
-      "createdAt": "2025-12-27T11:51:52.051Z",
-      "id": "3W7RR758UwICVpEC",
-      "name": "bot_command"
-    }
-  ]
+  }
 }
