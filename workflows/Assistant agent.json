@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-15T13:09:12.897Z",
+  "updatedAt": "2026-08-21T16:18:49.795Z",
   "createdAt": "2025-10-14T10:11:33.990Z",
   "id": "uf7MYoeaspA2V85u",
   "name": "Assistant agent",
@@ -126,8 +126,9 @@
           "mode": "list",
           "cachedResultName": "badm_data"
         },
-        "topK": 3,
+        "topK": 10,
         "includeDocumentMetadata": false,
+        "useReranker": true,
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
@@ -1132,20 +1133,40 @@
     },
     {
       "parameters": {
-        "model": "nomic-embed-text:latest"
+        "model": "nomic-embed-text-v1.5.Q8_0",
+        "options": {
+          "dimensions": "={{ 768 }}"
+        }
       },
-      "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
-      "typeVersion": 1,
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
       "position": [
-        2432,
+        2416,
         768
       ],
-      "id": "45635301-5b66-40af-9919-df53762f3fb6",
-      "name": "Embeddings Ollama",
+      "id": "c02ad27b-c1f9-4cbe-9039-c9ff54e11ffc",
+      "name": "Embeddings OpenAI",
       "credentials": {
-        "ollamaApi": {
-          "id": "U7TlGk83BxxHlbpq",
-          "name": "Ollama account 2"
+        "openAiApi": {
+          "id": "nqYgs2fGud4a98L6",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.rerankerCohere",
+      "typeVersion": 1,
+      "position": [
+        2560,
+        768
+      ],
+      "id": "92220be1-8596-4f2e-8e25-e2ec103ee988",
+      "name": "Reranker Cohere",
+      "credentials": {
+        "cohereApi": {
+          "id": "tItb2kgPIJvP7XP2",
+          "name": "Cohere account"
         }
       }
     }
@@ -1536,12 +1557,23 @@
         ]
       ]
     },
-    "Embeddings Ollama": {
+    "Embeddings OpenAI": {
       "ai_embedding": [
         [
           {
             "node": "Badminton knowledge base",
             "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reranker Cohere": {
+      "ai_reranker": [
+        [
+          {
+            "node": "Badminton knowledge base",
+            "type": "ai_reranker",
             "index": 0
           }
         ]
@@ -1561,9 +1593,10 @@
     "templateCredsSetupCompleted": true
   },
   "nodeGroups": [],
-  "versionId": "cc3a076c-178c-48da-ac98-f408d26359d4",
-  "activeVersionId": "cc3a076c-178c-48da-ac98-f408d26359d4",
+  "versionId": "da6e27e2-82e4-4d26-b1c3-6eabbfa3c9fd",
+  "activeVersionId": "da6e27e2-82e4-4d26-b1c3-6eabbfa3c9fd",
   "triggerCount": 1,
+  "tags": [],
   "shared": [
     {
       "updatedAt": "2025-10-14T10:11:33.992Z",
@@ -1574,9 +1607,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-08-15T13:09:34.000Z",
-    "createdAt": "2026-08-15T13:09:12.898Z",
-    "versionId": "cc3a076c-178c-48da-ac98-f408d26359d4",
+    "updatedAt": "2026-08-21T16:18:57.000Z",
+    "createdAt": "2026-08-21T16:18:49.797Z",
+    "versionId": "da6e27e2-82e4-4d26-b1c3-6eabbfa3c9fd",
     "workflowId": "uf7MYoeaspA2V85u",
     "nodes": [
       {
@@ -1699,8 +1732,9 @@
             "mode": "list",
             "cachedResultName": "badm_data"
           },
-          "topK": 3,
+          "topK": 10,
           "includeDocumentMetadata": false,
+          "useReranker": true,
           "options": {}
         },
         "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
@@ -2705,20 +2739,40 @@
       },
       {
         "parameters": {
-          "model": "nomic-embed-text:latest"
+          "model": "nomic-embed-text-v1.5.Q8_0",
+          "options": {
+            "dimensions": "={{ 768 }}"
+          }
         },
-        "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
-        "typeVersion": 1,
+        "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+        "typeVersion": 1.2,
         "position": [
-          2432,
+          2416,
           768
         ],
-        "id": "45635301-5b66-40af-9919-df53762f3fb6",
-        "name": "Embeddings Ollama",
+        "id": "c02ad27b-c1f9-4cbe-9039-c9ff54e11ffc",
+        "name": "Embeddings OpenAI",
         "credentials": {
-          "ollamaApi": {
-            "id": "U7TlGk83BxxHlbpq",
-            "name": "Ollama account 2"
+          "openAiApi": {
+            "id": "nqYgs2fGud4a98L6",
+            "name": "OpenAI account"
+          }
+        }
+      },
+      {
+        "parameters": {},
+        "type": "@n8n/n8n-nodes-langchain.rerankerCohere",
+        "typeVersion": 1,
+        "position": [
+          2560,
+          768
+        ],
+        "id": "92220be1-8596-4f2e-8e25-e2ec103ee988",
+        "name": "Reranker Cohere",
+        "credentials": {
+          "cohereApi": {
+            "id": "tItb2kgPIJvP7XP2",
+            "name": "Cohere account"
           }
         }
       }
@@ -3109,7 +3163,7 @@
           ]
         ]
       },
-      "Embeddings Ollama": {
+      "Embeddings OpenAI": {
         "ai_embedding": [
           [
             {
@@ -3119,13 +3173,23 @@
             }
           ]
         ]
+      },
+      "Reranker Cohere": {
+        "ai_reranker": [
+          [
+            {
+              "node": "Badminton knowledge base",
+              "type": "ai_reranker",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "nodeGroups": [],
     "authors": "Sergei Vedishchev",
-    "name": "Version cc3a076c",
+    "name": "Version da6e27e2",
     "description": "",
     "autosaved": true
-  },
-  "tags": []
+  }
 }
