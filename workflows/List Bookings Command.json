@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-11T19:45:00.534Z",
+  "updatedAt": "2026-09-01T11:11:29.755Z",
   "createdAt": "2025-12-25T12:24:14.384Z",
   "id": "51Y9SIV139LvX5jl",
   "name": "List Bookings Command",
@@ -62,10 +62,10 @@
       "parameters": {
         "conditions": {
           "options": {
-            "version": 2,
-            "leftValue": "",
             "caseSensitive": true,
-            "typeValidation": "strict"
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
           },
           "conditions": [
             {
@@ -74,7 +74,7 @@
                 "type": "string",
                 "operation": "exists"
               },
-              "leftValue": "={{ $json.result.structuredContent.session_id }}",
+              "leftValue": "={{ $json.result.structuredContent.access_token }}",
               "rightValue": ""
             }
           ],
@@ -96,12 +96,6 @@
         "assignments": {
           "assignments": [
             {
-              "id": "session-id",
-              "name": "session_id",
-              "type": "string",
-              "value": "={{ $json.result.structuredContent.session_id }}"
-            },
-            {
               "id": "list-chat-id",
               "name": "chat_id",
               "type": "string",
@@ -112,6 +106,12 @@
               "name": "lang",
               "type": "string",
               "value": "={{ $('When Executed by Another Workflow').first().json.lang || 'en' }}"
+            },
+            {
+              "id": "d9be8c4a-212c-4cbb-b59a-102859804991",
+              "name": "result.structuredContent.access_token",
+              "value": "={{ $json.result.structuredContent.access_token }}",
+              "type": "string"
             }
           ]
         },
@@ -130,7 +130,7 @@
       "parameters": {
         "operation": "executeTool",
         "toolName": "get_reservations",
-        "toolParameters": "={\"session_id\":\"{{ $json.session_id }}\"}"
+        "toolParameters": "={\"access_token\":\"{{ $json.result.structuredContent.access_token }}\"}"
       },
       "id": "mcp-get-reservations",
       "name": "MCP Get Reservations",
@@ -160,11 +160,11 @@
             {
               "id": "check-reservations-exist",
               "operator": {
-                "type": "array",
+                "type": "string",
                 "operation": "notEmpty",
                 "singleValue": true
               },
-              "leftValue": "={{ $json.result.structuredContent.result }}",
+              "leftValue": "={{ $json.result.content[0].text }}",
               "rightValue": ""
             }
           ],
@@ -183,7 +183,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const reservations = $input.first().json.result.structuredContent.result;\nconst context = $('Set List Context').first().json;\n\n// Build formatted message for each reservation\nconst lines = reservations.map((r, i) => {\n  const date = r.date || 'N/A';\n  const time = r.time || 'N/A';\n  const club = r.club_name || 'N/A';\n  const club_no = r.club_num || 'N/A';\n  const bookingId = r.booking_id || 'N/A';\n  \n  return `${i + 1}. <b>${date}</b> ${time}\\n  Club: ${club_no} - ${club}\\n  ID: <code>${bookingId}</code>`;\n});\n\nreturn [{\n  json: {\n    chat_id: context.chat_id,\n    lang: context.lang,\n    reservations: reservations,\n    formatted_list: lines.join('\\n\\n'),\n    count: reservations.length\n  }\n}];"
+        "jsCode": "const reservations = JSON.parse($input.first().json.result.content[0].text);\nconst context = $('Set List Context').first().json;\n\n// Build formatted message for each reservation\nconst lines = reservations.map((r, i) => {\n  const date = r.date || 'N/A';\n  const start_time = r.start_time?.slice(0, -3) || 'N/A';\n  const end_time = r.end_time?.slice(0, -3) || 'N/A';\n  const club = r.club_name || 'N/A';\n  const location = r.location_name || 'N/A';\n  \n  return `${i + 1}.\\n<b>${date}</b> ${start_time}-${end_time}\\n${club} - ${location}`;\n});\n\nreturn [{\n  json: {\n    chat_id: context.chat_id,\n    lang: context.lang,\n    reservations: reservations,\n    formatted_list: lines.join('\\n\\n'),\n    count: reservations.length\n  }\n}];"
       },
       "id": "format-reservations",
       "name": "Format Reservations",
@@ -398,7 +398,7 @@
     {
       "parameters": {
         "operation": "executeTool",
-        "toolName": "login",
+        "toolName": "login_oauth",
         "toolParameters": "={\"email\":\"{{$json.email}}\", \"password\": \"{{ $json.hash }}\"}"
       },
       "id": "f2a243f0-8e64-41cf-b670-0363b53e8136",
@@ -579,15 +579,16 @@
   "settings": {
     "executionOrder": "v1",
     "callerPolicy": "workflowsFromSameOwner",
-    "availableInMCP": false
+    "availableInMCP": false,
+    "binaryMode": "separate"
   },
   "staticData": null,
   "meta": {
     "templateCredsSetupCompleted": true
   },
   "nodeGroups": [],
-  "versionId": "854810d2-d5ad-4521-a267-ca7dea6fb410",
-  "activeVersionId": "854810d2-d5ad-4521-a267-ca7dea6fb410",
+  "versionId": "b18088bf-80dd-4c7a-9df3-7852aecbe913",
+  "activeVersionId": "b18088bf-80dd-4c7a-9df3-7852aecbe913",
   "triggerCount": 0,
   "tags": [
     {
@@ -607,9 +608,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-01-02T13:44:35.000Z",
-    "createdAt": "2025-12-31T11:23:17.724Z",
-    "versionId": "854810d2-d5ad-4521-a267-ca7dea6fb410",
+    "updatedAt": "2026-09-01T11:11:55.000Z",
+    "createdAt": "2026-09-01T11:11:29.756Z",
+    "versionId": "b18088bf-80dd-4c7a-9df3-7852aecbe913",
     "workflowId": "51Y9SIV139LvX5jl",
     "nodes": [
       {
@@ -668,10 +669,10 @@
         "parameters": {
           "conditions": {
             "options": {
-              "version": 2,
-              "leftValue": "",
               "caseSensitive": true,
-              "typeValidation": "strict"
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
             },
             "conditions": [
               {
@@ -680,7 +681,7 @@
                   "type": "string",
                   "operation": "exists"
                 },
-                "leftValue": "={{ $json.result.structuredContent.session_id }}",
+                "leftValue": "={{ $json.result.structuredContent.access_token }}",
                 "rightValue": ""
               }
             ],
@@ -702,12 +703,6 @@
           "assignments": {
             "assignments": [
               {
-                "id": "session-id",
-                "name": "session_id",
-                "type": "string",
-                "value": "={{ $json.result.structuredContent.session_id }}"
-              },
-              {
                 "id": "list-chat-id",
                 "name": "chat_id",
                 "type": "string",
@@ -718,6 +713,12 @@
                 "name": "lang",
                 "type": "string",
                 "value": "={{ $('When Executed by Another Workflow').first().json.lang || 'en' }}"
+              },
+              {
+                "id": "d9be8c4a-212c-4cbb-b59a-102859804991",
+                "name": "result.structuredContent.access_token",
+                "value": "={{ $json.result.structuredContent.access_token }}",
+                "type": "string"
               }
             ]
           },
@@ -736,7 +737,7 @@
         "parameters": {
           "operation": "executeTool",
           "toolName": "get_reservations",
-          "toolParameters": "={\"session_id\":\"{{ $json.session_id }}\"}"
+          "toolParameters": "={\"access_token\":\"{{ $json.result.structuredContent.access_token }}\"}"
         },
         "id": "mcp-get-reservations",
         "name": "MCP Get Reservations",
@@ -766,11 +767,11 @@
               {
                 "id": "check-reservations-exist",
                 "operator": {
-                  "type": "array",
+                  "type": "string",
                   "operation": "notEmpty",
                   "singleValue": true
                 },
-                "leftValue": "={{ $json.result.structuredContent.result }}",
+                "leftValue": "={{ $json.result.content[0].text }}",
                 "rightValue": ""
               }
             ],
@@ -789,7 +790,7 @@
       },
       {
         "parameters": {
-          "jsCode": "const reservations = $input.first().json.result.structuredContent.result;\nconst context = $('Set List Context').first().json;\n\n// Build formatted message for each reservation\nconst lines = reservations.map((r, i) => {\n  const date = r.date || 'N/A';\n  const time = r.time || 'N/A';\n  const club = r.club_name || 'N/A';\n  const club_no = r.club_num || 'N/A';\n  const bookingId = r.booking_id || 'N/A';\n  \n  return `${i + 1}. <b>${date}</b> ${time}\\n  Club: ${club_no} - ${club}\\n  ID: <code>${bookingId}</code>`;\n});\n\nreturn [{\n  json: {\n    chat_id: context.chat_id,\n    lang: context.lang,\n    reservations: reservations,\n    formatted_list: lines.join('\\n\\n'),\n    count: reservations.length\n  }\n}];"
+          "jsCode": "const reservations = JSON.parse($input.first().json.result.content[0].text);\nconst context = $('Set List Context').first().json;\n\n// Build formatted message for each reservation\nconst lines = reservations.map((r, i) => {\n  const date = r.date || 'N/A';\n  const start_time = r.start_time?.slice(0, -3) || 'N/A';\n  const end_time = r.end_time?.slice(0, -3) || 'N/A';\n  const club = r.club_name || 'N/A';\n  const location = r.location_name || 'N/A';\n  \n  return `${i + 1}.\\n<b>${date}</b> ${start_time}-${end_time}\\n${club} - ${location}`;\n});\n\nreturn [{\n  json: {\n    chat_id: context.chat_id,\n    lang: context.lang,\n    reservations: reservations,\n    formatted_list: lines.join('\\n\\n'),\n    count: reservations.length\n  }\n}];"
         },
         "id": "format-reservations",
         "name": "Format Reservations",
@@ -1004,7 +1005,7 @@
       {
         "parameters": {
           "operation": "executeTool",
-          "toolName": "login",
+          "toolName": "login_oauth",
           "toolParameters": "={\"email\":\"{{$json.email}}\", \"password\": \"{{ $json.hash }}\"}"
         },
         "id": "f2a243f0-8e64-41cf-b670-0363b53e8136",
@@ -1184,8 +1185,8 @@
     },
     "nodeGroups": [],
     "authors": "Sergei Vedishchev",
-    "name": "Version 854810d2",
+    "name": "Version b18088bf",
     "description": "",
-    "autosaved": false
+    "autosaved": true
   }
 }
