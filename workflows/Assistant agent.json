@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-09-01T20:21:54.184Z",
+  "updatedAt": "2026-09-05T21:34:38.713Z",
   "createdAt": "2025-10-14T10:11:33.990Z",
   "id": "uf7MYoeaspA2V85u",
   "name": "Assistant agent",
@@ -981,7 +981,8 @@
         -192
       ],
       "name": "Call Command Parser1",
-      "id": "be929140-238a-4d95-9c0e-511646dbccc7"
+      "id": "be929140-238a-4d95-9c0e-511646dbccc7",
+      "retryOnFail": true
     },
     {
       "parameters": {
@@ -1722,8 +1723,8 @@
     "templateCredsSetupCompleted": true
   },
   "nodeGroups": [],
-  "versionId": "1c27bbaa-a6ce-4a3f-8798-e03e486b6939",
-  "activeVersionId": "1c27bbaa-a6ce-4a3f-8798-e03e486b6939",
+  "versionId": "181edd2c-49ad-4cc0-9b2a-f1e62f70b96c",
+  "activeVersionId": "181edd2c-49ad-4cc0-9b2a-f1e62f70b96c",
   "triggerCount": 1,
   "tags": [],
   "shared": [
@@ -1736,9 +1737,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-09-01T20:21:57.000Z",
-    "createdAt": "2026-09-01T20:21:54.188Z",
-    "versionId": "1c27bbaa-a6ce-4a3f-8798-e03e486b6939",
+    "updatedAt": "2026-09-05T21:38:17.000Z",
+    "createdAt": "2026-09-05T21:34:38.717Z",
+    "versionId": "181edd2c-49ad-4cc0-9b2a-f1e62f70b96c",
     "workflowId": "uf7MYoeaspA2V85u",
     "nodes": [
       {
@@ -2716,7 +2717,8 @@
           -192
         ],
         "name": "Call Command Parser1",
-        "id": "be929140-238a-4d95-9c0e-511646dbccc7"
+        "id": "be929140-238a-4d95-9c0e-511646dbccc7",
+        "retryOnFail": true
       },
       {
         "parameters": {
@@ -3446,7 +3448,7 @@
     },
     "nodeGroups": [],
     "authors": "Sergei Vedishchev",
-    "name": "Version 1c27bbaa",
+    "name": "Version 181edd2c",
     "description": "",
     "autosaved": true
   }
