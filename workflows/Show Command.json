@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-18T12:25:24.781Z",
+  "updatedAt": "2026-09-19T09:51:00.469Z",
   "createdAt": "2025-12-27T11:51:58.987Z",
   "id": "HFeE52YK9tAzKTpk",
   "name": "Show Command",
@@ -429,7 +429,7 @@
   },
   "nodeGroups": [],
   "versionId": "0063d509-83c1-48fb-82a0-f35c335aee0f",
-  "activeVersionId": "aeeb0590-929b-441b-bcd5-0705c55961a8",
+  "activeVersionId": "0063d509-83c1-48fb-82a0-f35c335aee0f",
   "triggerCount": 0,
   "tags": [
     {
@@ -449,9 +449,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-06-17T14:27:10.000Z",
-    "createdAt": "2026-06-17T14:26:46.265Z",
-    "versionId": "aeeb0590-929b-441b-bcd5-0705c55961a8",
+    "updatedAt": "2026-09-19T11:02:39.000Z",
+    "createdAt": "2026-06-18T12:25:24.787Z",
+    "versionId": "0063d509-83c1-48fb-82a0-f35c335aee0f",
     "workflowId": "HFeE52YK9tAzKTpk",
     "nodes": [
       {
@@ -866,7 +866,7 @@
     },
     "nodeGroups": [],
     "authors": "Sergei Vedishchev",
-    "name": "Version aeeb0590",
+    "name": "Version 0063d509",
     "description": "",
     "autosaved": true
   }
